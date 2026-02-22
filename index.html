@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etéreo Lab Studio | Soundwave</title>
+    <style>
+        /* Paleta Corporativa Etéreo Lab Studio */
+        :root {
+            --bg-color: #011129;
+            --text-color: #f8f9fa;
+            --accent-color: #e6dfd1;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Helvetica', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .player-container {
+            text-align: center;
+            padding: 40px 20px;
+            border: 1px solid rgba(230, 223, 209, 0.2);
+            border-radius: 15px;
+            background: linear-gradient(145deg, #011533, #010d20);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 85%;
+            max-width: 350px;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        .accent {
+            color: var(--accent-color);
+        }
+
+        p.subtitle {
+            font-size: 13px;
+            color: #8b9bb4;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        /* Botón de reproducción elegante */
+        .play-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+
+        .play-btn:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            transform: scale(1.05);
+        }
+
+        #status-text {
+            margin-top: 25px;
+            font-size: 14px;
+            font-style: italic;
+            height: 20px; /* Evita que brinque la interfaz */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-container">
+        <h1>ETÉREO <span class="accent">LAB</span></h1>
+        <p class="subtitle">Cápsula de Memoria Auditiva</p>
+
+        <audio id="audio-player"></audio>
+
+        <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+
+        <p id="status-text">Buscando frecuencia...</p>
+    </div>
+
+    <script>
+        // 1. Leer el ID de la URL (ej. ?id=a8f93j)
+        const urlParams = new URLSearchParams(window.location.search);
+        const audioId = urlParams.get('id');
+        
+        const audioPlayer = document.getElementById('audio-player');
+        const playBtn = document.getElementById('play-btn');
+        const statusText = document.getElementById('status-text');
+
+        // 2. Lógica de carga
+        if (audioId) {
+            // Asigna la ruta del archivo. El script de Python subirá los MP3 a la carpeta 'audios'
+            audioPlayer.src = `audios/${audioId}.mp3`;
+            statusText.innerText = "Frecuencia encontrada. Lista para escuchar.";
+        } else {
+            statusText.innerText = "No se detectó ninguna cápsula válida.";
+            playBtn.style.display = 'none';
+            playBtn.disabled = true;
+        }
+
+        // 3. Lógica de Reproducción / Pausa
+        function togglePlay() {
+            if (!audioId) return;
+
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playBtn.innerHTML = "⏸";
+                statusText.innerText = "Reproduciendo memoria...";
+            } else {
+                audioPlayer.pause();
+                playBtn.innerHTML = "▶";
+                statusText.innerText = "Pausado";
+            }
+        }
+
+        // 4. Cuando el audio termina
+        audioPlayer.onended = function() {
+            playBtn.innerHTML = "▶";
+            statusText.innerText = "Memoria finalizada. Escuchar de nuevo.";
+        };
+
+        // Manejo de errores (si el MP3 no existe en GitHub)
+        audioPlayer.onerror = function() {
+            statusText.innerText = "Error: Frecuencia no encontrada o eliminada.";
+            playBtn.style.display = 'none';
+        };
+    </script>
+
+</body>
+</html>
