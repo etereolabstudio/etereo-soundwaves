@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Etéreo Lab Studio | Soundwave</title>
+    <title>Etéreo Lab Studio | Memoria Activa</title>
     <style>
+        /* Paleta Corporativa Etéreo Lab Studio */
         :root {
             --bg-color: #011129;
             --text-color: #f8f9fa;
@@ -16,9 +17,10 @@
             color: var(--text-color);
             font-family: 'Helvetica', Arial, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             overflow: hidden;
         }
@@ -26,18 +28,19 @@
         .player-container {
             text-align: center;
             padding: 40px 20px;
-            border: 1px solid rgba(230, 223, 209, 0.2);
-            border-radius: 15px;
+            border: 1px solid rgba(230, 223, 209, 0.15);
+            border-radius: 20px;
             background: linear-gradient(145deg, #011533, #010d20);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             width: 85%;
-            max-width: 350px;
+            max-width: 380px;
+            position: relative;
         }
 
         h1 {
-            font-size: 22px;
+            font-size: 24px;
             margin-bottom: 5px;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
 
         .accent {
@@ -45,22 +48,34 @@
         }
 
         p.subtitle {
-            font-size: 13px;
+            font-size: 12px;
             color: #8b9bb4;
             margin-top: 0;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
+        /* Lienzo del Osciloscopio */
+        canvas {
+            width: 100%;
+            height: 140px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            background-color: rgba(1, 17, 41, 0.5); /* Fondo sutil para el canvas */
+        }
+
+        /* Botón de reproducción premium */
         .play-btn {
             background-color: transparent;
             color: var(--accent-color);
             border: 2px solid var(--accent-color);
             border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            font-size: 28px;
+            width: 75px;
+            height: 75px;
+            font-size: 30px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -70,12 +85,13 @@
         .play-btn:hover {
             background-color: var(--accent-color);
             color: var(--bg-color);
-            transform: scale(1.05);
+            transform: scale(1.08);
+            box-shadow: 0 0 20px rgba(230, 223, 209, 0.4);
         }
 
         #status-text {
             margin-top: 25px;
-            font-size: 14px;
+            font-size: 13px;
             font-style: italic;
             height: 20px;
             color: #a0aec0;
@@ -86,11 +102,14 @@
 
     <div class="player-container">
         <h1>ETÉREO <span class="accent">LAB</span></h1>
-        <p class="subtitle">Cápsula de Memoria Auditiva</p>
+        <p class="subtitle">Memoria Acústica Enlazada</p>
 
-        <audio id="audio-player"></audio>
+        <canvas id="visualizer"></canvas>
+
+        <audio id="audio-player" crossorigin="anonymous"></audio>
+        
         <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
-        <p id="status-text">Buscando frecuencia...</p>
+        <p id="status-text">Sincronizando cápsula...</p>
     </div>
 
     <script>
@@ -100,50 +119,138 @@
         const audioPlayer = document.getElementById('audio-player');
         const playBtn = document.getElementById('play-btn');
         const statusText = document.getElementById('status-text');
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+
+        // Ajuste de resolución del canvas para pantallas retina (HD)
+        canvas.width = canvas.offsetWidth * 2;
+        canvas.height = canvas.offsetHeight * 2;
+        ctx.scale(2, 2);
+
+        let audioContext = null;
+        let analyser = null;
+        let source = null;
+        let animationId = null;
+        let isInitialized = false;
+
+        // Dibujo inicial (Línea plana de reposo)
+        function drawFlatline() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.offsetHeight / 2);
+            ctx.lineTo(canvas.offsetWidth, canvas.offsetHeight / 2);
+            ctx.strokeStyle = '#e6dfd1';
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.3;
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+        }
+        drawFlatline();
 
         if (audioId) {
-            // Se fuerza el formato .wav y se añade un cache-buster dinámico
             const cacheBuster = new Date().getTime();
-            audioPlayer.src = `audios/${audioId}.wav?cb=${cacheBuster}`;
-            
-            // Pre-cargar metadatos para asegurar que existe
+            audioPlayer.src = `./audios/${audioId}.wav?cb=${cacheBuster}`;
             audioPlayer.load();
             
             audioPlayer.oncanplay = function() {
-                statusText.innerText = "Frecuencia sincronizada. Lista.";
+                statusText.innerText = "Sincronización completa. Toque para iniciar.";
             };
         } else {
             statusText.innerText = "Cápsula no detectada.";
             playBtn.style.display = 'none';
         }
 
+        // DSP en vivo: Configuración de la Web Audio API
+        function initAudioEngine() {
+            if (isInitialized) return;
+            
+            // Compatibilidad con Safari/iOS
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioContext = new AudioContext();
+            
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 128; // Ventana de muestreo para barras gruesas y estéticas
+            
+            source = audioContext.createMediaElementSource(audioPlayer);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+            
+            isInitialized = true;
+        }
+
+        function drawVisualizer() {
+            if (!analyser || audioPlayer.paused) return;
+            
+            animationId = requestAnimationFrame(drawVisualizer);
+            
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculamos el ancho de cada barra dinámicamente
+            const barWidth = (canvas.offsetWidth / bufferLength) * 1.5;
+            let barHeight;
+            let x = 0;
+            const centerY = canvas.offsetHeight / 2;
+            
+            for(let i = 0; i < bufferLength; i++) {
+                // Suavizado visual de la amplitud (0 a 255)
+                barHeight = (dataArray[i] / 255) * (canvas.offsetHeight / 2);
+                
+                // Color corporativo
+                ctx.fillStyle = '#e6dfd1';
+                
+                // Dibujamos simétricamente desde el centro (Efecto espejo)
+                // Hacia arriba
+                ctx.fillRect(x, centerY - barHeight, barWidth, barHeight);
+                // Hacia abajo
+                ctx.fillRect(x, centerY, barWidth, barHeight);
+                
+                x += barWidth + 2; // Espaciado entre barras
+            }
+        }
+
         function togglePlay() {
             if (!audioId) return;
+
+            // En iOS, el contexto de audio debe arrancar por acción del usuario
+            if (!isInitialized) {
+                initAudioEngine();
+            }
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
 
             if (audioPlayer.paused) {
                 audioPlayer.play().then(() => {
                     playBtn.innerHTML = "⏸";
-                    statusText.innerText = "Reproduciendo memoria...";
+                    statusText.innerText = "Decodificando señal...";
+                    drawVisualizer(); // Arranca el osciloscopio
                 }).catch(e => {
-                    console.error("Error al reproducir:", e);
-                    statusText.innerText = "Espera a que cargue la señal...";
+                    console.error("Error DSP:", e);
+                    statusText.innerText = "Señal encriptada. Intente de nuevo.";
                 });
             } else {
                 audioPlayer.pause();
                 playBtn.innerHTML = "▶";
                 statusText.innerText = "Pausado";
+                cancelAnimationFrame(animationId);
+                drawFlatline(); // Volver a la línea plana de reposo
             }
         }
 
         audioPlayer.onended = function() {
             playBtn.innerHTML = "▶";
             statusText.innerText = "Memoria finalizada.";
+            cancelAnimationFrame(animationId);
+            drawFlatline();
         };
 
         audioPlayer.onerror = function() {
-            statusText.innerText = "Error 404: Frecuencia no encontrada.";
+            statusText.innerText = "Error 404: Frecuencia vacía.";
             playBtn.style.display = 'none';
-            console.error("No se pudo cargar: " + audioPlayer.src);
         };
     </script>
 </body>
