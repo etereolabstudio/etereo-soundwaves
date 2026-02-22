@@ -108,7 +108,7 @@
         // 2. Lógica de carga
         if (audioId) {
             // Asigna la ruta del archivo. El script de Python subirá los MP3 a la carpeta 'audios'
-            audioPlayer.src = `audios/${audioId}.mp3`;
+            audioPlayer.src = 'audios/${audioId}.ogg';
             statusText.innerText = "Frecuencia encontrada. Lista para escuchar.";
         } else {
             statusText.innerText = "No se detectó ninguna cápsula válida.";
@@ -145,4 +145,5 @@
     </script>
 
 </body>
+
 </html>
