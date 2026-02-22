@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Etéreo Lab Studio | Soundwave</title>
     <style>
-        /* Paleta Corporativa Etéreo Lab Studio */
         :root {
             --bg-color: #011129;
             --text-color: #f8f9fa;
@@ -52,7 +51,6 @@
             margin-bottom: 30px;
         }
 
-        /* Botón de reproducción elegante */
         .play-btn {
             background-color: transparent;
             color: var(--accent-color);
@@ -79,7 +77,8 @@
             margin-top: 25px;
             font-size: 14px;
             font-style: italic;
-            height: 20px; /* Evita que brinque la interfaz */
+            height: 20px;
+            color: #a0aec0;
         }
     </style>
 </head>
@@ -90,14 +89,11 @@
         <p class="subtitle">Cápsula de Memoria Auditiva</p>
 
         <audio id="audio-player"></audio>
-
         <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
-
         <p id="status-text">Buscando frecuencia...</p>
     </div>
 
     <script>
-        // 1. Leer el ID de la URL (ej. ?id=a8f93j)
         const urlParams = new URLSearchParams(window.location.search);
         const audioId = urlParams.get('id');
         
@@ -105,25 +101,33 @@
         const playBtn = document.getElementById('play-btn');
         const statusText = document.getElementById('status-text');
 
-        // 2. Lógica de carga
         if (audioId) {
-            // Asigna la ruta del archivo. El script de Python subirá los MP3 a la carpeta 'audios'
-            audioPlayer.src = 'audios/${audioId}.ogg';
-            statusText.innerText = "Frecuencia encontrada. Lista para escuchar.";
+            // Se fuerza el formato .wav y se añade un cache-buster dinámico
+            const cacheBuster = new Date().getTime();
+            audioPlayer.src = `audios/${audioId}.wav?cb=${cacheBuster}`;
+            
+            // Pre-cargar metadatos para asegurar que existe
+            audioPlayer.load();
+            
+            audioPlayer.oncanplay = function() {
+                statusText.innerText = "Frecuencia sincronizada. Lista.";
+            };
         } else {
-            statusText.innerText = "No se detectó ninguna cápsula válida.";
+            statusText.innerText = "Cápsula no detectada.";
             playBtn.style.display = 'none';
-            playBtn.disabled = true;
         }
 
-        // 3. Lógica de Reproducción / Pausa
         function togglePlay() {
             if (!audioId) return;
 
             if (audioPlayer.paused) {
-                audioPlayer.play();
-                playBtn.innerHTML = "⏸";
-                statusText.innerText = "Reproduciendo memoria...";
+                audioPlayer.play().then(() => {
+                    playBtn.innerHTML = "⏸";
+                    statusText.innerText = "Reproduciendo memoria...";
+                }).catch(e => {
+                    console.error("Error al reproducir:", e);
+                    statusText.innerText = "Espera a que cargue la señal...";
+                });
             } else {
                 audioPlayer.pause();
                 playBtn.innerHTML = "▶";
@@ -131,19 +135,16 @@
             }
         }
 
-        // 4. Cuando el audio termina
         audioPlayer.onended = function() {
             playBtn.innerHTML = "▶";
-            statusText.innerText = "Memoria finalizada. Escuchar de nuevo.";
+            statusText.innerText = "Memoria finalizada.";
         };
 
-        // Manejo de errores (si el MP3 no existe en GitHub)
         audioPlayer.onerror = function() {
-            statusText.innerText = "Error: Frecuencia no encontrada o eliminada.";
+            statusText.innerText = "Error 404: Frecuencia no encontrada.";
             playBtn.style.display = 'none';
+            console.error("No se pudo cargar: " + audioPlayer.src);
         };
     </script>
-
 </body>
-
 </html>
