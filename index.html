@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Etéreo Lab Studio | Memoria Activa</title>
     <style>
-        /* Paleta Corporativa Etéreo Lab Studio */
+        /* (Mantén el mismo CSS hermoso que ya tienes) */
         :root {
-            /* Fondo con un gradiente radial sutil para dar profundidad */
             --bg-gradient: radial-gradient(circle at center, #011c40 0%, #000814 100%);
             --text-color: #f8f9fa;
             --accent-color: #e6dfd1;
@@ -30,11 +29,10 @@
         .player-container {
             text-align: center;
             padding: 45px 25px;
-            /* Efecto cristal (Glassmorphism) sutil en el contenedor */
             border: 1px solid rgba(230, 223, 209, 0.1);
             border-radius: 24px;
             background: rgba(1, 21, 51, 0.6);
-            backdrop-filter: blur(10px); /* Desenfoque del fondo detrás del contenedor */
+            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.7);
             width: 85%;
@@ -42,100 +40,21 @@
             position: relative;
         }
 
-        h1 {
-            font-size: 26px;
-            margin-bottom: 8px;
-            letter-spacing: 4px;
-            font-weight: 300;
-        }
+        h1 { font-size: 26px; margin-bottom: 8px; letter-spacing: 4px; font-weight: 300; }
+        .accent { font-weight: 700; color: var(--accent-color); }
+        p.subtitle { font-size: 11px; color: #8b9bb4; margin-top: 0; margin-bottom: 35px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; }
 
-        .accent {
-            font-weight: 700;
-            color: var(--accent-color);
-        }
+        canvas { width: 100%; height: 150px; margin-bottom: 35px; }
 
-        p.subtitle {
-            font-size: 11px;
-            color: #8b9bb4;
-            margin-top: 0;
-            margin-bottom: 35px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            opacity: 0.8;
-        }
-
-        /* Lienzo del Osciloscopio */
-        canvas {
-            width: 100%;
-            height: 150px;
-            margin-bottom: 35px;
-            /* Eliminamos el borde y fondo del canvas para que las barras floten */
-        }
-
-        /* NUEVO DISEÑO DE BOTÓN PREMIUM */
-        .play-btn-container {
-            position: relative;
-            width: 85px;
-            height: 85px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .play-btn {
-            background-color: rgba(230, 223, 209, 0.1); /* Fondo semi-transparente */
-            color: var(--accent-color);
-            border: 3px solid var(--accent-color); /* Borde más grueso */
-            border-radius: 50%;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0; /* Reset de padding */
-            box-shadow: 0 0 25px var(--accent-glow); /* Resplandor sutil constante */
-        }
-        
-        /* Iconos SVG dentro del botón */
-        .play-btn svg {
-            width: 32px;
-            height: 32px;
-            fill: var(--accent-color);
-            transition: transform 0.3s ease;
-        }
-        
-        /* Ajuste óptico para centrar el icono de Play (triángulo) */
+        .play-btn-container { position: relative; width: 85px; height: 85px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
+        .play-btn { background-color: rgba(230, 223, 209, 0.1); color: var(--accent-color); border: 3px solid var(--accent-color); border-radius: 50%; width: 100%; height: 100%; cursor: pointer; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; justify-content: center; align-items: center; padding: 0; box-shadow: 0 0 25px var(--accent-glow); }
+        .play-btn svg { width: 32px; height: 32px; fill: var(--accent-color); transition: transform 0.3s ease; }
         .play-icon { margin-left: 5px; }
+        .play-btn:hover { background-color: var(--accent-color); transform: scale(1.1); box-shadow: 0 0 40px var(--accent-glow), 0 0 10px var(--accent-color); }
+        .play-btn:hover svg { fill: var(--bg-color); transform: scale(1.1); }
+        .play-btn:active { transform: scale(0.95); }
 
-        .play-btn:hover {
-            background-color: var(--accent-color);
-            transform: scale(1.1);
-            box-shadow: 0 0 40px var(--accent-glow), 0 0 10px var(--accent-color); /* Doble resplandor al pasar el mouse */
-        }
-        
-        .play-btn:hover svg {
-            fill: var(--bg-color); /* Cambia el icono a oscuro al hacer hover */
-            transform: scale(1.1);
-        }
-        
-        .play-btn:active {
-            transform: scale(0.95); /* Efecto de clic */
-        }
-
-        #status-text {
-            margin-top: 30px;
-            font-size: 13px;
-            font-weight: 300;
-            font-style: italic;
-            height: 20px;
-            color: #a0aec0;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Ocultar iconos por defecto */
+        #status-text { margin-top: 30px; font-size: 13px; font-weight: 300; font-style: italic; height: 20px; color: #a0aec0; letter-spacing: 0.5px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -174,7 +93,6 @@
         const playIcon = document.getElementById('play-icon');
         const pauseIcon = document.getElementById('pause-icon');
 
-        // Ajuste HD para pantallas retina
         canvas.width = canvas.offsetWidth * 2;
         canvas.height = canvas.offsetHeight * 2;
         ctx.scale(2, 2);
@@ -185,7 +103,6 @@
         let animationId = null;
         let isInitialized = false;
 
-        // Dibuja una línea sutil de "espera"
         function drawFlatline() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
@@ -216,7 +133,6 @@
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             audioContext = new AudioContext();
             analyser = audioContext.createAnalyser();
-            // FFT Size 128 = 64 barras de frecuencia. Ideal para móviles.
             analyser.fftSize = 128; 
             source = audioContext.createMediaElementSource(audioPlayer);
             source.connect(analyser);
@@ -224,40 +140,41 @@
             isInitialized = true;
         }
 
-        // --- CORRECCIÓN MATEMÁTICA DE CENTRADO ---
+        // --- LA MAGIA MATEMÁTICA: SIMETRÍA EN ESPEJO ---
         function drawVisualizer() {
             if (!analyser || audioPlayer.paused) return;
             animationId = requestAnimationFrame(drawVisualizer);
             
-            const bufferLength = analyser.frequencyBinCount; // Será 64
+            const bufferLength = analyser.frequencyBinCount; 
             const dataArray = new Uint8Array(bufferLength);
             analyser.getByteFrequencyData(dataArray);
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Configuración de barras
-            const barSpacing = 2; // Espacio entre barras
-            // Calculamos el ancho exacto para llenar el canvas sin sobrar espacio
-            const barWidth = (canvas.offsetWidth / bufferLength) - barSpacing;
+            // Ignoramos el 40% superior de la FFT porque casi siempre está vacío
+            const usefulBins = Math.floor(bufferLength * 0.6); 
+            const barSpacing = 2;
             
-            let barHeight;
-            let x = barSpacing / 2; // Offset inicial para centrado perfecto
+            // Calculamos el ancho de barra para que la mitad de los datos llenen exactamente media pantalla
+            const barWidth = (canvas.offsetWidth / 2 / usefulBins) - barSpacing;
+            
             const centerY = canvas.offsetHeight / 2;
+            const centerX = canvas.offsetWidth / 2;
             
-            for(let i = 0; i < bufferLength; i++) {
-                // Aumentamos un poco la sensibilidad (*0.8) para que se mueva más
-                barHeight = (dataArray[i] / 255) * (canvas.offsetHeight / 2) * 0.8;
-                
-                // Color de la paleta Oro Laminado
+            for(let i = 0; i < usefulBins; i++) {
+                // Suavizamos la caída de la amplitud (*0.8)
+                let barHeight = (dataArray[i] / 255) * (canvas.offsetHeight / 2) * 0.8;
                 ctx.fillStyle = '#e6dfd1';
                 
-                // Dibujo simétrico (Espejo)
-                // Hacia arriba
-                ctx.fillRect(x, centerY - barHeight, barWidth, barHeight);
-                // Hacia abajo
-                ctx.fillRect(x, centerY + 1, barWidth, barHeight); // +1 para evitar una línea gap en el centro
+                // --- DIBUJO MITAD DERECHA ---
+                let xRight = centerX + (i * (barWidth + barSpacing));
+                ctx.fillRect(xRight, centerY - barHeight, barWidth, barHeight); // Hacia arriba
+                ctx.fillRect(xRight, centerY + 1, barWidth, barHeight);         // Hacia abajo
                 
-                x += barWidth + barSpacing;
+                // --- DIBUJO MITAD IZQUIERDA (ESPEJO) ---
+                let xLeft = centerX - (i * (barWidth + barSpacing)) - barWidth;
+                ctx.fillRect(xLeft, centerY - barHeight, barWidth, barHeight);  // Hacia arriba
+                ctx.fillRect(xLeft, centerY + 1, barWidth, barHeight);          // Hacia abajo
             }
         }
 
@@ -269,7 +186,6 @@
 
             if (audioPlayer.paused) {
                 audioPlayer.play().then(() => {
-                    // Cambiar iconos SVG
                     playIcon.classList.add('hidden');
                     pauseIcon.classList.remove('hidden');
                     statusText.innerText = "Reproduciendo memoria...";
@@ -277,7 +193,6 @@
                 }).catch(e => { console.error("Error DSP:", e); });
             } else {
                 audioPlayer.pause();
-                // Cambiar iconos SVG
                 pauseIcon.classList.add('hidden');
                 playIcon.classList.remove('hidden');
                 statusText.innerText = "En pausa.";
