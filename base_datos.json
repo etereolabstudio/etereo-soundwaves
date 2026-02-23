@@ -34,5 +34,23 @@
         },
         "direccion_opcional": "Ahorro 4124 Lagos de Oriente",
         "foto": "ETR-D7114D.jpg"
+    },
+    "ETR-5919CC": {
+        "nombre": "Bobby",
+        "apellidos": "Navarro",
+        "especie_raza": "Pug",
+        "sexo": "Macho",
+        "fecha_nacimiento": "23/02/2001",
+        "condiciones_medicas": "",
+        "microchip": "332154646",
+        "contacto_principal": {
+            "nombre": "Andres Navarro",
+            "telefono": "+523322486655"
+        },
+        "contacto_emergencia": {
+            "telefono": ""
+        },
+        "direccion_opcional": "Guadalajara, Jalisco",
+        "foto": ""
     }
 }
