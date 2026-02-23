@@ -1,0 +1,20 @@
+{
+    "ETR-157CEF": {
+        "nombre": "Kitty",
+        "apellidos": "Navarro",
+        "especie_raza": "Siamés",
+        "sexo": "Macho",
+        "fecha_nacimiento": "23/02/2001",
+        "condiciones_medicas": "No tiene condiciones",
+        "microchip": "1654416",
+        "contacto_principal": {
+            "nombre": "Andres Navarro",
+            "telefono": "+523322486655"
+        },
+        "contacto_emergencia": {
+            "telefono": "+523333333333"
+        },
+        "direccion_opcional": "Ahorro 4124 Lagos de Oriente",
+        "foto": "ETR-157CEF.jpg"
+    }
+}
