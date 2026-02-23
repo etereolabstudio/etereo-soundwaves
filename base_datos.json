@@ -52,5 +52,23 @@
         },
         "direccion_opcional": "Guadalajara, Jalisco",
         "foto": "ETR-5919CC.jpg"
+    },
+    "ETR-E62DCD": {
+        "nombre": "Bobby",
+        "apellidos": "Navarro",
+        "especie_raza": "Pug",
+        "sexo": "Macho",
+        "fecha_nacimiento": "23/02/2001",
+        "condiciones_medicas": "",
+        "microchip": "3165413",
+        "contacto_principal": {
+            "nombre": "Andres Navarro",
+            "telefono": "+523322486655"
+        },
+        "contacto_emergencia": {
+            "telefono": ""
+        },
+        "direccion_opcional": "Guadalajara,Jalisco",
+        "foto": "ETR-E62DCD.jpg"
     }
 }
