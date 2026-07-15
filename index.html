@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Etéreo | Memoria Acústica</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;600&display=swap');
 
         body {
             background-color: #F7F7F9;
@@ -23,165 +23,131 @@
 
         .card {
             background: #FFFFFF;
-            padding: 50px 30px 40px 30px;
+            padding: 40px 30px 30px 30px;
             border-radius: 16px;
             box-shadow: 0 15px 45px rgba(0, 0, 0, 0.04);
-            max-width: 320px;
+            max-width: 340px;
             width: 90%;
             position: relative;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .brand-title {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 600;
             letter-spacing: 6px;
-            margin: 0 0 15px 0;
+            margin: 0 0 5px 0;
             color: #1A1A1A;
             text-transform: uppercase;
         }
 
         .status-text {
-            font-size: 13px;
+            font-size: 12px;
             color: #8B8B8B;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             line-height: 1.6;
-            min-height: 40px;
+            min-height: 20px;
         }
 
         .accent {
             color: #A39171;
             font-style: italic;
             font-family: 'Cormorant Garamond', serif;
-            font-size: 17px;
+            font-size: 15px;
         }
 
-        /* --- UI DEL REPRODUCTOR --- */
-        .player-container {
-            display: none; /* Se activa con JS si hay ID */
-            flex-direction: column;
-            align-items: center;
+        /* --- CONTENEDOR DEL CANVAS (ONDA DE SONIDO) --- */
+        .waveform-wrapper {
+            width: 100%;
+            height: 80px;
+            margin-bottom: 25px;
+            position: relative;
+            display: none; /* Oculto hasta cargar */
+            cursor: pointer;
         }
 
+        canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* --- BOTÓN PLAY FLOTANTE --- */
         .play-btn {
             background-color: #A39171;
             border: none;
             border-radius: 50%;
-            width: 65px;
-            height: 65px;
+            width: 50px;
+            height: 50px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
             box-shadow: 0 4px 15px rgba(163, 145, 113, 0.3);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            z-index: 2;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
         }
 
         .play-btn:hover {
-            transform: scale(1.05);
+            transform: translate(-50%, -50%) scale(1.05);
             box-shadow: 0 6px 20px rgba(163, 145, 113, 0.4);
         }
 
-        .play-btn:active { transform: scale(0.95); }
-
         .icon-play, .icon-pause {
             fill: #FFFFFF;
-            width: 22px;
-            height: 22px;
+            width: 18px;
+            height: 18px;
         }
         .icon-pause { display: none; }
 
-        /* --- VISUALIZADOR DE ONDAS ANIMADO --- */
-        .wave-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 40px;
-            margin-top: 25px;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        /* --- ENLACE DE RETORNO --- */
+        .back-link {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #A39171;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            transition: color 0.3s;
         }
 
-        .wave-bar {
-            width: 3px;
-            height: 4px;
-            background-color: #A39171;
-            border-radius: 4px;
-            transition: height 0.2s ease;
+        .back-link:hover {
+            color: #1A1A1A;
         }
-
-        .playing .wave-bar { animation: wave-bounce 1s infinite ease-in-out; }
-        .playing .wave-bar:nth-child(1) { animation-delay: 0.0s; }
-        .playing .wave-bar:nth-child(2) { animation-delay: 0.2s; }
-        .playing .wave-bar:nth-child(3) { animation-delay: 0.4s; }
-        .playing .wave-bar:nth-child(4) { animation-delay: 0.1s; }
-        .playing .wave-bar:nth-child(5) { animation-delay: 0.5s; }
-        .playing .wave-bar:nth-child(6) { animation-delay: 0.3s; }
-        .playing .wave-bar:nth-child(7) { animation-delay: 0.1s; }
-
-        @keyframes wave-bounce {
-            0%, 100% { height: 8px; }
-            50% { height: 35px; }
-        }
-
-        /* --- BARRA DE PROGRESO --- */
-        .progress-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: #F0F0F0;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background-color: #A39171;
-            transition: width 0.1s linear;
-        }
-
-        /* Reproductor nativo oculto */
+        
         audio { display: none; }
-
     </style>
 </head>
 <body>
 
     <div class="card" id="main-card">
         <h1 class="brand-title">Etéreo</h1>
-        <p class="status-text" id="status-text">Analizando firma acústica...</p>
+        <p class="status-text" id="status-text">Analizando señal acústica...</p>
         
-        <div class="player-container" id="player-ui">
+        <!-- Contenedor interactivo de la Onda -->
+        <div class="waveform-wrapper" id="waveform-wrapper">
+            <!-- Canvas Base (Gris) -->
+            <canvas id="canvas-base"></canvas>
+            <!-- Canvas Progreso (Color Acento) -->
+            <canvas id="canvas-progress"></canvas>
+            
             <button class="play-btn" id="custom-play-btn" onclick="togglePlay()">
-                <svg class="icon-play" id="icon-play" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                </svg>
-                <svg class="icon-pause" id="icon-pause" viewBox="0 0 24 24">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                </svg>
+                <svg class="icon-play" id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="icon-pause" id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
-
-            <!-- Visualizador Animado -->
-            <div class="wave-container" id="wave-visualizer">
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-            </div>
         </div>
 
-        <!-- Barra de progreso anclada al fondo de la tarjeta -->
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
-
+        <a href="https://etereomx.com" class="back-link">Visitar etereomx.com</a>
         <audio id="native-audio"></audio>
     </div>
 
@@ -190,71 +156,168 @@
         const audioId = params.get('id');
         
         const statusText = document.getElementById('status-text');
-        const playerUI = document.getElementById('player-ui');
+        const waveformWrapper = document.getElementById('waveform-wrapper');
         const audioEl = document.getElementById('native-audio');
-        const playBtn = document.getElementById('custom-play-btn');
         const iconPlay = document.getElementById('icon-play');
         const iconPause = document.getElementById('icon-pause');
-        const waveVisualizer = document.getElementById('wave-visualizer');
-        const progressBar = document.getElementById('progress-bar');
+        
+        const canvasBase = document.getElementById('canvas-base');
+        const canvasProgress = document.getElementById('canvas-progress');
+        const ctxBase = canvasBase.getContext('2d');
+        const ctxProgress = canvasProgress.getContext('2d');
+
+        let animationFrame;
+        let peaks = [];
+
+        // Colores de la marca Etéreo
+        const colorBase = "#EAEAEA"; // Gris muy claro para la onda sin reproducir
+        const colorProgress = "#A39171"; // Oro apagado
 
         if (audioId) {
             const audioPath = `audios/${audioId}.wav`;
             
-            fetch(audioPath, { method: 'HEAD' })
+            // 1. Cargamos el audio para el reproductor nativo
+            audioEl.src = audioPath;
+            
+            // 2. Cargamos el buffer del audio para dibujar la gráfica
+            fetch(audioPath)
                 .then(response => {
-                    if (response.ok) {
-                        audioEl.src = audioPath;
-                        playerUI.style.display = "flex";
-                        statusText.innerHTML = "Memoria acústica recuperada.<br><span class='accent'>Presiona reproducir.</span>";
-                    } else {
-                        statusText.innerHTML = "La cápsula está vacía.<br>Verifica el enlace o la sincronización con el estudio.";
-                    }
+                    if (!response.ok) throw new Error("Cápsula no encontrada");
+                    return response.arrayBuffer();
+                })
+                .then(arrayBuffer => {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    return audioCtx.decodeAudioData(arrayBuffer);
+                })
+                .then(audioBuffer => {
+                    processAudioData(audioBuffer);
+                    waveformWrapper.style.display = "block";
+                    statusText.innerHTML = "<span class='accent'>Memoria lista.</span>";
                 })
                 .catch(() => {
-                    statusText.innerHTML = "Error de red.<br>Verifica tu conexión a internet.";
+                    statusText.innerHTML = "La cápsula está vacía o aún se está sincronizando.";
                 });
+
         } else {
-            // EL ESTADO VACÍO (Landing Promocional)
-            statusText.innerHTML = "Bienvenido a Etéreo.<br><br>Acerca tu dispositivo al chip NFC de tu cuadro para reproducir tu memoria acústica.<br><br><span class='accent'>etereomx.com</span>";
+            statusText.innerHTML = "Acerca tu dispositivo al chip NFC de tu cuadro.<br><br><span class='accent'>etereomx.com</span>";
         }
 
+        // --- MATEMÁTICA DE PROCESAMIENTO DE SEÑAL ---
+        function processAudioData(audioBuffer) {
+            const rawData = audioBuffer.getChannelData(0); // Tomamos el canal mono
+            const numSamples = 200; // Densidad del polígono (Resolución)
+            const blockSize = Math.floor(rawData.length / numSamples);
+            
+            let maxPeak = 0;
+            
+            // Extracción de la envolvente de amplitud
+            for (let i = 0; i < numSamples; i++) {
+                let sum = 0;
+                for (let j = 0; j < blockSize; j++) {
+                    sum += Math.abs(rawData[i * blockSize + j]);
+                }
+                let peak = sum / blockSize;
+                peaks.push(peak);
+                if (peak > maxPeak) maxPeak = peak;
+            }
+
+            // Normalización y Suavizado básico
+            peaks = peaks.map(p => (p / maxPeak) * 0.8 + 0.05); // 0.05 mínimo para línea estética
+
+            // Ajustamos la resolución interna del canvas para pantallas de alta densidad (Retina)
+            const dpr = window.devicePixelRatio || 1;
+            const rect = waveformWrapper.getBoundingClientRect();
+            
+            [canvasBase, canvasProgress].forEach(c => {
+                c.width = rect.width * dpr;
+                c.height = rect.height * dpr;
+                c.getContext('2d').scale(dpr, dpr);
+            });
+
+            drawPolygon(ctxBase, canvasBase.width / dpr, canvasBase.height / dpr, colorBase);
+            updateProgress(); // Dibuja el estado inicial en 0
+        }
+
+        // --- RENDERIZADO DEL POLÍGONO SÍMETRICO ---
+        function drawPolygon(ctx, width, height, color) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            
+            const centerY = height / 2;
+            const step = width / (peaks.length - 1);
+            
+            // Borde Superior
+            ctx.moveTo(0, centerY);
+            for (let i = 0; i < peaks.length; i++) {
+                let amp = peaks[i] * height;
+                ctx.lineTo(i * step, centerY - (amp / 2));
+            }
+            
+            // Borde Inferior (Espejo)
+            for (let i = peaks.length - 1; i >= 0; i--) {
+                let amp = peaks[i] * height;
+                ctx.lineTo(i * step, centerY + (amp / 2));
+            }
+            
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // --- ANIMACIÓN DE PROGRESO DE LA MÁSCARA ---
+        function updateProgress() {
+            if (!peaks.length) return;
+            
+            const rect = canvasProgress.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            
+            // Calculamos el porcentaje reproducido
+            const progress = (audioEl.currentTime / (audioEl.duration || 1));
+            const fillWidth = width * progress;
+
+            // Dibujamos la misma onda, pero aplicando la técnica de enmascaramiento (Clipping)
+            ctxProgress.clearRect(0, 0, width, height);
+            
+            ctxProgress.save();
+            ctxProgress.beginPath();
+            ctxProgress.rect(0, 0, fillWidth, height);
+            ctxProgress.clip();
+            
+            drawPolygon(ctxProgress, width, height, colorProgress);
+            ctxProgress.restore();
+
+            if (!audioEl.paused) {
+                animationFrame = requestAnimationFrame(updateProgress);
+            }
+        }
+
+        // --- CONTROL DE REPRODUCCIÓN ---
         function togglePlay() {
             if (audioEl.paused) {
                 audioEl.play();
                 iconPlay.style.display = "none";
                 iconPause.style.display = "block";
-                waveVisualizer.classList.add("playing");
-                waveVisualizer.style.opacity = "1";
-                statusText.innerHTML = "<span class='accent'>Reproduciendo...</span>";
+                statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
+                updateProgress();
             } else {
                 audioEl.pause();
                 iconPlay.style.display = "block";
                 iconPause.style.display = "none";
-                waveVisualizer.classList.remove("playing");
-                waveVisualizer.style.opacity = "0.3";
                 statusText.innerHTML = "Pausado.<br><span class='accent'>Presiona reproducir.</span>";
+                cancelAnimationFrame(animationFrame);
             }
         }
 
-        // Animación de la barra de progreso
-        audioEl.addEventListener('timeupdate', () => {
-            if (audioEl.duration) {
-                const progress = (audioEl.currentTime / audioEl.duration) * 100;
-                progressBar.style.width = progress + "%";
-            }
-        });
-
-        // Resetear interfaz al terminar
         audioEl.onended = function() {
             iconPlay.style.display = "block";
             iconPause.style.display = "none";
-            waveVisualizer.classList.remove("playing");
-            waveVisualizer.style.opacity = "0";
-            progressBar.style.width = "0%";
             statusText.innerHTML = "Memoria finalizada.<br><span class='accent'>Vuelve a reproducir.</span>";
+            cancelAnimationFrame(animationFrame);
+            // Reseteamos la barra a 0
+            audioEl.currentTime = 0;
+            updateProgress();
         };
     </script>
-
 </body>
 </html>
