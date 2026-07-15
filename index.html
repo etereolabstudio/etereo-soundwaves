@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Etéreo - Memoria Acústica</title>
+    <title>Etéreo | Memoria Acústica</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400&display=swap');
+
         body {
-            background-color: #F7F7F9; /* Gris perla Etéreo */
-            color: #2B2B2B; /* Gris carbón */
-            font-family: 'Helvetica', Arial, sans-serif;
+            background-color: #F7F7F9;
+            color: #2B2B2B;
+            font-family: 'Montserrat', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -17,76 +19,174 @@
             margin: 0;
             text-align: center;
         }
-        .container {
-            padding: 40px;
-            background-color: #FFFFFF;
-            border-radius: 12px;
-            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05);
-            max-width: 90%;
-            width: 320px;
+
+        .card {
+            background: #FFFFFF;
+            padding: 50px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+            max-width: 300px;
+            width: 100%;
+            transition: opacity 0.5s ease-in-out;
         }
-        h1 {
-            font-size: 24px;
-            letter-spacing: 4px;
-            margin-bottom: 5px;
+
+        .brand-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 6px;
+            margin: 0 0 10px 0;
+            color: #1A1A1A;
             text-transform: uppercase;
         }
-        p {
-            font-size: 14px;
+
+        .status-text {
+            font-size: 13px;
             color: #8B8B8B;
-            margin-bottom: 30px;
-            letter-spacing: 1px;
+            margin-bottom: 40px;
+            line-height: 1.5;
+            min-height: 40px;
         }
-        /* Estilizando el reproductor nativo */
-        audio {
-            width: 100%;
-            outline: none;
-            border-radius: 30px;
+
+        .accent {
+            color: #A39171;
+            font-style: italic;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
         }
-        .etereo-accent {
-            color: #A39171; /* Oro apagado / Arena */
+
+        /* --- BOTÓN DE PLAY PERSONALIZADO --- */
+        .play-btn-container {
+            display: none; /* Oculto hasta que cargue el audio */
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
         }
+
+        .play-btn {
+            background-color: #A39171;
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(163, 145, 113, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(163, 145, 113, 0.4);
+        }
+
+        .play-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Iconos SVG (Play / Pause) */
+        .icon-play, .icon-pause {
+            fill: #FFFFFF;
+            width: 24px;
+            height: 24px;
+        }
+        .icon-pause { display: none; }
+
+        /* Animación de pulso al reproducir */
+        .playing {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(163, 145, 113, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(163, 145, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(163, 145, 113, 0); }
+        }
+
+        /* Reproductor nativo oculto */
+        audio { display: none; }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>ETÉREO</h1>
-        <p id="status-text">Buscando cápsula...</p>
+    <div class="card" id="main-card">
+        <h1 class="brand-title">Etéreo</h1>
+        <p class="status-text" id="status-text">Sincronizando cápsula...</p>
         
-        <audio id="audio-player" controls style="display: none;">
-            Tu navegador no soporta el reproductor de audio.
-        </audio>
+        <div class="play-btn-container" id="player-ui">
+            <button class="play-btn" id="custom-play-btn" onclick="togglePlay()">
+                <!-- Icono Play -->
+                <svg class="icon-play" id="icon-play" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <!-- Icono Pause -->
+                <svg class="icon-pause" id="icon-pause" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </button>
+        </div>
+
+        <audio id="native-audio"></audio>
     </div>
 
     <script>
-        // Extraemos el ID de la URL (ej. play.etereomx.com/?id=123456)
         const params = new URLSearchParams(window.location.search);
         const audioId = params.get('id');
+        
         const statusText = document.getElementById('status-text');
-        const player = document.getElementById('audio-player');
+        const playerUI = document.getElementById('player-ui');
+        const audioEl = document.getElementById('native-audio');
+        const playBtn = document.getElementById('custom-play-btn');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
 
         if (audioId) {
-            // Construimos la ruta del archivo WAV
             const audioPath = `audios/${audioId}.wav`;
             
-            // Verificamos si el archivo existe
             fetch(audioPath, { method: 'HEAD' })
                 .then(response => {
                     if (response.ok) {
-                        player.src = audioPath;
-                        player.style.display = "block";
-                        statusText.innerHTML = "Memoria acústica recuperada.<br><span class='etereo-accent'>Presiona reproducir.</span>";
+                        audioEl.src = audioPath;
+                        playerUI.style.display = "flex";
+                        statusText.innerHTML = "Memoria acústica recuperada.<br><span class='accent'>Presiona reproducir.</span>";
                     } else {
-                        statusText.innerText = "La cápsula está vacía o aún se está sincronizando con la bóveda.";
+                        statusText.innerHTML = "La cápsula está vacía.<br>Verifica el enlace o la sincronización.";
                     }
                 })
                 .catch(() => {
-                    statusText.innerText = "Error de conexión con la red Etéreo.";
+                    statusText.innerHTML = "Error de red.<br>Verifica tu conexión a internet.";
                 });
         } else {
-            statusText.innerText = "No se detectó ninguna firma acústica en el escaneo.";
+            statusText.innerHTML = "Cápsula no identificada.<br>Acerca tu dispositivo al NFC.";
         }
+
+        // Lógica del botón Play/Pause
+        function togglePlay() {
+            if (audioEl.paused) {
+                audioEl.play();
+                iconPlay.style.display = "none";
+                iconPause.style.display = "block";
+                playBtn.classList.add("playing");
+                statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
+            } else {
+                audioEl.pause();
+                iconPlay.style.display = "block";
+                iconPause.style.display = "none";
+                playBtn.classList.remove("playing");
+                statusText.innerHTML = "Memoria acústica recuperada.<br><span class='accent'>Presiona reproducir.</span>";
+            }
+        }
+
+        // Resetear la UI cuando el audio termine
+        audioEl.onended = function() {
+            iconPlay.style.display = "block";
+            iconPause.style.display = "none";
+            playBtn.classList.remove("playing");
+            statusText.innerHTML = "Memoria acústica finalizada.<br><span class='accent'>Vuelve a reproducir.</span>";
+        };
     </script>
 
 </body>
