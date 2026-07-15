@@ -18,16 +18,18 @@
             height: 100vh;
             margin: 0;
             text-align: center;
+            overflow: hidden;
         }
 
         .card {
             background: #FFFFFF;
-            padding: 50px 30px;
+            padding: 50px 30px 40px 30px;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
-            max-width: 300px;
-            width: 100%;
-            transition: opacity 0.5s ease-in-out;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.04);
+            max-width: 320px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
         }
 
         .brand-title {
@@ -35,7 +37,7 @@
             font-size: 28px;
             font-weight: 600;
             letter-spacing: 6px;
-            margin: 0 0 10px 0;
+            margin: 0 0 15px 0;
             color: #1A1A1A;
             text-transform: uppercase;
         }
@@ -43,8 +45,8 @@
         .status-text {
             font-size: 13px;
             color: #8B8B8B;
-            margin-bottom: 40px;
-            line-height: 1.5;
+            margin-bottom: 30px;
+            line-height: 1.6;
             min-height: 40px;
         }
 
@@ -52,29 +54,29 @@
             color: #A39171;
             font-style: italic;
             font-family: 'Cormorant Garamond', serif;
-            font-size: 16px;
+            font-size: 17px;
         }
 
-        /* --- BOTÓN DE PLAY PERSONALIZADO --- */
-        .play-btn-container {
-            display: none; /* Oculto hasta que cargue el audio */
-            justify-content: center;
+        /* --- UI DEL REPRODUCTOR --- */
+        .player-container {
+            display: none; /* Se activa con JS si hay ID */
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 10px;
         }
 
         .play-btn {
             background-color: #A39171;
             border: none;
             border-radius: 50%;
-            width: 70px;
-            height: 70px;
+            width: 65px;
+            height: 65px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
             box-shadow: 0 4px 15px rgba(163, 145, 113, 0.3);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 2;
         }
 
         .play-btn:hover {
@@ -82,27 +84,64 @@
             box-shadow: 0 6px 20px rgba(163, 145, 113, 0.4);
         }
 
-        .play-btn:active {
-            transform: scale(0.95);
-        }
+        .play-btn:active { transform: scale(0.95); }
 
-        /* Iconos SVG (Play / Pause) */
         .icon-play, .icon-pause {
             fill: #FFFFFF;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
         }
         .icon-pause { display: none; }
 
-        /* Animación de pulso al reproducir */
-        .playing {
-            animation: pulse 2s infinite;
+        /* --- VISUALIZADOR DE ONDAS ANIMADO --- */
+        .wave-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            margin-top: 25px;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(163, 145, 113, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(163, 145, 113, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(163, 145, 113, 0); }
+        .wave-bar {
+            width: 3px;
+            height: 4px;
+            background-color: #A39171;
+            border-radius: 4px;
+            transition: height 0.2s ease;
+        }
+
+        .playing .wave-bar { animation: wave-bounce 1s infinite ease-in-out; }
+        .playing .wave-bar:nth-child(1) { animation-delay: 0.0s; }
+        .playing .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+        .playing .wave-bar:nth-child(3) { animation-delay: 0.4s; }
+        .playing .wave-bar:nth-child(4) { animation-delay: 0.1s; }
+        .playing .wave-bar:nth-child(5) { animation-delay: 0.5s; }
+        .playing .wave-bar:nth-child(6) { animation-delay: 0.3s; }
+        .playing .wave-bar:nth-child(7) { animation-delay: 0.1s; }
+
+        @keyframes wave-bounce {
+            0%, 100% { height: 8px; }
+            50% { height: 35px; }
+        }
+
+        /* --- BARRA DE PROGRESO --- */
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: #F0F0F0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #A39171;
+            transition: width 0.1s linear;
         }
 
         /* Reproductor nativo oculto */
@@ -114,19 +153,33 @@
 
     <div class="card" id="main-card">
         <h1 class="brand-title">Etéreo</h1>
-        <p class="status-text" id="status-text">Sincronizando cápsula...</p>
+        <p class="status-text" id="status-text">Analizando firma acústica...</p>
         
-        <div class="play-btn-container" id="player-ui">
+        <div class="player-container" id="player-ui">
             <button class="play-btn" id="custom-play-btn" onclick="togglePlay()">
-                <!-- Icono Play -->
                 <svg class="icon-play" id="icon-play" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                 </svg>
-                <!-- Icono Pause -->
                 <svg class="icon-pause" id="icon-pause" viewBox="0 0 24 24">
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
             </button>
+
+            <!-- Visualizador Animado -->
+            <div class="wave-container" id="wave-visualizer">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+            </div>
+        </div>
+
+        <!-- Barra de progreso anclada al fondo de la tarjeta -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
         </div>
 
         <audio id="native-audio"></audio>
@@ -142,6 +195,8 @@
         const playBtn = document.getElementById('custom-play-btn');
         const iconPlay = document.getElementById('icon-play');
         const iconPause = document.getElementById('icon-pause');
+        const waveVisualizer = document.getElementById('wave-visualizer');
+        const progressBar = document.getElementById('progress-bar');
 
         if (audioId) {
             const audioPath = `audios/${audioId}.wav`;
@@ -153,39 +208,51 @@
                         playerUI.style.display = "flex";
                         statusText.innerHTML = "Memoria acústica recuperada.<br><span class='accent'>Presiona reproducir.</span>";
                     } else {
-                        statusText.innerHTML = "La cápsula está vacía.<br>Verifica el enlace o la sincronización.";
+                        statusText.innerHTML = "La cápsula está vacía.<br>Verifica el enlace o la sincronización con el estudio.";
                     }
                 })
                 .catch(() => {
                     statusText.innerHTML = "Error de red.<br>Verifica tu conexión a internet.";
                 });
         } else {
-            statusText.innerHTML = "Cápsula no identificada.<br>Acerca tu dispositivo al NFC.";
+            // EL ESTADO VACÍO (Landing Promocional)
+            statusText.innerHTML = "Bienvenido a Etéreo.<br><br>Acerca tu dispositivo al chip NFC de tu cuadro para reproducir tu memoria acústica.<br><br><span class='accent'>etereomx.com</span>";
         }
 
-        // Lógica del botón Play/Pause
         function togglePlay() {
             if (audioEl.paused) {
                 audioEl.play();
                 iconPlay.style.display = "none";
                 iconPause.style.display = "block";
-                playBtn.classList.add("playing");
-                statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
+                waveVisualizer.classList.add("playing");
+                waveVisualizer.style.opacity = "1";
+                statusText.innerHTML = "<span class='accent'>Reproduciendo...</span>";
             } else {
                 audioEl.pause();
                 iconPlay.style.display = "block";
                 iconPause.style.display = "none";
-                playBtn.classList.remove("playing");
-                statusText.innerHTML = "Memoria acústica recuperada.<br><span class='accent'>Presiona reproducir.</span>";
+                waveVisualizer.classList.remove("playing");
+                waveVisualizer.style.opacity = "0.3";
+                statusText.innerHTML = "Pausado.<br><span class='accent'>Presiona reproducir.</span>";
             }
         }
 
-        // Resetear la UI cuando el audio termine
+        // Animación de la barra de progreso
+        audioEl.addEventListener('timeupdate', () => {
+            if (audioEl.duration) {
+                const progress = (audioEl.currentTime / audioEl.duration) * 100;
+                progressBar.style.width = progress + "%";
+            }
+        });
+
+        // Resetear interfaz al terminar
         audioEl.onended = function() {
             iconPlay.style.display = "block";
             iconPause.style.display = "none";
-            playBtn.classList.remove("playing");
-            statusText.innerHTML = "Memoria acústica finalizada.<br><span class='accent'>Vuelve a reproducir.</span>";
+            waveVisualizer.classList.remove("playing");
+            waveVisualizer.style.opacity = "0";
+            progressBar.style.width = "0%";
+            statusText.innerHTML = "Memoria finalizada.<br><span class='accent'>Vuelve a reproducir.</span>";
         };
     </script>
 
