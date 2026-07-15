@@ -49,7 +49,7 @@
             color: #8B8B8B;
             margin-bottom: 25px;
             line-height: 1.6;
-            min-height: 20px;
+            min-height: 40px;
         }
 
         .accent {
@@ -65,8 +65,7 @@
             height: 80px;
             margin-bottom: 25px;
             position: relative;
-            display: none; /* Oculto hasta cargar */
-            cursor: pointer;
+            display: block; /* Ahora siempre visible */
         }
 
         canvas {
@@ -134,11 +133,8 @@
         <h1 class="brand-title">Etéreo</h1>
         <p class="status-text" id="status-text">Analizando señal acústica...</p>
         
-        <!-- Contenedor interactivo de la Onda -->
         <div class="waveform-wrapper" id="waveform-wrapper">
-            <!-- Canvas Base (Gris) -->
             <canvas id="canvas-base"></canvas>
-            <!-- Canvas Progreso (Color Acento) -->
             <canvas id="canvas-progress"></canvas>
             
             <button class="play-btn" id="custom-play-btn" onclick="togglePlay()">
@@ -147,7 +143,7 @@
             </button>
         </div>
 
-        <a href="https://etereomx.com" class="back-link">Visitar etereomx.com</a>
+        <a href="https://etereomx.com" class="back-link">Descubre Etéreo Studio</a>
         <audio id="native-audio"></audio>
     </div>
 
@@ -168,18 +164,22 @@
 
         let animationFrame;
         let peaks = [];
+        let isDemo = !audioId; // Bandera para saber si estamos en modo demostración
+        let isPlaying = false;
+        
+        // Variables para la animación de la demo
+        let demoProgress = 0;
+        let lastTime = 0;
+        const demoDuration = 10000; // 10 segundos de duración simulada
 
-        // Colores de la marca Etéreo
-        const colorBase = "#EAEAEA"; // Gris muy claro para la onda sin reproducir
-        const colorProgress = "#A39171"; // Oro apagado
+        const colorBase = "#EAEAEA"; 
+        const colorProgress = "#A39171"; 
 
-        if (audioId) {
+        if (!isDemo) {
+            // --- MODO PRODUCCIÓN (CON ID) ---
             const audioPath = `audios/${audioId}.wav`;
-            
-            // 1. Cargamos el audio para el reproductor nativo
             audioEl.src = audioPath;
             
-            // 2. Cargamos el buffer del audio para dibujar la gráfica
             fetch(audioPath)
                 .then(response => {
                     if (!response.ok) throw new Error("Cápsula no encontrada");
@@ -191,26 +191,40 @@
                 })
                 .then(audioBuffer => {
                     processAudioData(audioBuffer);
-                    waveformWrapper.style.display = "block";
                     statusText.innerHTML = "<span class='accent'>Memoria lista.</span>";
                 })
                 .catch(() => {
-                    statusText.innerHTML = "La cápsula está vacía o aún se está sincronizando.";
+                    // Si falla, activamos el modo demo para que no se quede feo
+                    isDemo = true;
+                    initDemoMode("La cápsula aún se está sincronizando.<br>Mientras tanto, <span class='accent'>prueba el reproductor.</span>");
                 });
 
         } else {
-            statusText.innerHTML = "Acerca tu dispositivo al chip NFC de tu cuadro.<br><br><span class='accent'>etereomx.com</span>";
+            // --- MODO DEMOSTRACIÓN (SIN ID) ---
+            initDemoMode("Materializamos el sonido.<br>Acerca tu celular a tu cuadro o <span class='accent'>prueba la demostración.</span>");
         }
 
-        // --- MATEMÁTICA DE PROCESAMIENTO DE SEÑAL ---
+        // --- GENERADOR DE ONDAS FALSAS PARA LA DEMO ---
+        function initDemoMode(message) {
+            statusText.innerHTML = message;
+            peaks = [];
+            // Generamos una onda matemática con forma de diamante para que luzca estéticamente hermosa
+            for(let i = 0; i < 200; i++) {
+                let wave = Math.abs(Math.sin(i * 0.1) * Math.cos(i * 0.05));
+                let noise = Math.random() * 0.3;
+                let bellCurve = Math.sin(Math.PI * (i / 200)); // Para que empiece y termine en punta
+                peaks.push(((wave + noise) * bellCurve) * 0.8 + 0.05);
+            }
+            prepareCanvases();
+        }
+
+        // --- MATEMÁTICA DE PROCESAMIENTO DE SEÑAL REAL ---
         function processAudioData(audioBuffer) {
-            const rawData = audioBuffer.getChannelData(0); // Tomamos el canal mono
-            const numSamples = 200; // Densidad del polígono (Resolución)
+            const rawData = audioBuffer.getChannelData(0); 
+            const numSamples = 200; 
             const blockSize = Math.floor(rawData.length / numSamples);
-            
             let maxPeak = 0;
             
-            // Extracción de la envolvente de amplitud
             for (let i = 0; i < numSamples; i++) {
                 let sum = 0;
                 for (let j = 0; j < blockSize; j++) {
@@ -221,10 +235,12 @@
                 if (peak > maxPeak) maxPeak = peak;
             }
 
-            // Normalización y Suavizado básico
-            peaks = peaks.map(p => (p / maxPeak) * 0.8 + 0.05); // 0.05 mínimo para línea estética
+            peaks = peaks.map(p => (p / maxPeak) * 0.8 + 0.05); 
+            prepareCanvases();
+        }
 
-            // Ajustamos la resolución interna del canvas para pantallas de alta densidad (Retina)
+        // --- CONFIGURACIÓN RESPONSIVE DE CANVASES ---
+        function prepareCanvases() {
             const dpr = window.devicePixelRatio || 1;
             const rect = waveformWrapper.getBoundingClientRect();
             
@@ -235,7 +251,7 @@
             });
 
             drawPolygon(ctxBase, canvasBase.width / dpr, canvasBase.height / dpr, colorBase);
-            updateProgress(); // Dibuja el estado inicial en 0
+            updateProgress(); 
         }
 
         // --- RENDERIZADO DEL POLÍGONO SÍMETRICO ---
@@ -247,14 +263,12 @@
             const centerY = height / 2;
             const step = width / (peaks.length - 1);
             
-            // Borde Superior
             ctx.moveTo(0, centerY);
             for (let i = 0; i < peaks.length; i++) {
                 let amp = peaks[i] * height;
                 ctx.lineTo(i * step, centerY - (amp / 2));
             }
             
-            // Borde Inferior (Espejo)
             for (let i = peaks.length - 1; i >= 0; i--) {
                 let amp = peaks[i] * height;
                 ctx.lineTo(i * step, centerY + (amp / 2));
@@ -272,52 +286,86 @@
             const width = rect.width;
             const height = rect.height;
             
-            // Calculamos el porcentaje reproducido
-            const progress = (audioEl.currentTime / (audioEl.duration || 1));
-            const fillWidth = width * progress;
+            let currentP = 0;
 
-            // Dibujamos la misma onda, pero aplicando la técnica de enmascaramiento (Clipping)
+            if (isDemo) {
+                if (isPlaying) {
+                    let now = Date.now();
+                    let delta = now - lastTime;
+                    lastTime = now;
+                    demoProgress += delta / demoDuration;
+                    
+                    if (demoProgress >= 1) {
+                        demoProgress = 1;
+                        handlePlaybackEnd();
+                    }
+                }
+                currentP = demoProgress;
+            } else {
+                currentP = (audioEl.currentTime / (audioEl.duration || 1));
+            }
+
+            const fillWidth = width * currentP;
+
             ctxProgress.clearRect(0, 0, width, height);
-            
             ctxProgress.save();
             ctxProgress.beginPath();
             ctxProgress.rect(0, 0, fillWidth, height);
             ctxProgress.clip();
-            
             drawPolygon(ctxProgress, width, height, colorProgress);
             ctxProgress.restore();
 
-            if (!audioEl.paused) {
+            if (isPlaying) {
                 animationFrame = requestAnimationFrame(updateProgress);
             }
         }
 
         // --- CONTROL DE REPRODUCCIÓN ---
         function togglePlay() {
-            if (audioEl.paused) {
-                audioEl.play();
+            if (!isPlaying) {
+                // Iniciar
+                isPlaying = true;
                 iconPlay.style.display = "none";
                 iconPause.style.display = "block";
-                statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
-                updateProgress();
+                
+                if (isDemo) {
+                    if (demoProgress >= 1) demoProgress = 0; // Reiniciar si había terminado
+                    lastTime = Date.now();
+                    statusText.innerHTML = "<span class='accent'>Reproduciendo demostración...</span>";
+                    updateProgress();
+                } else {
+                    audioEl.play();
+                    statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
+                    updateProgress();
+                }
             } else {
-                audioEl.pause();
+                // Pausar
+                isPlaying = false;
                 iconPlay.style.display = "block";
                 iconPause.style.display = "none";
                 statusText.innerHTML = "Pausado.<br><span class='accent'>Presiona reproducir.</span>";
+                if (!isDemo) audioEl.pause();
                 cancelAnimationFrame(animationFrame);
             }
         }
 
-        audioEl.onended = function() {
+        function handlePlaybackEnd() {
+            isPlaying = false;
             iconPlay.style.display = "block";
             iconPause.style.display = "none";
-            statusText.innerHTML = "Memoria finalizada.<br><span class='accent'>Vuelve a reproducir.</span>";
+            
+            if (isDemo) {
+                statusText.innerHTML = "Demostración finalizada.<br><span class='accent'>Vuelve a escuchar.</span>";
+            } else {
+                statusText.innerHTML = "Memoria finalizada.<br><span class='accent'>Vuelve a reproducir.</span>";
+                audioEl.currentTime = 0; // Reseteamos la pista real
+            }
+            
             cancelAnimationFrame(animationFrame);
-            // Reseteamos la barra a 0
-            audioEl.currentTime = 0;
-            updateProgress();
-        };
+            updateProgress(); // Para que dibuje el final o el reinicio
+        }
+
+        audioEl.onended = handlePlaybackEnd;
     </script>
 </body>
 </html>
