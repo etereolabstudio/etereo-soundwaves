@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Etéreo | Memoria Acústica</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23121016'/%3E%3Ccircle cx='50' cy='50' r='34' fill='none' stroke='%23DD8E5C' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23DD8E5C'/%3E%3C/svg%3E">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -144,6 +145,30 @@
         .icon-play, .icon-pause { fill: #14121A; width: 16px; height: 16px; }
         .icon-pause { display: none; }
 
+        /* Invitación a tocar cuando el navegador bloquea el autoplay */
+        @keyframes invite-pulse-ring {
+            0% { box-shadow: 0 6px 18px rgba(221, 142, 92, 0.3), 0 0 0 0 rgba(221, 142, 92, 0.55); }
+            70% { box-shadow: 0 6px 18px rgba(221, 142, 92, 0.3), 0 0 0 16px rgba(221, 142, 92, 0); }
+            100% { box-shadow: 0 6px 18px rgba(221, 142, 92, 0.3), 0 0 0 0 rgba(221, 142, 92, 0); }
+        }
+        .play-btn.invite-pulse { animation: invite-pulse-ring 1.8s ease-out infinite; }
+
+        .waveform-wrapper { cursor: pointer; }
+
+        /* Shimmer — barrido de luz mientras se descarga/decodifica el audio real */
+        .waveform-wrapper.loading::before {
+            content: ''; position: absolute; inset: 0; z-index: 5; border-radius: 3px;
+            background: linear-gradient(90deg, transparent, rgba(221, 142, 92, 0.14), transparent);
+            background-size: 200% 100%;
+            animation: shimmer-sweep 1.5s ease-in-out infinite;
+        }
+        @keyframes shimmer-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .time-display {
+            display: flex; justify-content: space-between; margin-top: 8px;
+            font-size: 9px; letter-spacing: 1px; color: var(--text-color); opacity: 0.6;
+        }
+
         .cassette-stamp {
             margin-top: 14px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
             color: var(--accent); opacity: 0.7; text-align: right; text-transform: uppercase;
@@ -178,17 +203,18 @@
         </div>
 
         <div class="tape-window">
-            <p class="status-text" id="status-text">Analizando señal acústica...</p>
+            <p class="status-text" id="status-text" aria-live="polite">Analizando señal acústica...</p>
 
             <div class="waveform-wrapper" id="waveform-wrapper">
                 <canvas id="canvas-base"></canvas>
                 <canvas id="canvas-progress"></canvas>
 
-                <button class="play-btn" id="custom-play-btn" onclick="togglePlay()">
+                <button class="play-btn" id="custom-play-btn" onclick="togglePlay()" aria-label="Reproducir memoria">
                     <svg class="icon-play" id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     <svg class="icon-pause" id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
             </div>
+            <div class="time-display mono"><span id="time-elapsed">0:00</span><span id="time-total">0:00</span></div>
             <div class="cassette-stamp">GDL·MX · Rec ●</div>
         </div>
 
@@ -207,6 +233,9 @@
         const iconPause = document.getElementById('icon-pause');
         const reelLeft = document.getElementById('reel-left');
         const reelRight = document.getElementById('reel-right');
+        const playBtn = document.getElementById('custom-play-btn');
+        const timeElapsed = document.getElementById('time-elapsed');
+        const timeTotal = document.getElementById('time-total');
 
         const canvasBase = document.getElementById('canvas-base');
         const canvasProgress = document.getElementById('canvas-progress');
@@ -232,33 +261,102 @@
             reelRight.classList.toggle('spinning', spinning);
         }
 
+        function formatTime(seconds) {
+            if (!isFinite(seconds) || seconds < 0) return '0:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // Prueba estos formatos en orden — mp3/m4a primero por ser mucho más ligeros que wav
+        const AUDIO_FORMATS = ['mp3', 'm4a', 'wav'];
+        const MAX_ATTEMPTS = 3;
+        const RETRY_DELAY_MS = 2500;
+
+        function showShimmer() { waveformWrapper.classList.add('loading'); }
+        function hideShimmer() { waveformWrapper.classList.remove('loading'); }
+
+        // Intenta descargar audios/{id}.mp3, luego .m4a, luego .wav — usa el primero que responda OK
+        async function findAudioSource(id) {
+            for (const ext of AUDIO_FORMATS) {
+                const path = `audios/${id}.${ext}`;
+                try {
+                    const response = await fetch(path);
+                    if (response.ok) {
+                        const arrayBuffer = await response.arrayBuffer();
+                        return { path, arrayBuffer };
+                    }
+                } catch (e) { /* probamos el siguiente formato */ }
+            }
+            return null;
+        }
+
+        // Carga con reintentos: si ningún formato responde, reintenta un par de veces
+        // (por si la cápsula terminó de subirse justo después del escaneo) antes de
+        // caer al modo demostración.
+        async function tryLoadAudio(id, attempt = 1) {
+            statusText.innerHTML = attempt === 1
+                ? "Analizando señal acústica..."
+                : `Sincronizando cápsula<span class="accent">...</span> (${attempt}/${MAX_ATTEMPTS})`;
+
+            const found = await findAudioSource(id);
+
+            if (found) {
+                try {
+                    audioEl.preload = 'auto';
+                    audioEl.src = found.path;
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    const audioCtx = new AudioContextClass();
+                    const audioBuffer = await audioCtx.decodeAudioData(found.arrayBuffer);
+                    processAudioData(audioBuffer);
+                    hideShimmer();
+                    statusText.innerHTML = "<span class='accent'>Memoria lista.</span>";
+                    attemptAutoplay();
+                    return;
+                } catch (e) {
+                    // El archivo se descargó pero no se pudo decodificar (formato dañado o no soportado)
+                }
+            }
+
+            if (attempt < MAX_ATTEMPTS) {
+                setTimeout(() => tryLoadAudio(id, attempt + 1), RETRY_DELAY_MS);
+            } else {
+                isDemo = true;
+                hideShimmer();
+                initDemoMode("La cápsula aún se está sincronizando.<br>Mientras tanto, <span class='accent'>prueba el reproductor.</span>");
+            }
+        }
+
         if (!isDemo) {
             // --- MODO PRODUCCIÓN (CON ID) ---
-            const audioPath = `audios/${audioId}.wav`;
-            audioEl.src = audioPath;
-
-            fetch(audioPath)
-                .then(response => {
-                    if (!response.ok) throw new Error("Cápsula no encontrada");
-                    return response.arrayBuffer();
-                })
-                .then(arrayBuffer => {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    return audioCtx.decodeAudioData(arrayBuffer);
-                })
-                .then(audioBuffer => {
-                    processAudioData(audioBuffer);
-                    statusText.innerHTML = "<span class='accent'>Memoria lista.</span>";
-                })
-                .catch(() => {
-                    // Si falla, activamos el modo demo para que no se quede feo
-                    isDemo = true;
-                    initDemoMode("La cápsula aún se está sincronizando.<br>Mientras tanto, <span class='accent'>prueba el reproductor.</span>");
-                });
-
+            showShimmer();
+            tryLoadAudio(audioId);
         } else {
             // --- MODO DEMOSTRACIÓN (SIN ID) ---
             initDemoMode("Materializamos el sonido.<br>Acerca tu celular a tu cuadro o <span class='accent'>prueba la demostración.</span>");
+        }
+
+        // --- AUTOPLAY CON RESPALDO ---
+        // Muchos navegadores (sobre todo Android/Chrome al abrir vía NFC) permiten
+        // reproducir automáticamente. Si el navegador lo bloquea (común en iOS),
+        // en vez de fallar en silencio invitamos a tocar con un pulso visible.
+        function attemptAutoplay() {
+            const playPromise = audioEl.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    isPlaying = true;
+                    iconPlay.style.display = "none";
+                    iconPause.style.display = "block";
+                    setReelsSpinning(true);
+                    playBtn.setAttribute('aria-label', 'Pausar memoria');
+                    statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
+                    lastTime = Date.now();
+                    updateProgress();
+                }).catch(() => {
+                    playBtn.classList.add('invite-pulse');
+                    statusText.innerHTML = "Memoria lista.<br><span class='accent'>Toca para escuchar.</span>";
+                });
+            }
         }
 
         // --- GENERADOR DE ONDAS FALSAS PARA LA DEMO ---
@@ -371,18 +469,37 @@
             drawPolygon(ctxProgress, width, height, colorProgress);
             ctxProgress.restore();
 
+            const totalSeconds = isDemo ? (demoDuration / 1000) : (audioEl.duration || 0);
+            timeElapsed.textContent = formatTime(totalSeconds * currentP);
+            timeTotal.textContent = formatTime(totalSeconds);
+
             if (isPlaying) {
                 animationFrame = requestAnimationFrame(updateProgress);
             }
         }
 
+        // --- BUSCAR TOCANDO LA CINTA ---
+        waveformWrapper.addEventListener('click', (e) => {
+            if (e.target.closest('.play-btn') || !peaks.length) return;
+            const rect = waveformWrapper.getBoundingClientRect();
+            const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+            if (isDemo) {
+                demoProgress = ratio;
+            } else if (audioEl.duration) {
+                audioEl.currentTime = ratio * audioEl.duration;
+            }
+            updateProgress();
+        });
+
         // --- CONTROL DE REPRODUCCIÓN ---
         function togglePlay() {
+            playBtn.classList.remove('invite-pulse');
             if (!isPlaying) {
                 isPlaying = true;
                 iconPlay.style.display = "none";
                 iconPause.style.display = "block";
                 setReelsSpinning(true);
+                playBtn.setAttribute('aria-label', 'Pausar memoria');
 
                 if (isDemo) {
                     if (demoProgress >= 1) demoProgress = 0;
@@ -399,6 +516,7 @@
                 iconPlay.style.display = "block";
                 iconPause.style.display = "none";
                 setReelsSpinning(false);
+                playBtn.setAttribute('aria-label', 'Reproducir memoria');
                 statusText.innerHTML = "Pausado.<br><span class='accent'>Presiona reproducir.</span>";
                 if (!isDemo) audioEl.pause();
                 cancelAnimationFrame(animationFrame);
@@ -410,6 +528,7 @@
             iconPlay.style.display = "block";
             iconPause.style.display = "none";
             setReelsSpinning(false);
+            playBtn.setAttribute('aria-label', 'Reproducir memoria');
 
             if (isDemo) {
                 statusText.innerHTML = "Demostración finalizada.<br><span class='accent'>Vuelve a escuchar.</span>";
