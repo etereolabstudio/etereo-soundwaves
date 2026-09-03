@@ -13,348 +13,409 @@
 
     <style>
         /* =========================================
-           VARIABLES GLOBALES Y TEMÁTICA
+           1. INGENIERÍA DE VARIABLES TÉRMICAS
            ========================================= */
         :root {
-            --bg-color: #0c0b0f;
-            --cassette-base: #1c1a22;
-            --cassette-dark: #110f15;
-            --cassette-light: #2a2731;
+            /* Entorno general */
+            --bg-color: #060507;
             
-            --text-color: #9B9488;
+            /* Materialidad del Plástico (Chasis) */
+            --plastic-high: #2d2936;
+            --plastic-mid: #1c1a22;
+            --plastic-low: #0c0b0f;
+            --plastic-edge: rgba(255, 255, 255, 0.08);
+            
+            /* Identidad Etéreo */
+            --text-color: #A39B8F;
             --title-color: #EDE6D6;
             --accent: #DD8E5C;
-            --accent-glow: rgba(221, 142, 92, 0.4);
+            --accent-glow: rgba(221, 142, 92, 0.6);
+            --copper-light: #FFCBA4;
+            --copper-dark: #8C4A23;
             
-            --label-bg: #EAE3D2;
-            --label-text: #1B1912;
+            /* Materialidad del Papel */
+            --paper-base: #E8E1CE;
+            --paper-shadow: #C4BC9F;
             
-            --light-leak-1: rgba(221, 142, 92, 0.08);
-            --light-leak-2: rgba(139, 132, 163, 0.06);
+            /* Emisividad HUD */
+            --led-red: #ff3333;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* =========================================
+           2. ATMÓSFERA Y ENTORNO GLOBAL
+           ========================================= */
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Outfit', sans-serif;
             font-weight: 300;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 24px;
-            text-align: center;
-            overflow-x: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 24px; text-align: center; overflow-x: hidden;
             position: relative;
         }
 
-        /* Iluminación global y textura de grano analógico */
-        body::before {
-            content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0;
-            background:
-                radial-gradient(ellipse 45% 45% at 80% 20%, var(--light-leak-1) 0%, transparent 65%),
-                radial-gradient(ellipse 50% 50% at -10% 115%, var(--light-leak-2) 0%, transparent 60%);
+        /* Iluminación volumétrica con deriva lenta */
+        @keyframes ambient-drift {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.6; }
+            50% { transform: scale(1.15) translate(-3%, 4%); opacity: 0.9; }
+            100% { transform: scale(1) translate(0, 0); opacity: 0.6; }
         }
+
+        body::before {
+            content: ''; position: fixed; top: -20%; left: -20%; width: 140vw; height: 140vh; pointer-events: none; z-index: 0;
+            background:
+                radial-gradient(ellipse 40% 40% at 75% 25%, rgba(221, 142, 92, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 45% 45% at 20% 85%, rgba(139, 132, 163, 0.08) 0%, transparent 60%);
+            animation: ambient-drift 15s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+        }
+        
+        /* Textura de grano fina para evitar el "banding" del fondo */
         body::after {
-            content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9998; opacity: 0.15; mix-blend-mode: overlay;
-            background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9998; 
+            opacity: 0.25; mix-blend-mode: soft-light;
+            background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
         }
 
         .mono { font-family: 'Space Mono', monospace; }
 
         /* =========================================
-           CHASIS DEL CASSETTE (ESTRUCTURA 3D)
+           3. CHASIS (MOLDEADO 3D Y MATERIALES)
            ========================================= */
         .cassette {
             position: relative; z-index: 1;
-            background: linear-gradient(180deg, var(--cassette-light) 0%, var(--cassette-base) 40%, var(--cassette-dark) 100%);
-            border-radius: 16px;
-            padding: 16px;
-            max-width: 380px;
+            /* El gradiente principal del policarbonato */
+            background: linear-gradient(170deg, var(--plastic-high) 0%, var(--plastic-mid) 30%, var(--plastic-low) 100%);
+            border-radius: 18px;
+            padding: 18px;
+            max-width: 390px;
             width: 100%;
-            /* Sombras complejas para simular biselado de plástico y elevación */
+            /* 
+               Sombras Ultra-Realistas (Física de rebote):
+               1. Rim light superior (bisel iluminado)
+               2. Oclusión ambiental interna superior
+               3. Oclusión ambiental interna inferior
+               4. Sombra proyectada principal difusa
+               5. Sombra proyectada núcleo duro
+            */
             box-shadow: 
-                inset 0 2px 2px rgba(255,255,255,0.08),
-                inset 0 -4px 6px rgba(0,0,0,0.6),
-                inset -2px 0 4px rgba(0,0,0,0.4),
-                inset 2px 0 4px rgba(255,255,255,0.03),
-                0 30px 60px rgba(0,0,0,0.6), 
-                0 15px 20px rgba(0,0,0,0.4);
-            border: 1px solid #322E3A;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+                inset 0 2px 3px rgba(255,255,255,0.15),
+                inset 0 -6px 12px rgba(0,0,0,0.8),
+                inset -3px 0 6px rgba(0,0,0,0.5),
+                inset 3px 0 6px rgba(255,255,255,0.04),
+                0 40px 70px rgba(0,0,0,0.8), 
+                0 15px 25px rgba(0,0,0,0.6);
+            border: 1px solid #3c3746;
+            border-bottom: 2px solid #000; /* Sensación de peso */
+            display: flex; flex-direction: column; gap: 14px;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
         }
 
-        /* Tornillos con ranura en cruz (Phillips) realista */
+        .cassette:hover { 
+            transform: translateY(-4px) rotateX(2deg); 
+            box-shadow: 
+                inset 0 2px 3px rgba(255,255,255,0.2),
+                inset 0 -6px 12px rgba(0,0,0,0.8),
+                0 50px 80px rgba(0,0,0,0.9), 
+                0 20px 30px rgba(0,0,0,0.6);
+        }
+
+        /* Tornillos Phillips Metálicos */
         .screw { 
-            position: absolute; 
-            width: 10px; height: 10px; 
-            border-radius: 50%; 
-            background: linear-gradient(135deg, #5A5462, #18151D); 
-            box-shadow: inset 0 1px 2px rgba(255,255,255,0.2), 0 1px 3px rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute; width: 11px; height: 11px; border-radius: 50%; 
+            background: conic-gradient(from 45deg, #444, #888, #333, #777, #444); 
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.9), inset 0 -1px 2px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center;
         }
         .screw::after {
-            content: '';
-            width: 6px; height: 6px;
-            border-radius: 50%;
+            content: ''; width: 7px; height: 7px; border-radius: 50%;
             background: 
-                linear-gradient(0deg, transparent 40%, #0c0b0f 40%, #0c0b0f 60%, transparent 60%),
-                linear-gradient(90deg, transparent 40%, #0c0b0f 40%, #0c0b0f 60%, transparent 60%);
-            opacity: 0.8;
-            transform: rotate(45deg);
+                linear-gradient(0deg, transparent 38%, rgba(0,0,0,0.9) 38%, rgba(0,0,0,0.9) 62%, transparent 62%),
+                linear-gradient(90deg, transparent 38%, rgba(0,0,0,0.9) 38%, rgba(0,0,0,0.9) 62%, transparent 62%);
+            transform: rotate(45deg); filter: drop-shadow(0 1px 0 rgba(255,255,255,0.2));
         }
-        .screw.tl { top: 12px; left: 12px; transform: rotate(15deg); } 
-        .screw.tr { top: 12px; right: 12px; transform: rotate(-35deg); }
-        .screw.bl { bottom: 12px; left: 12px; transform: rotate(80deg); } 
-        .screw.br { bottom: 12px; right: 12px; transform: rotate(-10deg); }
+        .screw.tl { top: 14px; left: 14px; transform: rotate(15deg); } 
+        .screw.tr { top: 14px; right: 14px; transform: rotate(-42deg); }
+        .screw.bl { bottom: 14px; left: 14px; transform: rotate(78deg); } 
+        .screw.br { bottom: 14px; right: 14px; transform: rotate(-12deg); }
 
         /* =========================================
-           ETIQUETA SUPERIOR (TEXTURA DE PAPEL)
+           4. ETIQUETA (FIBRA DE PAPEL Y FOIL METÁLICO)
            ========================================= */
         .cassette-label {
-            background: linear-gradient(160deg, var(--label-bg) 0%, #D4CBB5 100%);
-            color: var(--label-text);
-            border-radius: 6px;
-            padding: 16px 20px;
-            margin: 0 16px;
+            background: linear-gradient(150deg, var(--paper-base) 0%, var(--paper-shadow) 100%);
+            border-radius: 6px; padding: 20px 22px 18px; margin: 0 14px;
+            /* Relieve de la etiqueta hundiéndose en el plástico */
             box-shadow: 
-                inset 0 0 20px rgba(0,0,0,0.05),
-                0 2px 5px rgba(0,0,0,0.4);
-            position: relative;
-            z-index: 2;
+                inset 0 0 30px rgba(0,0,0,0.08),
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                0 2px 4px rgba(0,0,0,0.5),
+                0 0 0 1px rgba(0,0,0,0.3); /* Contorno sutil del troquelado */
+            position: relative; z-index: 2; overflow: hidden;
         }
-        /* Líneas decorativas impresas en la etiqueta */
+        
+        /* Fibra de papel incrustada */
         .cassette-label::before {
-            content: ''; position: absolute; left: 12px; right: 12px; top: 6px; height: 2px; 
-            background: rgba(27,25,18,0.1); border-radius: 1px;
-        }
-        .cassette-label::after {
-            content: ''; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 2px; 
-            background: rgba(27,25,18,0.1); border-radius: 1px;
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            opacity: 0.12; mix-blend-mode: multiply;
         }
 
+        /* Copper Foil Stamping (Estampado metálico) */
         .brand-title {
-            font-family: 'Clash Display', sans-serif; font-weight: 600; font-size: 24px; 
-            letter-spacing: 6px; text-transform: uppercase; margin: 0;
-            text-shadow: 0px 1px 1px rgba(255,255,255,0.6);
+            font-family: 'Clash Display', sans-serif; font-weight: 700; font-size: 28px; 
+            letter-spacing: 8px; text-transform: uppercase; margin: 0;
+            background: linear-gradient(120deg, var(--accent) 0%, var(--copper-light) 30%, var(--accent) 60%, var(--copper-dark) 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* Sombra interna para emular que está estampado/hundido en el papel */
+            filter: drop-shadow(0px 1px 0px rgba(255,255,255,0.8));
+            animation: foil-shine 8s linear infinite;
         }
-        .side-tag {
-            font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-            opacity: 0.7; margin-top: 4px; font-weight: 700;
+        @keyframes foil-shine { to { background-position: 200% center; } }
+
+        .side-tag { 
+            font-size: 10.5px; letter-spacing: 3px; text-transform: uppercase; 
+            color: #4a4539; margin-top: 4px; font-weight: 700; text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+        }
+
+        /* Líneas de registro o escritura */
+        .cassette-label::after {
+            content: ''; position: absolute; left: 16px; right: 16px; bottom: 12px; height: 1px; 
+            background: rgba(27,25,18,0.12); box-shadow: 0 -26px 0 rgba(27,25,18,0.08);
         }
 
         /* =========================================
-           VENTANA CENTRAL (CRISTAL Y CARRETES)
+           5. ÓPTICA DEL CRISTAL Y SISTEMA MAGNÉTICO
            ========================================= */
         .cassette-window {
-            background: #060507;
-            margin: 0 24px;
-            border-radius: 8px;
-            padding: 6px;
+            background: #020103; margin: 0 22px; border-radius: 10px; padding: 6px;
             box-shadow: 
-                inset 0 4px 15px rgba(0,0,0,0.9),
-                inset 0 0 0 1px rgba(255,255,255,0.04),
-                0 1px 1px rgba(255,255,255,0.08);
-            position: relative;
-            height: 90px;
-            overflow: hidden;
+                inset 0 8px 20px rgba(0,0,0,1),
+                inset 0 0 0 1px rgba(255,255,255,0.03),
+                0 2px 2px rgba(255,255,255,0.15); /* Reflejo del borde del hueco */
+            position: relative; height: 100px; overflow: hidden;
         }
 
-        /* Simulación de cristal con reflejo de luz diagonal */
-        .window-glass {
-            position: relative;
-            width: 100%; height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* Foco de luz animado barriendo el cristal */
+        @keyframes glass-sweep {
+            0% { transform: translateX(-150%) skewX(-15deg); }
+            40% { transform: translateX(200%) skewX(-15deg); }
+            100% { transform: translateX(200%) skewX(-15deg); }
         }
+
+        .window-glass {
+            position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; border-radius: 4px;
+        }
+        /* El destello en movimiento */
+        .window-glass::before {
+            content: ''; position: absolute; top: 0; left: -20%; width: 50%; height: 100%; z-index: 15; pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            animation: glass-sweep 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        /* Reflejos estáticos oblicuos */
         .window-glass::after {
             content: ''; position: absolute; inset: 0; z-index: 10; pointer-events: none;
-            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.08) 50%, transparent 55%);
+            background: 
+                linear-gradient(110deg, transparent 20%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.09) 35%, transparent 40%),
+                linear-gradient(-65deg, transparent 55%, rgba(255,255,255,0.03) 65%, transparent 70%);
             mix-blend-mode: screen;
         }
 
-        /* Marcadores impresos en el cristal (líneas de medida de cinta) */
         .tape-markers {
-            position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
-            width: 100px; height: 10px; z-index: 5;
+            position: absolute; top: 12%; left: 50%; transform: translateX(-50%); width: 120px; height: 8px; z-index: 5;
             background: 
                 linear-gradient(90deg, 
-                    transparent 0%, transparent 10%, rgba(255,255,255,0.15) 10%, rgba(255,255,255,0.15) 15%,
-                    transparent 15%, transparent 48%, rgba(255,255,255,0.3) 48%, rgba(255,255,255,0.3) 52%,
-                    transparent 52%, transparent 85%, rgba(255,255,255,0.15) 85%, rgba(255,255,255,0.15) 90%,
-                    transparent 90%
+                    transparent 0%, transparent 10%, rgba(255,255,255,0.2) 10%, rgba(255,255,255,0.2) 15%,
+                    transparent 15%, transparent 48%, rgba(255,255,255,0.4) 48%, rgba(255,255,255,0.4) 52%,
+                    transparent 52%, transparent 85%, rgba(255,255,255,0.2) 85%, rgba(255,255,255,0.2) 90%, transparent 90%
                 );
         }
 
-        /* Sistema de carretes y cinta magnética */
-        .reels-row { 
-            display: flex; justify-content: center; align-items: center; gap: 70px; 
-            position: relative; z-index: 2; width: 100%;
-        }
-        
-        .reel-container {
-            position: relative;
-            display: flex; justify-content: center; align-items: center;
-        }
+        /* Mecánica: Carretes y Cinta (Física Magnética) */
+        .reels-row { display: flex; justify-content: center; align-items: center; gap: 76px; position: relative; z-index: 2; width: 100%; }
+        .reel-container { position: relative; display: flex; justify-content: center; align-items: center; }
 
-        /* La cinta enrollada (marrón muy oscuro) */
+        /* Simulación de las diminutas crestas de la cinta enrollada (Anisotropía) */
         .tape-spool {
-            position: absolute;
-            background: #150F0B;
-            border-radius: 50%;
-            box-shadow: 
-                inset 0 0 10px rgba(0,0,0,0.8),
-                0 0 0 2px #090604;
-            z-index: 0;
-        }
-        .tape-spool-left { width: 85px; height: 85px; } /* Más cinta en la izquierda */
-        .tape-spool-right { width: 65px; height: 65px; }
-
-        /* El engranaje blanco central (el que gira) */
-        .reel {
-            width: 44px; height: 44px; border-radius: 50%;
+            position: absolute; border-radius: 50%; z-index: 0;
             background: 
-                radial-gradient(circle at center, #100E14 18%, transparent 20%),
-                repeating-conic-gradient(from 0deg, 
-                    transparent 0deg, transparent 35deg, 
-                    #D8D3C8 35deg, #D8D3C8 60deg);
-            border: 5px solid #D8D3C8;
-            position: relative;
-            z-index: 2;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+                repeating-radial-gradient(circle at center, transparent 0, rgba(0,0,0,0.4) 1px, transparent 2px),
+                conic-gradient(from 45deg, #110B08, #2a1b14, #110B08, #050302, #110B08);
+            box-shadow: 
+                inset 0 0 15px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.03);
+            transition: width 0.3s, height 0.3s;
         }
-        
-        /* Eje interno del carrete */
+        .tape-spool-left { width: 92px; height: 92px; } 
+        .tape-spool-right { width: 66px; height: 66px; }
+
+        /* Engranaje central */
+        .reel {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: 
+                radial-gradient(circle at center, #0a090c 18%, transparent 20%),
+                repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #E6E1D6 35deg, #E6E1D6 60deg);
+            border: 6px solid #E6E1D6; position: relative; z-index: 2;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.8), inset 0 2px 2px rgba(255,255,255,0.5);
+        }
         .reel::after {
-            content: ''; position: absolute; inset: 30%; border-radius: 50%;
-            background: #0A090D; border: 1px solid rgba(255,255,255,0.1);
+            content: ''; position: absolute; inset: 28%; border-radius: 50%;
+            background: conic-gradient(#111, #333, #111, #000, #111);
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 2px 5px rgba(0,0,0,0.9);
         }
 
-        .reel.spinning { animation: reel-spin 2s linear infinite; }
+        .reel.spinning { animation: reel-spin 1.8s linear infinite; }
         @keyframes reel-spin { to { transform: rotate(360deg); } }
 
         /* =========================================
-           PUENTE INFERIOR (TECNOLOGÍA / HUD)
+           6. HUD DIGITAL / INTERFAZ HARDWARE
            ========================================= */
         .cassette-bridge {
-            background: linear-gradient(180deg, var(--cassette-base) 0%, var(--cassette-dark) 100%);
-            border-radius: 8px 8px 12px 12px;
-            padding: 16px 20px;
-            margin-top: -4px;
+            background: linear-gradient(180deg, #24212c 0%, var(--plastic-mid) 20%, var(--plastic-low) 100%);
+            border-radius: 10px 10px 14px 14px; padding: 20px 22px; margin-top: -6px;
             box-shadow: 
-                inset 0 3px 6px rgba(255,255,255,0.03),
-                inset 0 1px 1px rgba(255,255,255,0.05);
-            border-top: 1px solid rgba(0,0,0,0.4);
-            position: relative;
+                inset 0 3px 6px rgba(255,255,255,0.05), 
+                inset 0 1px 1px rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(0,0,0,0.8); position: relative;
         }
         
-        /* Detalles mecánicos laterales del puente */
+        /* Relieves estructurales del puente */
         .cassette-bridge::before, .cassette-bridge::after {
-            content: ''; position: absolute; top: -5px; width: 30px; height: 10px;
-            background: #060507; border-radius: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+            content: ''; position: absolute; top: -6px; width: 36px; height: 14px;
+            background: #040305; border-radius: 0 0 4px 4px; box-shadow: inset 0 4px 8px rgba(0,0,0,0.9), 0 1px 1px rgba(255,255,255,0.1);
         }
-        .cassette-bridge::before { left: 30px; }
-        .cassette-bridge::after { right: 30px; }
+        .cassette-bridge::before { left: 32px; }
+        .cassette-bridge::after { right: 32px; }
 
-        /* Pantalla digital para la onda */
-        .tape-window { /* Se mantiene la clase para evitar afectar JS, pero funciona como display */
-            background: #09080A; 
-            border: 1px solid rgba(255,255,255,0.03);
-            border-radius: 8px; padding: 14px 16px 12px;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.6);
-            position: relative;
+        /* Pantalla VFD profunda */
+        .tape-window { 
+            background: #040304; border: 1px solid #1a1720;
+            border-radius: 6px; padding: 16px 18px 14px;
+            box-shadow: 
+                inset 0 8px 18px rgba(0,0,0,1), 
+                inset 0 0 10px rgba(0,0,0,0.8),
+                0 1px 0 rgba(255,255,255,0.08);
+            position: relative; overflow: hidden;
+        }
+        /* Scanlines y matriz de puntos */
+        .tape-window::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 20;
+            background: 
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 1px, transparent 1px, transparent 2px),
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 3px);
         }
 
         .status-text {
-            font-size: 11px; color: var(--text-color); margin-bottom: 12px; 
-            line-height: 1.5; min-height: 33px; font-family: 'Space Mono', monospace; 
-            letter-spacing: 0.5px;
+            font-size: 11px; color: var(--text-color); margin-bottom: 16px; 
+            line-height: 1.6; min-height: 35px; font-family: 'Space Mono', monospace; 
+            letter-spacing: 0.5px; position: relative; z-index: 5;
+            text-shadow: 0 0 6px rgba(155, 148, 136, 0.3);
         }
-        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 14px; }
+        .accent { 
+            color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; 
+            font-size: 15px; text-shadow: 0 0 10px var(--accent-glow), 0 0 20px var(--accent-glow); 
+        }
 
-        /* Contenedor del Canvas de Onda */
+        /* Emisión de luz del Waveform */
         .waveform-wrapper { 
-            width: 100%; height: 50px; position: relative; display: block; 
-            cursor: pointer; border-radius: 4px; overflow: hidden;
-            background: repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 4px);
+            width: 100%; height: 54px; position: relative; display: block; 
+            cursor: pointer; border-radius: 4px; overflow: hidden; z-index: 5;
         }
-        canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 3px var(--accent-glow)); }
+        canvas { 
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0; 
+            filter: drop-shadow(0 0 4px var(--accent-glow)) drop-shadow(0 0 8px rgba(221, 142, 92, 0.2)); 
+        }
 
         /* =========================================
-           BOTONES Y CONTROLES TÁCTILES
+           7. BOTÓN TÁCTIL (Mecánica de interruptor)
            ========================================= */
         .play-btn {
-            background: linear-gradient(135deg, #E69D6F, #D27E47); 
-            border: none; border-radius: 50%;
-            width: 48px; height: 48px; cursor: pointer;
+            background: linear-gradient(135deg, #F0A97E, #D1743B); 
+            border: none; border-radius: 50%; width: 54px; height: 54px; cursor: pointer;
             display: flex; justify-content: center; align-items: center;
+            /* Ingeniería de sombra para un domo levantado */
             box-shadow: 
-                0 4px 12px rgba(0,0,0,0.4),
-                inset 0 2px 2px rgba(255,255,255,0.4),
-                inset 0 -2px 4px rgba(0,0,0,0.2);
-            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;
+                0 8px 20px rgba(0,0,0,0.6),
+                inset 0 3px 4px rgba(255,255,255,0.6),
+                inset 0 -4px 6px rgba(0,0,0,0.4),
+                0 0 0 4px #09080b; /* Anillo plástico exterior */
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 25;
         }
+        
         .play-btn:hover { 
-            transform: translate(-50%, -50%) scale(1.05); 
-            box-shadow: 0 6px 16px var(--accent-glow), inset 0 2px 2px rgba(255,255,255,0.5);
+            background: linear-gradient(135deg, #F3B58F, #DB7E44);
+            box-shadow: 
+                0 10px 25px var(--accent-glow), 
+                inset 0 3px 5px rgba(255,255,255,0.7),
+                inset 0 -4px 6px rgba(0,0,0,0.4),
+                0 0 0 4px #09080b;
         }
+        
+        /* Colapso físico del domo (click) */
         .play-btn:active {
-            transform: translate(-50%, -46%) scale(0.96);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6), inset 0 3px 6px rgba(0,0,0,0.4);
+            transform: translate(-50%, -46%) scale(0.95);
+            background: linear-gradient(135deg, #D1743B, #F0A97E); 
+            box-shadow: 
+                0 2px 5px rgba(0,0,0,0.9), 
+                inset 0 6px 12px rgba(0,0,0,0.8),
+                inset 0 -1px 2px rgba(255,255,255,0.3),
+                0 0 0 4px #09080b;
         }
 
-        .icon-play, .icon-pause { fill: #1B120C; width: 18px; height: 18px; filter: drop-shadow(0 1px 0 rgba(255,255,255,0.3)); }
+        /* Grabado profundo del ícono */
+        .icon-play, .icon-pause { 
+            fill: #26160B; width: 20px; height: 20px; 
+            filter: drop-shadow(0 1px 1px rgba(255,255,255,0.5)); 
+        }
         .icon-pause { display: none; }
 
         @keyframes invite-pulse-ring {
-            0% { box-shadow: 0 4px 12px rgba(221, 142, 92, 0.4), 0 0 0 0 rgba(221, 142, 92, 0.6); }
-            70% { box-shadow: 0 4px 12px rgba(221, 142, 92, 0.4), 0 0 0 16px rgba(221, 142, 92, 0); }
-            100% { box-shadow: 0 4px 12px rgba(221, 142, 92, 0.4), 0 0 0 0 rgba(221, 142, 92, 0); }
+            0% { box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 3px 4px rgba(255,255,255,0.6), 0 0 0 4px #09080b, 0 0 0 4px rgba(221, 142, 92, 0.5); }
+            70% { box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 3px 4px rgba(255,255,255,0.6), 0 0 0 4px #09080b, 0 0 0 22px rgba(221, 142, 92, 0); }
+            100% { box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 3px 4px rgba(255,255,255,0.6), 0 0 0 4px #09080b, 0 0 0 4px rgba(221, 142, 92, 0); }
         }
-        .play-btn.invite-pulse { animation: invite-pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+        .play-btn.invite-pulse { animation: invite-pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
 
         .waveform-wrapper.loading::before {
-            content: ''; position: absolute; inset: 0; z-index: 5;
-            background: linear-gradient(90deg, transparent, rgba(221, 142, 92, 0.2), transparent);
-            background-size: 200% 100%;
-            animation: shimmer-sweep 1.5s ease-in-out infinite;
+            content: ''; position: absolute; inset: 0; z-index: 15;
+            background: linear-gradient(90deg, transparent, rgba(221, 142, 92, 0.35), transparent);
+            background-size: 200% 100%; animation: shimmer-sweep 1s ease-in-out infinite;
         }
         @keyframes shimmer-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
         .time-display {
-            display: flex; justify-content: space-between; margin-top: 10px;
-            font-size: 10px; letter-spacing: 1.5px; color: var(--text-color); opacity: 0.8;
-            font-weight: 700;
+            display: flex; justify-content: space-between; margin-top: 12px;
+            font-size: 10.5px; letter-spacing: 2px; color: var(--title-color); opacity: 0.9;
+            font-weight: 700; position: relative; z-index: 5; text-shadow: 0 0 6px rgba(237, 230, 214, 0.4);
         }
 
+        /* Indicador LED de hardware */
         .cassette-stamp {
-            margin-top: 16px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px;
-            color: var(--text-color); opacity: 0.4; text-align: right; text-transform: uppercase;
+            margin-top: 18px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px;
+            color: var(--text-color); opacity: 0.6; text-align: right; text-transform: uppercase; position: relative; z-index: 5;
         }
         
-        .cassette-stamp span { color: var(--accent); }
+        .led-indicator { color: var(--led-red); text-shadow: 0 0 8px var(--led-red), 0 0 15px var(--led-red); }
+        .recording .led-indicator { animation: led-blink 1s infinite alternate; }
+        @keyframes led-blink { from { opacity: 1; } to { opacity: 0.3; } }
 
         /* =========================================
-           ENLACES EXTERNOS
+           8. TIPOGRAFÍA ENLACE EXTERNO
            ========================================= */
         .back-link {
-            margin-top: 32px; display: inline-block; font-family: 'Space Mono', monospace;
+            margin-top: 40px; display: inline-block; font-family: 'Space Mono', monospace;
             font-size: 11px; color: var(--text-color); text-decoration: none;
-            text-transform: uppercase; letter-spacing: 2px; font-weight: 400;
-            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
-            transition: color 0.3s, border-color 0.3s; position: relative; z-index: 1;
+            text-transform: uppercase; letter-spacing: 3px; font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px;
+            transition: all 0.3s ease; position: relative; z-index: 1;
         }
-        .back-link:hover { color: var(--title-color); border-color: var(--accent); }
+        .back-link:hover { 
+            color: var(--title-color); border-color: var(--accent); 
+            text-shadow: 0 0 10px rgba(237, 230, 214, 0.5); transform: translateY(-2px);
+        }
 
         audio { display: none; }
     </style>
@@ -362,27 +423,22 @@
 <body>
 
     <div class="cassette" id="main-card">
-        <!-- Tornillos Mecánicos -->
         <span class="screw tl"></span><span class="screw tr"></span>
         <span class="screw bl"></span><span class="screw br"></span>
 
-        <!-- Etiqueta Texturizada -->
         <div class="cassette-label">
             <h1 class="brand-title">Etéreo</h1>
             <p class="side-tag mono">Lado A · Memoria Acústica</p>
         </div>
 
-        <!-- Ventana Central (Cristal y Carretes) -->
         <div class="cassette-window">
             <div class="window-glass">
                 <div class="tape-markers"></div>
                 <div class="reels-row">
-                    <!-- Carrete Izquierdo (Cinta Llena) -->
                     <div class="reel-container">
                         <div class="tape-spool tape-spool-left"></div>
                         <div class="reel" id="reel-left"></div>
                     </div>
-                    <!-- Carrete Derecho (Cinta Vacía/Receptora) -->
                     <div class="reel-container">
                         <div class="tape-spool tape-spool-right"></div>
                         <div class="reel" id="reel-right"></div>
@@ -391,7 +447,6 @@
             </div>
         </div>
 
-        <!-- Puente Inferior (Lectura Digital / HUD) -->
         <div class="cassette-bridge">
             <div class="tape-window">
                 <p class="status-text" id="status-text" aria-live="polite">Analizando señal acústica...</p>
@@ -411,7 +466,7 @@
                     <span id="time-total">0:00</span>
                 </div>
                 
-                <div class="cassette-stamp">GDL·MX <span>· Rec ●</span></div>
+                <div class="cassette-stamp" id="recording-stamp">GDL·MX <span class="led-indicator">· Rec ●</span></div>
             </div>
         </div>
 
@@ -421,7 +476,7 @@
     <a href="https://etereomx.com" class="back-link">Descubre Etéreo Studio</a>
 
     <script>
-        // EL SCRIPT PERMANECE INTACTO - NINGUNA LÓGICA FUE ALTERADA
+        // EL SCRIPT PERMANECE INTACTO - LÓGICA DE PROGRAMACIÓN PRESERVADA
         const params = new URLSearchParams(window.location.search);
         const audioId = params.get('id');
 
@@ -435,6 +490,7 @@
         const playBtn = document.getElementById('custom-play-btn');
         const timeElapsed = document.getElementById('time-elapsed');
         const timeTotal = document.getElementById('time-total');
+        const recStamp = document.getElementById('recording-stamp'); // Utilizado por CSS toggle
 
         const canvasBase = document.getElementById('canvas-base');
         const canvasProgress = document.getElementById('canvas-progress');
@@ -450,12 +506,13 @@
         let lastTime = 0;
         const demoDuration = 10000; 
 
-        const colorBase = "rgba(237, 230, 214, 0.18)";
+        const colorBase = "rgba(237, 230, 214, 0.25)";
         const colorProgress = "#DD8E5C";
 
         function setReelsSpinning(spinning) {
             reelLeft.classList.toggle('spinning', spinning);
             reelRight.classList.toggle('spinning', spinning);
+            recStamp.classList.toggle('recording', spinning); // Activa el LED rojo
         }
 
         function formatTime(seconds) {
