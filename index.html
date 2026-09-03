@@ -1,611 +1,1094 @@
 <!DOCTYPE html>
+
 <html lang="es" data-theme="dark">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>Etéreo | Memoria Acústica</title>
+
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23121016'/%3E%3Ccircle cx='50' cy='50' r='34' fill='none' stroke='%23DD8E5C' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23DD8E5C'/%3E%3C/svg%3E">
 
+
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
+
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=Playfair+Display:ital,wght@1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+
 
     <style>
+
         /* =========================================
-           IDENTIDAD DE ETÉREO — Revelado Analógico 90s
+
+           MISMA IDENTIDAD DE ETÉREO — Revelado Analógico 90s
+
            ========================================= */
+
         :root {
+
             --bg-color: #121016;
+
             --bg-raise: #18161D;
+
             --text-color: #9B9488;
+
             --title-color: #EDE6D6;
+
             --accent: #DD8E5C;
+
             --accent-soft: #8B84A3;
+
             --card-border: rgba(237, 230, 214, 0.10);
+
             --gallery-frame: #EDE6D6;
+
             --light-leak-1: rgba(221, 142, 92, 0.10);
+
             --light-leak-2: rgba(139, 132, 163, 0.08);
+
         }
+
+
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+
+
         body {
+
             background-color: var(--bg-color);
+
             color: var(--text-color);
+
             font-family: 'Outfit', sans-serif;
+
             font-weight: 300;
+
             display: flex;
+
             flex-direction: column;
+
             align-items: center;
+
             justify-content: center;
+
             min-height: 100vh;
+
             margin: 0;
+
             padding: 24px;
+
             text-align: center;
+
             overflow-x: hidden;
+
             position: relative;
+
         }
 
+
+
+        /* Misma textura de luz y grano que el sitio principal, para que se sienta un solo universo */
+
         body::before {
+
             content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0;
+
             background:
+
                 radial-gradient(ellipse 45% 35% at 78% 15%, var(--light-leak-1) 0%, transparent 65%),
+
                 radial-gradient(ellipse at -10% 115%, var(--light-leak-2) 0%, transparent 60%);
+
         }
+
         body::after {
+
             content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9998; opacity: 0.13; mix-blend-mode: overlay;
+
             background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+
         }
+
+
 
         .mono { font-family: 'Space Mono', monospace; }
 
-        /* =========================================
-           MÓDULO DE MARKETING — Tarjeta de Contexto (Solo Demo)
-           ========================================= */
-        .demo-guide {
-            position: relative;
-            z-index: 2;
-            max-width: 360px;
-            width: 100%;
-            margin-bottom: 24px;
-            background: rgba(30, 27, 34, 0.4);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 22px;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            text-align: left;
-            display: none; /* Oculto por defecto, JS lo muestra si es demo */
-            animation: slideDownFade 0.8s ease-out forwards;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-        }
 
-        @keyframes slideDownFade {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .demo-guide h2 {
-            font-family: 'Clash Display', sans-serif;
-            color: var(--title-color);
-            font-size: 18px;
-            margin-bottom: 12px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-
-        .demo-guide p {
-            font-size: 13.5px;
-            line-height: 1.6;
-            color: var(--text-color);
-            margin-bottom: 16px;
-        }
-
-        .demo-guide strong { color: var(--accent); font-weight: 500; }
-
-        .guide-steps {
-            display: flex; justify-content: space-between; align-items: center;
-            font-family: 'Space Mono', monospace; font-size: 9.5px;
-            color: var(--title-color);
-            background: rgba(18, 16, 22, 0.7);
-            border: 1px solid rgba(237, 230, 214, 0.05);
-            padding: 12px 8px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-
-        .step-arrow { color: var(--accent); opacity: 0.7; }
-        
-        .demo-badge {
-            display: inline-block;
-            font-family: 'Space Mono', monospace;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            background: var(--accent);
-            color: #121016;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
 
         /* =========================================
-           EL CASSETTE — Cuerpo del reproductor
+
+           EL CASSETTE — cuerpo del reproductor
+
            ========================================= */
+
         .cassette {
+
             position: relative; z-index: 1;
+
             background: linear-gradient(155deg, #1E1B22 0%, #17151B 60%, #1A171E 100%);
+
             border: 1px solid var(--card-border);
+
             border-radius: 14px;
+
             padding: 26px 24px 22px;
+
             max-width: 360px;
+
             width: 100%;
+
             box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+
         }
+
+
+
+        /* Tornillos decorativos de esquina, como un cassette real */
 
         .screw { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #4A4650, #0E0C11); box-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+
         .screw.tl { top: 12px; left: 12px; } .screw.tr { top: 12px; right: 12px; }
+
         .screw.bl { bottom: 12px; left: 12px; } .screw.br { bottom: 12px; right: 12px; }
 
+
+
+        /* Carretes giratorios — solo giran mientras suena el audio */
+
         .reels-row { display: flex; justify-content: center; align-items: center; gap: 46px; padding: 8px 0 18px; }
+
         .reel {
+
             width: 48px; height: 48px; border-radius: 50%;
+
             background: repeating-conic-gradient(rgba(237,230,214,0.35) 0deg 6deg, transparent 6deg 60deg);
+
             border: 2px solid rgba(237,230,214,0.18);
+
             position: relative;
+
             transition: opacity 0.3s;
+
         }
+
         .reel::after {
+
             content: ''; position: absolute; inset: 34%; border-radius: 50%;
+
             background: #100E14; border: 1px solid rgba(237,230,214,0.25);
+
         }
+
         .reel.spinning { animation: reel-spin 2.4s linear infinite; }
+
         @keyframes reel-spin { to { transform: rotate(360deg); } }
 
+
+
+        /* Etiqueta de papel del cassette, ligeramente inclinada como una escrita a mano */
+
         .cassette-label {
+
             background: var(--gallery-frame);
+
             color: #1B1912;
+
             border-radius: 3px;
+
             padding: 14px 10px 12px;
+
             transform: rotate(-0.6deg);
+
             box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+
             position: relative;
+
         }
+
         .cassette-label::before {
+
             content: ''; position: absolute; left: 10px; right: 10px; bottom: 8px; height: 1px; background: rgba(27,25,18,0.15);
+
         }
+
         .brand-title {
+
             font-family: 'Clash Display', sans-serif; font-weight: 600; font-size: 22px; letter-spacing: 5px;
+
             text-transform: uppercase; margin: 0;
+
         }
+
         .side-tag {
+
             font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+
             opacity: 0.6; margin-top: 4px;
+
         }
+
+
+
+        /* Ventana de la cinta — donde vive el waveform */
 
         .tape-window {
+
             margin-top: 18px; background: #0D0B10; border: 1px solid rgba(237,230,214,0.08);
+
             border-radius: 8px; padding: 16px 14px 14px;
+
         }
+
+
 
         .status-text {
+
             font-size: 11px; color: var(--text-color); margin-bottom: 18px; line-height: 1.7; min-height: 34px;
+
             font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
+
         }
+
         .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 13px; }
 
+
+
         .waveform-wrapper { width: 100%; height: 64px; margin-bottom: 6px; position: relative; display: block; }
+
         canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
 
+
+
         .play-btn {
+
             background-color: var(--accent); border: none; border-radius: 50%;
+
             width: 46px; height: 46px; cursor: pointer;
+
             display: flex; justify-content: center; align-items: center;
+
             box-shadow: 0 6px 18px rgba(221, 142, 92, 0.3);
+
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;
+
         }
+
         .play-btn:hover { transform: translate(-50%, -50%) scale(1.06); }
+
         .icon-play, .icon-pause { fill: #14121A; width: 16px; height: 16px; }
+
         .icon-pause { display: none; }
 
+
+
+        /* Invitación a tocar cuando el navegador bloquea el autoplay */
+
         @keyframes invite-pulse-ring {
+
             0% { box-shadow: 0 6px 18px rgba(221, 142, 92, 0.3), 0 0 0 0 rgba(221, 142, 92, 0.55); }
+
             70% { box-shadow: 0 6px 18px rgba(221, 142, 92, 0.3), 0 0 0 16px rgba(221, 142, 92, 0); }
+
             100% { box-shadow: 0 6px 18px rgba(221, 142, 92, 0.3), 0 0 0 0 rgba(221, 142, 92, 0); }
+
         }
+
         .play-btn.invite-pulse { animation: invite-pulse-ring 1.8s ease-out infinite; }
+
+
+
         .waveform-wrapper { cursor: pointer; }
 
+
+
+        /* Shimmer — barrido de luz mientras se descarga/decodifica el audio real */
+
         .waveform-wrapper.loading::before {
+
             content: ''; position: absolute; inset: 0; z-index: 5; border-radius: 3px;
+
             background: linear-gradient(90deg, transparent, rgba(221, 142, 92, 0.14), transparent);
+
             background-size: 200% 100%;
+
             animation: shimmer-sweep 1.5s ease-in-out infinite;
+
         }
+
         @keyframes shimmer-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+
+
         .time-display {
+
             display: flex; justify-content: space-between; margin-top: 8px;
+
             font-size: 9px; letter-spacing: 1px; color: var(--text-color); opacity: 0.6;
+
         }
+
+
 
         .cassette-stamp {
+
             margin-top: 14px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+
             color: var(--accent); opacity: 0.7; text-align: right; text-transform: uppercase;
+
         }
+
+
 
         .back-link {
+
             margin-top: 22px; display: inline-block; font-family: 'Space Mono', monospace;
+
             font-size: 10px; color: var(--text-color); text-decoration: none;
+
             text-transform: uppercase; letter-spacing: 2px; font-weight: 400;
+
             border-bottom: 1px solid var(--card-border); padding-bottom: 3px;
+
             transition: color 0.3s, border-color 0.3s; position: relative; z-index: 1;
+
         }
+
         .back-link:hover { color: var(--accent); border-color: var(--accent); }
 
+
+
         audio { display: none; }
+
     </style>
+
 </head>
+
 <body>
 
-    <!-- TARJETA DE CONTEXTO: Se muestra únicamente si NO hay un ID de audio -->
-    <div class="demo-guide" id="demo-guide">
-        <span class="demo-badge">Simulador Interactivo</span>
-        <h2>El puente entre tu recuerdo y el sonido.</h2>
-        <p>Nuestra <strong>Colección Sonora</strong> oculta tecnología NFC tras un arte impecable. Al acercar tu celular al portarretrato físico, viajas instantáneamente a esta cápsula del tiempo.</p>
-        
-        <div class="guide-steps">
-            <span>🖼️ Cuadro Físico</span>
-            <span class="step-arrow">→</span>
-            <span>📲 Escaneo NFC/QR</span>
-            <span class="step-arrow">→</span>
-            <span>📼 Cápsula Sonora</span>
-        </div>
-        <p style="font-size: 12px; margin-bottom: 0;">Presiona <strong>Play</strong> en el cassette de abajo para vivir la experiencia.</p>
-    </div>
 
-    <!-- EL REPRODUCTOR PRINCIPAL -->
+
     <div class="cassette" id="main-card">
+
         <span class="screw tl"></span><span class="screw tr"></span>
+
         <span class="screw bl"></span><span class="screw br"></span>
 
+
+
         <div class="reels-row">
+
             <div class="reel" id="reel-left"></div>
+
             <div class="reel" id="reel-right"></div>
+
         </div>
+
+
 
         <div class="cassette-label">
+
             <h1 class="brand-title">Etéreo</h1>
+
             <p class="side-tag mono">Lado A · Memoria Acústica</p>
+
         </div>
+
+
 
         <div class="tape-window">
+
             <p class="status-text" id="status-text" aria-live="polite">Analizando señal acústica...</p>
 
+
+
             <div class="waveform-wrapper" id="waveform-wrapper">
+
                 <canvas id="canvas-base"></canvas>
+
                 <canvas id="canvas-progress"></canvas>
 
+
+
                 <button class="play-btn" id="custom-play-btn" onclick="togglePlay()" aria-label="Reproducir memoria">
+
                     <svg class="icon-play" id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+
                     <svg class="icon-pause" id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+
                 </button>
+
             </div>
+
             <div class="time-display mono"><span id="time-elapsed">0:00</span><span id="time-total">0:00</span></div>
+
             <div class="cassette-stamp">GDL·MX · Rec ●</div>
+
         </div>
 
-        <a href="https://etereomx.com" class="back-link">Volver a Etéreo Studio</a>
+
+
+        <a href="https://etereomx.com" class="back-link">Descubre Etéreo Studio</a>
+
         <audio id="native-audio"></audio>
+
     </div>
 
+
+
     <script>
+
         const params = new URLSearchParams(window.location.search);
+
         const audioId = params.get('id');
 
+
+
         const statusText = document.getElementById('status-text');
+
         const waveformWrapper = document.getElementById('waveform-wrapper');
+
         const audioEl = document.getElementById('native-audio');
+
         const iconPlay = document.getElementById('icon-play');
+
         const iconPause = document.getElementById('icon-pause');
+
         const reelLeft = document.getElementById('reel-left');
+
         const reelRight = document.getElementById('reel-right');
+
         const playBtn = document.getElementById('custom-play-btn');
+
         const timeElapsed = document.getElementById('time-elapsed');
+
         const timeTotal = document.getElementById('time-total');
-        const demoGuide = document.getElementById('demo-guide'); // Referencia a la tarjeta
+
+
 
         const canvasBase = document.getElementById('canvas-base');
+
         const canvasProgress = document.getElementById('canvas-progress');
+
         const ctxBase = canvasBase.getContext('2d');
+
         const ctxProgress = canvasProgress.getContext('2d');
 
+
+
         let animationFrame;
+
         let peaks = [];
-        let isDemo = !audioId; 
+
+        let isDemo = !audioId; // Bandera para saber si estamos en modo demostración
+
         let isPlaying = false;
 
+
+
+        // Variables para la animación de la demo
+
         let demoProgress = 0;
+
         let lastTime = 0;
-        const demoDuration = 10000; 
+
+        const demoDuration = 10000; // 10 segundos de duración simulada
+
+
+
+        // Paleta Etéreo: base tenue color crema translúcido, progreso en acento durazno
 
         const colorBase = "rgba(237, 230, 214, 0.18)";
+
         const colorProgress = "#DD8E5C";
 
+
+
         function setReelsSpinning(spinning) {
+
             reelLeft.classList.toggle('spinning', spinning);
+
             reelRight.classList.toggle('spinning', spinning);
+
         }
+
+
 
         function formatTime(seconds) {
+
             if (!isFinite(seconds) || seconds < 0) return '0:00';
+
             const m = Math.floor(seconds / 60);
+
             const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+
             return `${m}:${s}`;
+
         }
+
+
+
+        // Prueba estos formatos en orden — mp3/m4a primero por ser mucho más ligeros que wav
 
         const AUDIO_FORMATS = ['mp3', 'm4a', 'wav'];
+
         const MAX_ATTEMPTS = 3;
+
         const RETRY_DELAY_MS = 2500;
 
+
+
         function showShimmer() { waveformWrapper.classList.add('loading'); }
+
         function hideShimmer() { waveformWrapper.classList.remove('loading'); }
 
+
+
+        // Intenta descargar audios/{id}.mp3, luego .m4a, luego .wav — usa el primero que responda OK
+
         async function findAudioSource(id) {
+
             for (const ext of AUDIO_FORMATS) {
+
                 const path = `audios/${id}.${ext}`;
+
                 try {
+
                     const response = await fetch(path);
+
                     if (response.ok) {
+
                         const arrayBuffer = await response.arrayBuffer();
+
                         return { path, arrayBuffer };
+
                     }
-                } catch (e) {}
+
+                } catch (e) { /* probamos el siguiente formato */ }
+
             }
+
             return null;
+
         }
 
+
+
+        // Carga con reintentos: si ningún formato responde, reintenta un par de veces
+
+        // (por si la cápsula terminó de subirse justo después del escaneo) antes de
+
+        // caer al modo demostración.
+
         async function tryLoadAudio(id, attempt = 1) {
+
             statusText.innerHTML = attempt === 1
+
                 ? "Analizando señal acústica..."
+
                 : `Sincronizando cápsula<span class="accent">...</span> (${attempt}/${MAX_ATTEMPTS})`;
+
+
 
             const found = await findAudioSource(id);
 
+
+
             if (found) {
+
                 try {
+
                     audioEl.preload = 'auto';
+
                     audioEl.src = found.path;
+
                     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
                     const audioCtx = new AudioContextClass();
+
                     const audioBuffer = await audioCtx.decodeAudioData(found.arrayBuffer);
+
                     processAudioData(audioBuffer);
+
                     hideShimmer();
+
                     statusText.innerHTML = "<span class='accent'>Memoria lista.</span>";
+
                     attemptAutoplay();
+
                     return;
-                } catch (e) {}
+
+                } catch (e) {
+
+                    // El archivo se descargó pero no se pudo decodificar (formato dañado o no soportado)
+
+                }
+
             }
+
+
 
             if (attempt < MAX_ATTEMPTS) {
+
                 setTimeout(() => tryLoadAudio(id, attempt + 1), RETRY_DELAY_MS);
+
             } else {
+
                 isDemo = true;
+
                 hideShimmer();
+
                 initDemoMode("La cápsula aún se está sincronizando.<br>Mientras tanto, <span class='accent'>prueba el reproductor.</span>");
+
             }
+
         }
 
-        // --- GESTIÓN DE ESTADOS (PRODUCCIÓN VS DEMO) ---
+
+
         if (!isDemo) {
-            // MODO PRODUCCIÓN: Entró escaneando el cuadro
+
+            // --- MODO PRODUCCIÓN (CON ID) ---
+
             showShimmer();
+
             tryLoadAudio(audioId);
+
         } else {
-            // MODO DEMO: Entró desde el botón de la web principal para probar
-            demoGuide.style.display = 'block'; // Mostramos la tarjeta de ventas
-            playBtn.classList.add('invite-pulse'); // Invitamos a dar play
-            initDemoMode("Cinta calibrada.<br><span class='accent'>Presiona reproducir para iniciar.</span>");
+
+            // --- MODO DEMOSTRACIÓN (SIN ID) ---
+
+            initDemoMode("Materializamos el sonido.<br>Acerca tu celular a tu cuadro o <span class='accent'>prueba la demostración.</span>");
+
         }
+
+
+
+        // --- AUTOPLAY CON RESPALDO ---
+
+        // Muchos navegadores (sobre todo Android/Chrome al abrir vía NFC) permiten
+
+        // reproducir automáticamente. Si el navegador lo bloquea (común en iOS),
+
+        // en vez de fallar en silencio invitamos a tocar con un pulso visible.
 
         function attemptAutoplay() {
+
             const playPromise = audioEl.play();
+
             if (playPromise !== undefined) {
+
                 playPromise.then(() => {
+
                     isPlaying = true;
+
                     iconPlay.style.display = "none";
+
                     iconPause.style.display = "block";
+
                     setReelsSpinning(true);
+
                     playBtn.setAttribute('aria-label', 'Pausar memoria');
+
                     statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
+
                     lastTime = Date.now();
+
                     updateProgress();
+
                 }).catch(() => {
+
                     playBtn.classList.add('invite-pulse');
+
                     statusText.innerHTML = "Memoria lista.<br><span class='accent'>Toca para escuchar.</span>";
+
                 });
+
             }
+
         }
+
+
+
+        // --- GENERADOR DE ONDAS FALSAS PARA LA DEMO ---
 
         function initDemoMode(message) {
+
             statusText.innerHTML = message;
+
             peaks = [];
+
             for(let i = 0; i < 200; i++) {
+
                 let wave = Math.abs(Math.sin(i * 0.1) * Math.cos(i * 0.05));
+
                 let noise = Math.random() * 0.3;
+
                 let bellCurve = Math.sin(Math.PI * (i / 200));
+
                 peaks.push(((wave + noise) * bellCurve) * 0.8 + 0.05);
+
             }
+
             prepareCanvases();
+
         }
+
+
+
+        // --- MATEMÁTICA DE PROCESAMIENTO DE SEÑAL REAL ---
 
         function processAudioData(audioBuffer) {
+
             const rawData = audioBuffer.getChannelData(0);
+
             const numSamples = 200;
+
             const blockSize = Math.floor(rawData.length / numSamples);
+
             let maxPeak = 0;
 
+
+
             for (let i = 0; i < numSamples; i++) {
+
                 let sum = 0;
+
                 for (let j = 0; j < blockSize; j++) {
+
                     sum += Math.abs(rawData[i * blockSize + j]);
+
                 }
+
                 let peak = sum / blockSize;
+
                 peaks.push(peak);
+
                 if (peak > maxPeak) maxPeak = peak;
+
             }
+
+
 
             peaks = peaks.map(p => (p / maxPeak) * 0.8 + 0.05);
+
             prepareCanvases();
+
         }
+
+
+
+        // --- CONFIGURACIÓN RESPONSIVE DE CANVASES ---
 
         function prepareCanvases() {
+
             const dpr = window.devicePixelRatio || 1;
+
             const rect = waveformWrapper.getBoundingClientRect();
 
+
+
             [canvasBase, canvasProgress].forEach(c => {
+
                 c.width = rect.width * dpr;
+
                 c.height = rect.height * dpr;
+
                 c.getContext('2d').scale(dpr, dpr);
+
             });
 
+
+
             drawPolygon(ctxBase, canvasBase.width / dpr, canvasBase.height / dpr, colorBase);
+
             updateProgress();
+
         }
+
+
+
+        // --- RENDERIZADO DEL POLÍGONO SIMÉTRICO ---
 
         function drawPolygon(ctx, width, height, color) {
+
             ctx.clearRect(0, 0, width, height);
+
             ctx.fillStyle = color;
+
             ctx.beginPath();
 
+
+
             const centerY = height / 2;
+
             const step = width / (peaks.length - 1);
 
+
+
             ctx.moveTo(0, centerY);
+
             for (let i = 0; i < peaks.length; i++) {
+
                 let amp = peaks[i] * height;
+
                 ctx.lineTo(i * step, centerY - (amp / 2));
+
             }
+
+
 
             for (let i = peaks.length - 1; i >= 0; i--) {
+
                 let amp = peaks[i] * height;
+
                 ctx.lineTo(i * step, centerY + (amp / 2));
+
             }
 
+
+
             ctx.closePath();
+
             ctx.fill();
+
         }
 
+
+
+        // --- ANIMACIÓN DE PROGRESO DE LA MÁSCARA ---
+
         function updateProgress() {
+
             if (!peaks.length) return;
 
+
+
             const rect = canvasProgress.getBoundingClientRect();
+
             const width = rect.width;
+
             const height = rect.height;
+
+
 
             let currentP = 0;
 
+
+
             if (isDemo) {
+
                 if (isPlaying) {
+
                     let now = Date.now();
+
                     let delta = now - lastTime;
+
                     lastTime = now;
+
                     demoProgress += delta / demoDuration;
 
+
+
                     if (demoProgress >= 1) {
+
                         demoProgress = 1;
+
                         handlePlaybackEnd();
+
                     }
+
                 }
+
                 currentP = demoProgress;
+
             } else {
+
                 currentP = (audioEl.currentTime / (audioEl.duration || 1));
+
             }
+
+
 
             const fillWidth = width * currentP;
 
+
+
             ctxProgress.clearRect(0, 0, width, height);
+
             ctxProgress.save();
+
             ctxProgress.beginPath();
+
             ctxProgress.rect(0, 0, fillWidth, height);
+
             ctxProgress.clip();
+
             drawPolygon(ctxProgress, width, height, colorProgress);
+
             ctxProgress.restore();
 
+
+
             const totalSeconds = isDemo ? (demoDuration / 1000) : (audioEl.duration || 0);
+
             timeElapsed.textContent = formatTime(totalSeconds * currentP);
+
             timeTotal.textContent = formatTime(totalSeconds);
 
+
+
             if (isPlaying) {
+
                 animationFrame = requestAnimationFrame(updateProgress);
+
             }
+
         }
+
+
+
+        // --- BUSCAR TOCANDO LA CINTA ---
 
         waveformWrapper.addEventListener('click', (e) => {
+
             if (e.target.closest('.play-btn') || !peaks.length) return;
+
             const rect = waveformWrapper.getBoundingClientRect();
+
             const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+
             if (isDemo) {
+
                 demoProgress = ratio;
+
             } else if (audioEl.duration) {
+
                 audioEl.currentTime = ratio * audioEl.duration;
+
             }
+
             updateProgress();
+
         });
 
+
+
+        // --- CONTROL DE REPRODUCCIÓN ---
+
         function togglePlay() {
+
             playBtn.classList.remove('invite-pulse');
+
             if (!isPlaying) {
+
                 isPlaying = true;
+
                 iconPlay.style.display = "none";
+
                 iconPause.style.display = "block";
+
                 setReelsSpinning(true);
+
                 playBtn.setAttribute('aria-label', 'Pausar memoria');
 
+
+
                 if (isDemo) {
+
                     if (demoProgress >= 1) demoProgress = 0;
+
                     lastTime = Date.now();
+
                     statusText.innerHTML = "<span class='accent'>Reproduciendo demostración...</span>";
+
                     updateProgress();
+
                 } else {
+
                     audioEl.play();
+
                     statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
+
                     updateProgress();
+
                 }
+
             } else {
+
                 isPlaying = false;
+
                 iconPlay.style.display = "block";
+
                 iconPause.style.display = "none";
+
                 setReelsSpinning(false);
+
                 playBtn.setAttribute('aria-label', 'Reproducir memoria');
+
                 statusText.innerHTML = "Pausado.<br><span class='accent'>Presiona reproducir.</span>";
+
                 if (!isDemo) audioEl.pause();
+
                 cancelAnimationFrame(animationFrame);
+
             }
+
         }
+
+
 
         function handlePlaybackEnd() {
+
             isPlaying = false;
+
             iconPlay.style.display = "block";
+
             iconPause.style.display = "none";
+
             setReelsSpinning(false);
+
             playBtn.setAttribute('aria-label', 'Reproducir memoria');
 
+
+
             if (isDemo) {
+
                 statusText.innerHTML = "Demostración finalizada.<br><span class='accent'>Vuelve a escuchar.</span>";
+
             } else {
+
                 statusText.innerHTML = "Memoria finalizada.<br><span class='accent'>Vuelve a reproducir.</span>";
+
                 audioEl.currentTime = 0;
+
             }
 
+
+
             cancelAnimationFrame(animationFrame);
+
             updateProgress();
+
         }
 
+
+
         audioEl.onended = handlePlaybackEnd;
+
     </script>
+
 </body>
+
 </html>
+
