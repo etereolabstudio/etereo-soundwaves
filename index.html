@@ -56,14 +56,14 @@
         .mono { font-family: 'Space Mono', monospace; }
 
         /* =========================================
-           ECOLOCALIZACIÓN (ONDAS DSP)
+           ECOLOCALIZACIÓN (ONDAS)
            ========================================= */
         .echo-container {
             position: absolute; bottom: -20px; left: 50%;
             width: 280px; height: 140px; transform: translateX(-50%);
             z-index: 0; pointer-events: none; display: flex; justify-content: center;
             opacity: calc(var(--audio-peak, 0) * 1.5);
-            transition: opacity 0.08s ease-out;
+            transition: opacity 0.2s ease-out; /* Transición más suave para el apagado */
         }
 
         .echo-arc {
@@ -140,9 +140,11 @@
         .tape-spool {
             position: absolute; background: #150F0B; border-radius: 50%;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 0 1px #090604; z-index: 0;
-            transition: width 0.2s linear, height 0.2s linear;
+            /* Suaviza visualmente la transferencia de cinta */
+            transition: width 0.1s linear, height 0.1s linear;
         }
-        /* El carrete se transfiere dinámicamente según --tape-progress */
+        
+        /* Matemáticas CSS que transfieren la cinta según el progreso */
         .tape-spool-left { 
             width: calc(85px - (30px * var(--tape-progress, 0))); 
             height: calc(85px - (30px * var(--tape-progress, 0))); 
@@ -219,7 +221,7 @@
         .btn-icon { width: 10px; height: 10px; fill: currentColor; }
 
         /* =========================================
-           ENLACE
+           ENLACE EXTERNO
            ========================================= */
         .back-link {
             margin-top: 32px; display: inline-block; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-color); text-decoration: none;
@@ -244,7 +246,7 @@
             <div class="echo-arc"></div>
         </div>
 
-        <!-- COMPARTIMENTO -->
+        <!-- COMPARTIMENTO FÍSICO -->
         <div class="cassette-compartment">
             <div class="cassette">
                 <div class="cassette-label">
@@ -264,7 +266,7 @@
             </div>
         </div>
 
-        <!-- PANTALLA DIGITAL -->
+        <!-- PANTALLA DIGITAL (VISOR DE ONDA) -->
         <div class="digital-display">
             <div class="status-text mono">
                 <span id="status-text" aria-live="polite">Analizando...</span>
@@ -282,7 +284,7 @@
             </div>
         </div>
 
-        <!-- CONTROLES -->
+        <!-- CONTROLES MECÁNICOS -->
         <div class="mechanical-controls">
             <button class="mech-btn stop-btn" onclick="stopAudio()" aria-label="Detener memoria">
                 <div class="btn-led"></div>
@@ -343,7 +345,7 @@
         const colorBase = "rgba(237, 230, 214, 0.18)";
         const colorProgress = "#DD8E5C";
 
-        // --- SISTEMA DSP (FFT) ---
+        // --- SISTEMA DSP (API WEB AUDIO) ---
         let audioCtx, analyser, dataArray;
         function setupWebAudio() {
             if (audioCtx) return;
@@ -357,19 +359,19 @@
                 analyser.connect(audioCtx.destination);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
             } catch(e) {
-                console.warn("Modo FFT desactivado (restricción CORS o entorno local). Usando fallback de amplitud.", e);
+                console.warn("Modo FFT desactivado por CORS. Usando onda normal.", e);
                 analyser = null;
             }
         }
 
-        // --- RESPUESTA HÁPTICA ---
+        // --- RESPUESTA HÁPTICA (ANDROID NATIVO) ---
         function hapticPulse(pattern) {
             if (navigator.vibrate) {
                 try { navigator.vibrate(pattern); } catch(e) {}
             }
         }
 
-        // --- ANTI-SPECTRAL LEAKAGE (Fade suavizado) ---
+        // --- FADE IN/OUT (ANTI-SPECTRAL LEAKAGE) ---
         let fadeInterval;
         function smoothPlay() {
             clearInterval(fadeInterval);
@@ -533,16 +535,16 @@
                 currentP = (audioEl.currentTime / (audioEl.duration || 1));
             }
 
-            // Transferencia de Cinta Física
+            // Transferencia Visual de la Cinta
             document.documentElement.style.setProperty('--tape-progress', currentP);
 
-            // FFT: Extracción de energía para ecos
+            // FFT / Mapeo de Frecuencia para los Ecos
             let currentPeak = 0;
             if (isPlaying && !isDemo && analyser && dataArray) {
                 analyser.getByteFrequencyData(dataArray);
                 let sum = 0;
                 for(let i = 0; i < 6; i++) sum += dataArray[i]; 
-                currentPeak = Math.pow((sum / 6) / 255, 1.5); // Curva exponencial visual
+                currentPeak = Math.pow((sum / 6) / 255, 1.5); 
             } else if (isPlaying && peaks.length) {
                 let index = Math.floor(currentP * peaks.length);
                 currentPeak = peaks[Math.min(index, peaks.length - 1)];
@@ -559,7 +561,9 @@
             timeElapsed.textContent = formatTime(totalSeconds * currentP);
             timeTotal.textContent = formatTime(totalSeconds);
 
-            if (isPlaying) animationFrame = requestAnimationFrame(updateProgress);
+            if (isPlaying) {
+                animationFrame = requestAnimationFrame(updateProgress);
+            }
         }
 
         waveformWrapper.addEventListener('click', (e) => {
@@ -586,6 +590,11 @@
             playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing'); 
             setReelsSpinning(false);
             statusText.innerHTML = "‖ <span class='accent'>Pausado.</span>";
+            
+            // CORRECCIÓN DEL BUG: Forzar variable y eco a 0 inmediatamente
+            smoothedPeak = 0;
+            document.documentElement.style.setProperty('--audio-peak', 0);
+            
             cancelAnimationFrame(animationFrame); requestAnimationFrame(updateProgress);
         }
 
@@ -611,6 +620,10 @@
             iconPlay.style.display = "block"; iconPause.style.display = "none";
             playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing');
             setReelsSpinning(false);
+            
+            // CORRECCIÓN DEL BUG: Forzar variable y eco a 0 inmediatamente
+            smoothedPeak = 0;
+            document.documentElement.style.setProperty('--audio-peak', 0);
             
             if (isDemo) {
                 demoProgress = 0;
