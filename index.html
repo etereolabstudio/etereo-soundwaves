@@ -18,27 +18,22 @@
         :root {
             --bg-color: #070609;
             
-            /* Material Plástico (Deck ABS) */
             --deck-base: #1c1a21;
             --deck-dark: #0f0e13;
             --deck-edge: #302c38;
             
-            /* Material Cassette */
             --cassette-bg: #222029;
             --label-bg: #EAE3D2;
             --label-text: #1B1912;
             
-            /* Acentos */
             --text-color: #9B9488;
             --title-color: #EDE6D6;
             --accent: #DD8E5C;
             --accent-glow: rgba(221, 142, 92, 0.4);
             
-            /* Componentes Electrónicos */
             --retro-green: #10b981;
             --retro-red: #ef4444;
             
-            /* Textura SVG Base64 (Ruido de Polímero) */
             --noise-texture: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
         }
 
@@ -49,10 +44,9 @@
             font-family: 'Outfit', sans-serif; font-weight: 300;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 100vh; margin: 0; padding: 24px; text-align: center; overflow-x: hidden;
-            position: relative;
+            position: relative; perspective: 1200px; /* Profundidad 3D para el efecto de los ecos */
         }
 
-        /* Luces de estudio volumétricas ambientales */
         body::before {
             content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
             background:
@@ -60,7 +54,6 @@
                 radial-gradient(ellipse 50% 50% at 15% 95%, rgba(139, 132, 163, 0.07) 0%, transparent 60%);
         }
         
-        /* Grano de película de fondo */
         body::after {
             content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; 
             opacity: 0.2; mix-blend-mode: soft-light; background-image: var(--noise-texture);
@@ -69,82 +62,107 @@
         .mono { font-family: 'Space Mono', monospace; }
 
         /* =========================================
-           CHASIS PRINCIPAL (HARDWARE DECK)
+           ECOLOCALIZACIÓN ACÚSTICA (EFECTO ONDAS)
            ========================================= */
-        .player-deck {
-            position: relative; z-index: 1;
-            /* Fusión de degradado volumétrico + textura de ABS inyectado */
-            background-image: var(--noise-texture), linear-gradient(160deg, var(--deck-edge) 0%, var(--deck-base) 30%, var(--deck-dark) 100%);
-            background-blend-mode: soft-light, normal;
-            border-radius: 12px; padding: 16px 14px 26px 14px;
-            max-width: 385px; width: 100%;
-            /* Iluminación especular de bordes y sombras de peso real */
-            box-shadow: 
-                inset 0 1px 1px rgba(255,255,255,0.15), 
-                inset 1px 0 2px rgba(255,255,255,0.05),
-                inset 0 -4px 8px rgba(0,0,0,0.8),
-                0 40px 60px rgba(0,0,0,0.8), 
-                0 15px 25px rgba(0,0,0,0.6);
-            border: 1px solid #111;
-            border-top: 1px solid #3c3846; /* Borde superior atrapando la luz */
-            display: flex; flex-direction: column; gap: 16px;
+        .echo-container {
+            position: absolute;
+            bottom: -30px; 
+            left: 50%;
+            width: 260px;
+            height: 120px;
+            /* 3D: Se coloca físicamente detrás del reproductor */
+            transform: translateX(-50%) translateZ(-40px);
+            z-index: -1;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            /* JS inyecta la variable --audio-peak dependiendo del volumen actual */
+            opacity: calc(var(--audio-peak, 0) * 1.8);
+            transition: opacity 0.1s ease-out;
         }
 
-        /* Biseles decorativos del hardware (Tornillos / Ensamblaje) */
+        .echo-arc {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid transparent;
+            /* El arco inferior radiante */
+            border-bottom: 3px solid var(--accent);
+            border-radius: 50%;
+            filter: drop-shadow(0 0 6px var(--accent-glow)) drop-shadow(0 0 12px rgba(221,142,92,0.4));
+            animation: echo-radiate 2.4s cubic-bezier(0.1, 0.4, 0.8, 1) infinite;
+        }
+
+        /* Desfase de anillos para crear el patrón de ecolocalización */
+        .echo-arc:nth-child(1) { animation-delay: 0s; }
+        .echo-arc:nth-child(2) { animation-delay: 0.6s; }
+        .echo-arc:nth-child(3) { animation-delay: 1.2s; }
+        .echo-arc:nth-child(4) { animation-delay: 1.8s; }
+
+        @keyframes echo-radiate {
+            0% { transform: scale(0.4) translateY(0); opacity: 0; border-bottom-width: 4px; }
+            15% { opacity: 1; }
+            100% { transform: scale(2.4) translateY(80px); opacity: 0; border-bottom-width: 1px; }
+        }
+
+        /* =========================================
+           CHASIS PRINCIPAL (HARDWARE DECK)
+           ========================================= */
+        @keyframes deck-float {
+            0% { transform: rotateX(2deg) rotateY(-2deg) translateY(0px); box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), inset 1px 0 2px rgba(255,255,255,0.05), inset 0 -4px 8px rgba(0,0,0,0.8), 0 40px 60px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6); }
+            50% { transform: rotateX(-1deg) rotateY(1deg) translateY(-8px); box-shadow: inset 0 2px 2px rgba(255,255,255,0.2), inset 1px 0 2px rgba(255,255,255,0.08), inset 0 -4px 8px rgba(0,0,0,0.9), 0 50px 75px rgba(0,0,0,0.85), 0 20px 30px rgba(0,0,0,0.5); }
+            100% { transform: rotateX(2deg) rotateY(-2deg) translateY(0px); box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), inset 1px 0 2px rgba(255,255,255,0.05), inset 0 -4px 8px rgba(0,0,0,0.8), 0 40px 60px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6); }
+        }
+
+        .player-deck {
+            position: relative; z-index: 1;
+            background-image: var(--noise-texture), linear-gradient(160deg, var(--deck-edge) 0%, var(--deck-base) 30%, var(--deck-dark) 100%);
+            background-blend-mode: soft-light, normal;
+            border-radius: 12px; padding: 16px 14px 26px 14px; max-width: 385px; width: 100%;
+            border: 1px solid #111; border-top: 1px solid #3c3846;
+            display: flex; flex-direction: column; gap: 16px;
+            animation: deck-float 9s ease-in-out infinite;
+            transform-style: preserve-3d; /* Permite que los ecos se rendericen detrás en 3D */
+        }
+
         .player-deck::before, .player-deck::after {
             content: ''; position: absolute; bottom: 80px; width: 6px; height: 35px;
-            background: #0a090d; border-radius: 4px;
-            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.9), 1px 0 1px rgba(255,255,255,0.05);
+            background: #0a090d; border-radius: 4px; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.9), 1px 0 1px rgba(255,255,255,0.05);
         }
-        .player-deck::before { left: 4px; }
-        .player-deck::after { right: 4px; }
+        .player-deck::before { left: 4px; } .player-deck::after { right: 4px; }
 
         /* =========================================
            COMPARTIMENTO DEL CASSETTE Y CRISTAL
            ========================================= */
         .cassette-compartment {
             background: #050406; border-radius: 8px; padding: 14px;
-            /* Oclusión ambiental profunda simulando la recámara */
-            box-shadow: 
-                inset 0 10px 20px rgba(0,0,0,1), 
-                inset 0 -2px 5px rgba(0,0,0,0.5),
-                inset 0 0 0 1px rgba(255,255,255,0.04),
-                0 1px 1px rgba(255,255,255,0.06);
+            box-shadow: inset 0 10px 20px rgba(0,0,0,1), inset 0 -2px 5px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04), 0 1px 1px rgba(255,255,255,0.06);
             position: relative; overflow: hidden;
         }
 
-        /* Acrílico curvo sobre el cassette */
         .cassette-compartment::after {
-            content: ''; position: absolute; inset: 0; z-index: 20; pointer-events: none;
-            border-radius: 8px;
+            content: ''; position: absolute; inset: 0; z-index: 20; pointer-events: none; border-radius: 8px;
             background: 
                 linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 30%, transparent 35%),
                 linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.6) 100%);
             box-shadow: inset 0 2px 4px rgba(255,255,255,0.03);
         }
 
-        /* El Cassette físico incrustado */
         .cassette {
             background: linear-gradient(180deg, #373342 0%, var(--cassette-bg) 100%);
-            border-radius: 6px; padding: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.15);
-            border: 1px solid rgba(0,0,0,0.7);
-            display: flex; flex-direction: column; gap: 10px;
-            position: relative; z-index: 1;
+            border-radius: 6px; padding: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.15);
+            border: 1px solid rgba(0,0,0,0.7); display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1;
         }
 
         .cassette-label {
             background: var(--noise-texture), linear-gradient(160deg, var(--label-bg) 0%, #D4CBB5 100%);
-            background-blend-mode: multiply, normal;
-            color: var(--label-text); border-radius: 4px; padding: 14px 16px; margin: 0 6px;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.5);
-            position: relative;
+            background-blend-mode: multiply, normal; color: var(--label-text); border-radius: 4px; padding: 14px 16px; margin: 0 6px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.5); position: relative;
         }
         
         .brand-title {
-            font-family: 'Clash Display', sans-serif; font-weight: 700; font-size: 24px; 
-            letter-spacing: 6px; text-transform: uppercase; margin: 0; 
-            color: #111; text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
+            font-family: 'Clash Display', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 6px; text-transform: uppercase; margin: 0; color: #111; text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
         }
         .side-tag { font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase; color: #444; margin-top: 2px; font-weight: 700; }
 
@@ -156,11 +174,9 @@
 
         .reels-row { display: flex; justify-content: center; align-items: center; gap: 58px; position: relative; z-index: 2; width: 100%; height: 100%; }
         
-        /* Cinta expuesta simulando tensión */
         .magnetic-tape {
             position: absolute; bottom: -8px; left: -10px; right: -10px; height: 16px;
-            background: linear-gradient(180deg, #111 0%, #2a1b14 50%, #0a0604 100%);
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.9); opacity: 0.9;
+            background: linear-gradient(180deg, #111 0%, #2a1b14 50%, #0a0604 100%); box-shadow: 0 -2px 10px rgba(0,0,0,0.9); opacity: 0.9;
         }
 
         .tape-spool {
@@ -171,43 +187,32 @@
 
         .reel {
             width: 36px; height: 36px; border-radius: 50%;
-            background: radial-gradient(circle at center, #0a090d 18%, transparent 20%),
-                        repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #e4dfd3 35deg, #e4dfd3 60deg);
+            background: radial-gradient(circle at center, #0a090d 18%, transparent 20%), repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #e4dfd3 35deg, #e4dfd3 60deg);
             border: 4px solid #e4dfd3; position: relative; z-index: 2; box-shadow: 0 3px 8px rgba(0,0,0,0.7);
         }
         .reel::after {
             content: ''; position: absolute; inset: 25%; border-radius: 50%;
-            background: conic-gradient(#111, #333, #111, #000, #111);
-            border: 1px solid rgba(255,255,255,0.15); box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
+            background: conic-gradient(#111, #333, #111, #000, #111); border: 1px solid rgba(255,255,255,0.15); box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
         }
         .reel.spinning { animation: reel-spin 1.8s linear infinite; }
         @keyframes reel-spin { to { transform: rotate(360deg); } }
 
         /* =========================================
-           PANTALLA DIGITAL (VFD CON FLICKER)
+           PANTALLA DIGITAL (VFD)
            ========================================= */
         .digital-display {
-            background: #050406; border: 1px solid #14121a; border-radius: 6px; 
-            padding: 14px 16px 12px; position: relative; margin: 0 4px;
-            /* Efecto de pantalla incrustada */
-            box-shadow: 
-                inset 0 8px 16px rgba(0,0,0,1), 
-                inset 0 0 8px rgba(0,0,0,0.8),
-                0 1px 0 rgba(255,255,255,0.06);
-            overflow: hidden;
+            background: #050406; border: 1px solid #14121a; border-radius: 6px; padding: 14px 16px 12px; position: relative; margin: 0 4px;
+            box-shadow: inset 0 8px 16px rgba(0,0,0,1), inset 0 0 8px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.06); overflow: hidden;
         }
         
-        /* Scanlines analógicas */
         .digital-display::after {
             content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 10;
             background: repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 1px, transparent 1px, transparent 2px);
         }
 
         .status-text {
-            font-size: 11px; color: var(--text-color); margin-bottom: 14px; line-height: 1.5; 
-            min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
-            display: flex; justify-content: space-between; position: relative; z-index: 5;
-            text-shadow: 0 0 5px rgba(155, 148, 136, 0.3);
+            font-size: 11px; color: var(--text-color); margin-bottom: 14px; line-height: 1.5; min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
+            display: flex; justify-content: space-between; position: relative; z-index: 5; text-shadow: 0 0 5px rgba(155, 148, 136, 0.3);
         }
         .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 14px; text-shadow: 0 0 12px var(--accent-glow); }
 
@@ -218,57 +223,31 @@
         canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 4px var(--accent-glow)); }
 
         .time-display {
-            display: flex; justify-content: space-between; margin-top: 10px;
-            font-size: 10px; letter-spacing: 2px; color: var(--title-color); opacity: 0.9; font-weight: 700;
+            display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; letter-spacing: 2px; color: var(--title-color); opacity: 0.9; font-weight: 700;
             position: relative; z-index: 5; text-shadow: 0 0 5px rgba(237, 230, 214, 0.4);
         }
 
         /* =========================================
            BOTONES MECÁNICOS (INGENIERÍA HÁPTICA)
            ========================================= */
-        .mechanical-controls {
-            display: flex; justify-content: center; gap: 14px; margin-top: 6px; padding: 0 6px;
-        }
+        .mechanical-controls { display: flex; justify-content: center; gap: 14px; margin-top: 6px; padding: 0 6px; }
 
         .mech-btn {
             flex: 1; height: 54px; border-radius: 4px; cursor: pointer;
-            /* Textura plástica en el botón */
-            background-image: var(--noise-texture), linear-gradient(180deg, #322e3e 0%, #1a1722 100%);
-            background-blend-mode: soft-light, normal;
-            border: none;
-            /* Arquitectura 3D del botón de hardware */
-            box-shadow: 
-                0 6px 0 #070608,               /* La pared frontal del botón */
-                0 8px 12px rgba(0,0,0,0.8),    /* Sombra proyectada */
-                inset 0 1px 1px rgba(255,255,255,0.2), /* Brillo del borde superior */
-                inset 1px 0 1px rgba(255,255,255,0.05),
-                inset -1px 0 1px rgba(0,0,0,0.5);
-            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 11px; 
-            letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+            background-image: var(--noise-texture), linear-gradient(180deg, #322e3e 0%, #1a1722 100%); background-blend-mode: soft-light, normal; border: none;
+            box-shadow: 0 6px 0 #070608, 0 8px 12px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.2), inset 1px 0 1px rgba(255,255,255,0.05), inset -1px 0 1px rgba(0,0,0,0.5);
+            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-            transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; overflow: hidden;
-            /* Tampografía simulada para el texto */
-            text-shadow: 0 1px 1px rgba(0,0,0,0.8), 0 -1px 0 rgba(255,255,255,0.1);
+            transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; text-shadow: 0 1px 1px rgba(0,0,0,0.8), 0 -1px 0 rgba(255,255,255,0.1);
         }
 
-        .mech-btn:hover { 
-            background-image: var(--noise-texture), linear-gradient(180deg, #3a3648 0%, #201c29 100%);
-            color: var(--title-color); 
-        }
+        .mech-btn:hover { background-image: var(--noise-texture), linear-gradient(180deg, #3a3648 0%, #201c29 100%); color: var(--title-color); }
         
-        /* Colapso físico al presionar */
         .mech-btn:active, .mech-btn.active-state {
-            transform: translateY(6px); /* El botón baja toda la distancia de su pared frontal */
-            box-shadow: 
-                0 0px 0 #070608, 
-                0 2px 4px rgba(0,0,0,0.8),
-                inset 0 4px 8px rgba(0,0,0,0.6),
-                inset 0 1px 2px rgba(0,0,0,0.8);
+            transform: translateY(6px); box-shadow: 0 0px 0 #070608, 0 2px 4px rgba(0,0,0,0.8), inset 0 4px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(0,0,0,0.8);
             background-image: var(--noise-texture), linear-gradient(180deg, #131118 0%, #1a1722 100%);
         }
 
-        /* Leds de hardware con lente de cristal simulado */
         .btn-led { 
             width: 18px; height: 4px; border-radius: 2px; background: #0a090c; 
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.1); 
@@ -281,14 +260,9 @@
         .btn-content { display: flex; align-items: center; gap: 8px; }
         .btn-icon { width: 11px; height: 11px; fill: currentColor; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.8)); }
 
-        /* =========================================
-           ENLACES
-           ========================================= */
         .back-link {
-            margin-top: 36px; display: inline-block; font-family: 'Space Mono', monospace;
-            font-size: 11px; color: var(--text-color); text-decoration: none;
-            text-transform: uppercase; letter-spacing: 3px; font-weight: 700;
-            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
+            margin-top: 36px; display: inline-block; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-color); text-decoration: none;
+            text-transform: uppercase; letter-spacing: 3px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
             transition: all 0.3s ease; position: relative; z-index: 1;
         }
         .back-link:hover { color: var(--title-color); border-color: var(--accent); text-shadow: 0 0 8px rgba(237, 230, 214, 0.4); transform: translateY(-1px); }
@@ -299,6 +273,16 @@
 <body>
 
     <div class="player-deck" id="main-card">
+        
+        <!-- =========================================
+             NUEVO: ECOLOCALIZACIÓN ETÉREA (ONDAS)
+             ========================================= -->
+        <div class="echo-container">
+            <div class="echo-arc"></div>
+            <div class="echo-arc"></div>
+            <div class="echo-arc"></div>
+            <div class="echo-arc"></div>
+        </div>
         
         <!-- COMPARTIMENTO FÍSICO -->
         <div class="cassette-compartment">
@@ -365,7 +349,6 @@
     <a href="https://etereomx.com" class="back-link">Descubre Etéreo Studio</a>
 
     <script>
-        // EL SCRIPT PERMANECE INTACTO - LÓGICA DE PROGRAMACIÓN DE AUDIO PRESERVADA
         const params = new URLSearchParams(window.location.search);
         const audioId = params.get('id');
 
@@ -396,6 +379,9 @@
         let demoProgress = 0;
         let lastTime = 0;
         const demoDuration = 10000; 
+
+        // Variable para controlar la opacidad de los ecos según el volumen
+        let smoothedPeak = 0; 
 
         const colorBase = "rgba(237, 230, 214, 0.2)";
         const colorProgress = "#DD8E5C";
@@ -577,6 +563,18 @@
                 currentP = (audioEl.currentTime / (audioEl.duration || 1));
             }
 
+            // --- LÓGICA DE ECOLOCALIZACIÓN (ECOS) ---
+            let currentPeak = 0;
+            if (isPlaying && peaks.length) {
+                let index = Math.floor(currentP * peaks.length);
+                if (index >= peaks.length) index = peaks.length - 1;
+                currentPeak = peaks[index];
+            }
+            // Suavizamos el cambio matemático para que el brillo de los ecos sea fluido
+            smoothedPeak += (currentPeak - smoothedPeak) * 0.15;
+            document.documentElement.style.setProperty('--audio-peak', smoothedPeak);
+            // ----------------------------------------
+
             const fillWidth = width * currentP;
 
             ctxProgress.clearRect(0, 0, width, height);
@@ -631,6 +629,8 @@
             setReelsSpinning(false);
             statusText.innerHTML = "‖ <span class='accent'>Pausado.</span>";
             cancelAnimationFrame(animationFrame);
+            // Forzamos un update para que los ecos se apaguen al pausar
+            requestAnimationFrame(updateProgress);
         }
 
         function togglePlay() {
@@ -662,7 +662,8 @@
             }
             
             cancelAnimationFrame(animationFrame);
-            updateProgress(); 
+            // Forzamos un update para que los ecos desaparezcan de inmediato al poner Stop
+            requestAnimationFrame(updateProgress); 
         }
 
         audioEl.onended = stopAudio;
