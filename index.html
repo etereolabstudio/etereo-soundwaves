@@ -13,30 +13,33 @@
 
     <style>
         /* =========================================
-           VARIABLES Y PALETA ETÉREO
+           VARIABLES: PALETA ETÉREO Y MATERIALES
            ========================================= */
         :root {
-            --bg-color: #0c0b0f;
+            --bg-color: #070609;
             
-            /* Colores del Reproductor (Deck) */
-            --deck-base: #18161d;
-            --deck-dark: #0e0d12;
-            --deck-edge: #2a2732;
+            /* Material Plástico (Deck ABS) */
+            --deck-base: #1c1a21;
+            --deck-dark: #0f0e13;
+            --deck-edge: #302c38;
             
-            /* Colores del Cassette */
+            /* Material Cassette */
             --cassette-bg: #222029;
             --label-bg: #EAE3D2;
             --label-text: #1B1912;
             
-            /* Acentos Etéreo y Retro */
+            /* Acentos */
             --text-color: #9B9488;
             --title-color: #EDE6D6;
             --accent: #DD8E5C;
             --accent-glow: rgba(221, 142, 92, 0.4);
             
-            /* LEDs Retro */
-            --retro-green: #34d399;
+            /* Componentes Electrónicos */
+            --retro-green: #10b981;
             --retro-red: #ef4444;
+            
+            /* Textura SVG Base64 (Ruido de Polímero) */
+            --noise-texture: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -49,203 +52,255 @@
             position: relative;
         }
 
-        /* Iluminación de fondo */
+        /* Luces de estudio volumétricas ambientales */
         body::before {
             content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
             background:
-                radial-gradient(ellipse 45% 45% at 80% 20%, rgba(221, 142, 92, 0.08) 0%, transparent 65%),
-                radial-gradient(ellipse 50% 50% at -10% 115%, rgba(139, 132, 163, 0.06) 0%, transparent 60%);
+                radial-gradient(ellipse 55% 45% at 75% 15%, rgba(221, 142, 92, 0.08) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 50% at 15% 95%, rgba(139, 132, 163, 0.07) 0%, transparent 60%);
         }
+        
+        /* Grano de película de fondo */
         body::after {
-            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.15; mix-blend-mode: overlay;
-            background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; 
+            opacity: 0.2; mix-blend-mode: soft-light; background-image: var(--noise-texture);
         }
 
         .mono { font-family: 'Space Mono', monospace; }
 
         /* =========================================
-           EL REPRODUCTOR (TAPE DECK / WALKMAN)
+           CHASIS PRINCIPAL (HARDWARE DECK)
            ========================================= */
         .player-deck {
             position: relative; z-index: 1;
-            background: linear-gradient(180deg, var(--deck-edge) 0%, var(--deck-base) 20%, var(--deck-dark) 100%);
-            border-radius: 12px; padding: 14px 14px 24px 14px;
-            max-width: 380px; width: 100%;
+            /* Fusión de degradado volumétrico + textura de ABS inyectado */
+            background-image: var(--noise-texture), linear-gradient(160deg, var(--deck-edge) 0%, var(--deck-base) 30%, var(--deck-dark) 100%);
+            background-blend-mode: soft-light, normal;
+            border-radius: 12px; padding: 16px 14px 26px 14px;
+            max-width: 385px; width: 100%;
+            /* Iluminación especular de bordes y sombras de peso real */
             box-shadow: 
-                inset 0 1px 2px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.8),
-                0 30px 50px rgba(0,0,0,0.6), 0 10px 15px rgba(0,0,0,0.4);
-            border: 1px solid #322E3A;
+                inset 0 1px 1px rgba(255,255,255,0.15), 
+                inset 1px 0 2px rgba(255,255,255,0.05),
+                inset 0 -4px 8px rgba(0,0,0,0.8),
+                0 40px 60px rgba(0,0,0,0.8), 
+                0 15px 25px rgba(0,0,0,0.6);
+            border: 1px solid #111;
+            border-top: 1px solid #3c3846; /* Borde superior atrapando la luz */
             display: flex; flex-direction: column; gap: 16px;
         }
 
+        /* Biseles decorativos del hardware (Tornillos / Ensamblaje) */
+        .player-deck::before, .player-deck::after {
+            content: ''; position: absolute; bottom: 80px; width: 6px; height: 35px;
+            background: #0a090d; border-radius: 4px;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.9), 1px 0 1px rgba(255,255,255,0.05);
+        }
+        .player-deck::before { left: 4px; }
+        .player-deck::after { right: 4px; }
+
         /* =========================================
-           COMPARTIMENTO DEL CASSETTE
+           COMPARTIMENTO DEL CASSETTE Y CRISTAL
            ========================================= */
         .cassette-compartment {
-            background: #08070a; border-radius: 8px; padding: 12px;
-            box-shadow: inset 0 8px 15px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.03);
-            position: relative;
+            background: #050406; border-radius: 8px; padding: 14px;
+            /* Oclusión ambiental profunda simulando la recámara */
+            box-shadow: 
+                inset 0 10px 20px rgba(0,0,0,1), 
+                inset 0 -2px 5px rgba(0,0,0,0.5),
+                inset 0 0 0 1px rgba(255,255,255,0.04),
+                0 1px 1px rgba(255,255,255,0.06);
+            position: relative; overflow: hidden;
         }
 
+        /* Acrílico curvo sobre el cassette */
+        .cassette-compartment::after {
+            content: ''; position: absolute; inset: 0; z-index: 20; pointer-events: none;
+            border-radius: 8px;
+            background: 
+                linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 30%, transparent 35%),
+                linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.6) 100%);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.03);
+        }
+
+        /* El Cassette físico incrustado */
         .cassette {
-            background: linear-gradient(180deg, #322e3b 0%, var(--cassette-bg) 100%);
+            background: linear-gradient(180deg, #373342 0%, var(--cassette-bg) 100%);
             border-radius: 6px; padding: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1);
-            border: 1px solid rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; gap: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.15);
+            border: 1px solid rgba(0,0,0,0.7);
+            display: flex; flex-direction: column; gap: 10px;
+            position: relative; z-index: 1;
         }
 
         .cassette-label {
-            background: linear-gradient(160deg, var(--label-bg) 0%, #D4CBB5 100%);
-            color: var(--label-text); border-radius: 4px; padding: 12px 16px; margin: 0 8px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.4);
+            background: var(--noise-texture), linear-gradient(160deg, var(--label-bg) 0%, #D4CBB5 100%);
+            background-blend-mode: multiply, normal;
+            color: var(--label-text); border-radius: 4px; padding: 14px 16px; margin: 0 6px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.5);
+            position: relative;
         }
-        .cassette-label::before { content: ''; position: absolute; left: 12px; right: 12px; top: 6px; height: 1px; background: rgba(27,25,18,0.15); }
-        .cassette-label::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 1px; background: rgba(27,25,18,0.15); }
-
-        .brand-title {
-            font-family: 'Clash Display', sans-serif; font-weight: 600; font-size: 22px; 
-            letter-spacing: 5px; text-transform: uppercase; margin: 0; text-shadow: 0px 1px 1px rgba(255,255,255,0.6);
-        }
-        .side-tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; margin-top: 2px; font-weight: 700; }
-
-        /* Ventana del cassette (Carretes) */
-        .cassette-window {
-            background: #040305; margin: 0 16px; border-radius: 6px; padding: 4px;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,0.04);
-            height: 75px; position: relative; overflow: hidden;
-        }
-
-        .window-glass { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .window-glass::after {
-            content: ''; position: absolute; inset: 0; z-index: 10; pointer-events: none;
-            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.06) 50%, transparent 55%);
-        }
-
-        .reels-row { display: flex; justify-content: center; align-items: center; gap: 55px; position: relative; z-index: 2; width: 100%; }
         
-        .tape-spool {
-            position: absolute; background: #150F0B; border-radius: 50%;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 0 1px #090604; z-index: 0;
+        .brand-title {
+            font-family: 'Clash Display', sans-serif; font-weight: 700; font-size: 24px; 
+            letter-spacing: 6px; text-transform: uppercase; margin: 0; 
+            color: #111; text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
         }
-        .tape-spool-left { width: 70px; height: 70px; } 
-        .tape-spool-right { width: 55px; height: 55px; }
+        .side-tag { font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase; color: #444; margin-top: 2px; font-weight: 700; }
+
+        .cassette-window {
+            background: #020102; margin: 0 14px; border-radius: 6px; padding: 4px;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,0.05), 0 1px 1px rgba(255,255,255,0.1);
+            height: 78px; position: relative; overflow: hidden;
+        }
+
+        .reels-row { display: flex; justify-content: center; align-items: center; gap: 58px; position: relative; z-index: 2; width: 100%; height: 100%; }
+        
+        /* Cinta expuesta simulando tensión */
+        .magnetic-tape {
+            position: absolute; bottom: -8px; left: -10px; right: -10px; height: 16px;
+            background: linear-gradient(180deg, #111 0%, #2a1b14 50%, #0a0604 100%);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.9); opacity: 0.9;
+        }
+
+        .tape-spool {
+            position: absolute; background: repeating-radial-gradient(circle at center, #110B08 0px, #1a120d 1.5px, #0a0604 3px);
+            border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.9), 0 0 0 1.5px #050302; z-index: 0;
+        }
+        .tape-spool-left { width: 72px; height: 72px; } .tape-spool-right { width: 52px; height: 52px; }
 
         .reel {
             width: 36px; height: 36px; border-radius: 50%;
-            background: radial-gradient(circle at center, #100E14 18%, transparent 20%),
-                        repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #D8D3C8 35deg, #D8D3C8 60deg);
-            border: 4px solid #D8D3C8; position: relative; z-index: 2; box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            background: radial-gradient(circle at center, #0a090d 18%, transparent 20%),
+                        repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #e4dfd3 35deg, #e4dfd3 60deg);
+            border: 4px solid #e4dfd3; position: relative; z-index: 2; box-shadow: 0 3px 8px rgba(0,0,0,0.7);
         }
         .reel::after {
             content: ''; position: absolute; inset: 25%; border-radius: 50%;
-            background: #0A090D; border: 1px solid rgba(255,255,255,0.1);
+            background: conic-gradient(#111, #333, #111, #000, #111);
+            border: 1px solid rgba(255,255,255,0.15); box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
         }
-        .reel.spinning { animation: reel-spin 2s linear infinite; }
+        .reel.spinning { animation: reel-spin 1.8s linear infinite; }
         @keyframes reel-spin { to { transform: rotate(360deg); } }
 
         /* =========================================
-           PANTALLA DIGITAL (HUD & WAVEFORM)
+           PANTALLA DIGITAL (VFD CON FLICKER)
            ========================================= */
         .digital-display {
-            background: #070608; border: 1px solid #1a1820; border-radius: 6px; 
-            padding: 12px 14px 10px; box-shadow: inset 0 6px 12px rgba(0,0,0,0.8);
-            position: relative; margin: 0 4px;
+            background: #050406; border: 1px solid #14121a; border-radius: 6px; 
+            padding: 14px 16px 12px; position: relative; margin: 0 4px;
+            /* Efecto de pantalla incrustada */
+            box-shadow: 
+                inset 0 8px 16px rgba(0,0,0,1), 
+                inset 0 0 8px rgba(0,0,0,0.8),
+                0 1px 0 rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+        
+        /* Scanlines analógicas */
+        .digital-display::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 10;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 1px, transparent 1px, transparent 2px);
         }
 
         .status-text {
-            font-size: 11px; color: var(--text-color); margin-bottom: 12px; line-height: 1.5; 
+            font-size: 11px; color: var(--text-color); margin-bottom: 14px; line-height: 1.5; 
             min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
-            display: flex; justify-content: space-between;
+            display: flex; justify-content: space-between; position: relative; z-index: 5;
+            text-shadow: 0 0 5px rgba(155, 148, 136, 0.3);
         }
-        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 13px; }
+        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 14px; text-shadow: 0 0 12px var(--accent-glow); }
 
-        /* Ahora la onda está 100% libre de botones */
         .waveform-wrapper { 
-            width: 100%; height: 50px; position: relative; display: block; cursor: pointer; border-radius: 2px;
-            background: repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 4px);
+            width: 100%; height: 50px; position: relative; display: block; cursor: pointer; border-radius: 2px; z-index: 5;
+            background: repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 4px);
         }
-        canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 3px var(--accent-glow)); }
+        canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 4px var(--accent-glow)); }
 
         .time-display {
-            display: flex; justify-content: space-between; margin-top: 8px;
-            font-size: 10px; letter-spacing: 1.5px; color: var(--title-color); opacity: 0.8; font-weight: 700;
+            display: flex; justify-content: space-between; margin-top: 10px;
+            font-size: 10px; letter-spacing: 2px; color: var(--title-color); opacity: 0.9; font-weight: 700;
+            position: relative; z-index: 5; text-shadow: 0 0 5px rgba(237, 230, 214, 0.4);
         }
-
-        .waveform-wrapper.loading::before {
-            content: ''; position: absolute; inset: 0; z-index: 5;
-            background: linear-gradient(90deg, transparent, rgba(221, 142, 92, 0.2), transparent);
-            background-size: 200% 100%; animation: shimmer-sweep 1.5s ease-in-out infinite;
-        }
-        @keyframes shimmer-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
         /* =========================================
-           BOTONES MECÁNICOS DEL REPRODUCTOR
+           BOTONES MECÁNICOS (INGENIERÍA HÁPTICA)
            ========================================= */
         .mechanical-controls {
-            display: flex; justify-content: center; gap: 12px; margin-top: 4px; padding: 0 4px;
+            display: flex; justify-content: center; gap: 14px; margin-top: 6px; padding: 0 6px;
         }
 
         .mech-btn {
-            flex: 1; height: 48px; border-radius: 4px; cursor: pointer;
-            background: linear-gradient(180deg, #2b2834 0%, #1e1b25 100%);
-            border: 1px solid #000; border-top: 1px solid #433e50;
-            /* El efecto 3D mecánico grueso */
+            flex: 1; height: 54px; border-radius: 4px; cursor: pointer;
+            /* Textura plástica en el botón */
+            background-image: var(--noise-texture), linear-gradient(180deg, #322e3e 0%, #1a1722 100%);
+            background-blend-mode: soft-light, normal;
+            border: none;
+            /* Arquitectura 3D del botón de hardware */
             box-shadow: 
-                0 4px 0 #08070a, /* Grosor frontal del botón */
-                0 6px 10px rgba(0,0,0,0.6), /* Sombra proyectada */
-                inset 0 1px 2px rgba(255,255,255,0.1); /* Brillo superior */
-            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 10px; 
-            letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-            transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
-            position: relative;
+                0 6px 0 #070608,               /* La pared frontal del botón */
+                0 8px 12px rgba(0,0,0,0.8),    /* Sombra proyectada */
+                inset 0 1px 1px rgba(255,255,255,0.2), /* Brillo del borde superior */
+                inset 1px 0 1px rgba(255,255,255,0.05),
+                inset -1px 0 1px rgba(0,0,0,0.5);
+            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 11px; 
+            letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+            /* Tampografía simulada para el texto */
+            text-shadow: 0 1px 1px rgba(0,0,0,0.8), 0 -1px 0 rgba(255,255,255,0.1);
         }
 
-        .mech-btn:hover { background: linear-gradient(180deg, #322e3d 0%, #23202b 100%); color: var(--title-color); }
+        .mech-btn:hover { 
+            background-image: var(--noise-texture), linear-gradient(180deg, #3a3648 0%, #201c29 100%);
+            color: var(--title-color); 
+        }
         
-        /* Efecto de hundimiento mecánico al presionar */
+        /* Colapso físico al presionar */
         .mech-btn:active, .mech-btn.active-state {
-            transform: translateY(4px);
+            transform: translateY(6px); /* El botón baja toda la distancia de su pared frontal */
             box-shadow: 
-                0 0px 0 #08070a, 
-                0 2px 4px rgba(0,0,0,0.6),
-                inset 0 2px 4px rgba(0,0,0,0.5);
-            background: linear-gradient(180deg, #18161d 0%, #1e1b25 100%);
-            border-top: 1px solid #111;
+                0 0px 0 #070608, 
+                0 2px 4px rgba(0,0,0,0.8),
+                inset 0 4px 8px rgba(0,0,0,0.6),
+                inset 0 1px 2px rgba(0,0,0,0.8);
+            background-image: var(--noise-texture), linear-gradient(180deg, #131118 0%, #1a1722 100%);
         }
 
-        /* Leds indicadores en los botones */
-        .btn-led { width: 16px; height: 3px; border-radius: 2px; background: #111; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8); }
+        /* Leds de hardware con lente de cristal simulado */
+        .btn-led { 
+            width: 18px; height: 4px; border-radius: 2px; background: #0a090c; 
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.1); 
+            transition: all 0.2s; border: 1px solid #000;
+        }
         
-        .mech-btn.stop-btn:active .btn-led { background: var(--retro-red); box-shadow: 0 0 6px var(--retro-red); }
-        /* El LED verde se mantiene encendido mientras suena */
-        .mech-btn.play-btn.playing .btn-led { background: var(--retro-green); box-shadow: 0 0 8px var(--retro-green); }
+        .mech-btn.stop-btn:active .btn-led { background: var(--retro-red); box-shadow: 0 0 8px var(--retro-red), inset 0 1px 2px rgba(255,255,255,0.4); border-color: var(--retro-red); }
+        .mech-btn.play-btn.playing .btn-led { background: var(--retro-green); box-shadow: 0 0 12px var(--retro-green), inset 0 1px 2px rgba(255,255,255,0.5); border-color: var(--retro-green); }
 
-        .btn-content { display: flex; align-items: center; gap: 6px; }
-        .btn-icon { width: 10px; height: 10px; fill: currentColor; }
+        .btn-content { display: flex; align-items: center; gap: 8px; }
+        .btn-icon { width: 11px; height: 11px; fill: currentColor; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.8)); }
 
         /* =========================================
            ENLACES
            ========================================= */
         .back-link {
-            margin-top: 32px; display: inline-block; font-family: 'Space Mono', monospace;
+            margin-top: 36px; display: inline-block; font-family: 'Space Mono', monospace;
             font-size: 11px; color: var(--text-color); text-decoration: none;
-            text-transform: uppercase; letter-spacing: 2px; font-weight: 400;
+            text-transform: uppercase; letter-spacing: 3px; font-weight: 700;
             border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
-            transition: color 0.3s, border-color 0.3s; position: relative; z-index: 1;
+            transition: all 0.3s ease; position: relative; z-index: 1;
         }
-        .back-link:hover { color: var(--title-color); border-color: var(--accent); }
+        .back-link:hover { color: var(--title-color); border-color: var(--accent); text-shadow: 0 0 8px rgba(237, 230, 214, 0.4); transform: translateY(-1px); }
 
         audio { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- REPRODUCTOR (EL DECK) -->
     <div class="player-deck" id="main-card">
         
-        <!-- COMPARTIMENTO Y CASSETTE -->
+        <!-- COMPARTIMENTO FÍSICO -->
         <div class="cassette-compartment">
             <div class="cassette">
                 <div class="cassette-label">
@@ -253,19 +308,18 @@
                     <p class="side-tag mono">Memoria Acústica</p>
                 </div>
                 <div class="cassette-window">
-                    <div class="window-glass">
-                        <div class="reels-row">
-                            <div class="tape-spool tape-spool-left"></div>
-                            <div class="reel" id="reel-left"></div>
-                            <div class="tape-spool tape-spool-right"></div>
-                            <div class="reel" id="reel-right"></div>
-                        </div>
+                    <div class="magnetic-tape"></div>
+                    <div class="reels-row">
+                        <div class="tape-spool tape-spool-left"></div>
+                        <div class="reel" id="reel-left"></div>
+                        <div class="tape-spool tape-spool-right"></div>
+                        <div class="reel" id="reel-right"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PANTALLA DIGITAL (WAVEFORM LIBRE) -->
+        <!-- PANTALLA DIGITAL -->
         <div class="digital-display">
             <div class="status-text mono">
                 <span id="status-text" aria-live="polite">Analizando...</span>
@@ -283,9 +337,9 @@
             </div>
         </div>
 
-        <!-- BOTONES MECÁNICOS CLÁSICOS -->
+        <!-- BOTONES MECÁNICOS -->
         <div class="mechanical-controls">
-            <!-- BOTÓN STOP (ROJO) -->
+            <!-- BOTÓN STOP -->
             <button class="mech-btn stop-btn" onclick="stopAudio()" aria-label="Detener memoria">
                 <div class="btn-led"></div>
                 <div class="btn-content">
@@ -294,7 +348,7 @@
                 </div>
             </button>
             
-            <!-- BOTÓN PLAY/PAUSE (VERDE) -->
+            <!-- BOTÓN PLAY/PAUSE -->
             <button class="mech-btn play-btn" id="custom-play-btn" onclick="togglePlay()" aria-label="Reproducir memoria">
                 <div class="btn-led"></div>
                 <div class="btn-content">
@@ -311,6 +365,7 @@
     <a href="https://etereomx.com" class="back-link">Descubre Etéreo Studio</a>
 
     <script>
+        // EL SCRIPT PERMANECE INTACTO - LÓGICA DE PROGRAMACIÓN DE AUDIO PRESERVADA
         const params = new URLSearchParams(window.location.search);
         const audioId = params.get('id');
 
@@ -318,7 +373,6 @@
         const waveformWrapper = document.getElementById('waveform-wrapper');
         const audioEl = document.getElementById('native-audio');
         
-        // Elementos de los botones
         const iconPlay = document.getElementById('icon-play');
         const iconPause = document.getElementById('icon-pause');
         const playTextLabel = document.getElementById('play-text-label');
@@ -343,7 +397,7 @@
         let lastTime = 0;
         const demoDuration = 10000; 
 
-        const colorBase = "rgba(237, 230, 214, 0.18)";
+        const colorBase = "rgba(237, 230, 214, 0.2)";
         const colorProgress = "#DD8E5C";
 
         function setReelsSpinning(spinning) {
@@ -515,7 +569,7 @@
 
                     if (demoProgress >= 1) {
                         demoProgress = 1;
-                        stopAudio(); // Demo terminó, se detiene
+                        stopAudio(); 
                     }
                 }
                 currentP = demoProgress;
@@ -554,14 +608,12 @@
             updateProgress();
         });
 
-        // --- LÓGICA DE BOTONES MECÁNICOS ---
-
         function startPlaybackState() {
             isPlaying = true;
             iconPlay.style.display = "none";
             iconPause.style.display = "block";
             playTextLabel.textContent = "PAUSE";
-            playBtn.classList.add('playing'); // Enciende el LED verde
+            playBtn.classList.add('playing'); 
             
             setReelsSpinning(true);
             lastTime = Date.now();
@@ -574,7 +626,7 @@
             iconPlay.style.display = "block";
             iconPause.style.display = "none";
             playTextLabel.textContent = "PLAY";
-            playBtn.classList.remove('playing'); // Apaga el LED verde
+            playBtn.classList.remove('playing'); 
             
             setReelsSpinning(false);
             statusText.innerHTML = "‖ <span class='accent'>Pausado.</span>";
@@ -592,11 +644,8 @@
             }
         }
 
-        // NUEVA FUNCIÓN: STOP (Detiene y reinicia a 0)
         function stopAudio() {
             isPlaying = false;
-            
-            // Actualizar botones a estado original
             iconPlay.style.display = "block";
             iconPause.style.display = "none";
             playTextLabel.textContent = "PLAY";
@@ -608,12 +657,12 @@
                 statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>";
             } else {
                 audioEl.pause();
-                audioEl.currentTime = 0; // Regresa la cinta al inicio
+                audioEl.currentTime = 0; 
                 statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>";
             }
             
             cancelAnimationFrame(animationFrame);
-            updateProgress(); // Fuerza el repintado a 0:00
+            updateProgress(); 
         }
 
         audioEl.onended = stopAudio;
