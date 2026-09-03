@@ -12,11 +12,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+        /* =========================================
+           1. VARIABLES DE MATERIALES
+           ========================================= */
         :root {
             --bg-color: #0c0b0f;
-            --deck-base: #18161d;
-            --deck-dark: #0e0d12;
-            --deck-edge: #2a2732;
+            --deck-base: #1a1820;
+            --deck-dark: #0f0d14;
+            --deck-edge: #2c2936;
             
             --cassette-bg: #222029;
             --label-bg: #EAE3D2;
@@ -27,7 +30,8 @@
             --accent: #DD8E5C;
             --accent-glow: rgba(221, 142, 92, 0.4);
             
-            --retro-green: #34d399;
+            --retro-green: #22c55e;
+            --retro-yellow: #eab308;
             --retro-red: #ef4444;
         }
 
@@ -55,10 +59,13 @@
 
         .mono { font-family: 'Space Mono', monospace; }
 
+        /* =========================================
+           2. ECOS DE ENERGÍA
+           ========================================= */
         .echo-container {
-            position: absolute; bottom: -20px; left: 50%; width: 280px; height: 140px; transform: translateX(-50%);
+            position: absolute; bottom: -10px; left: 50%; width: 280px; height: 140px; transform: translateX(-50%);
             z-index: 0; pointer-events: none; display: flex; justify-content: center;
-            opacity: calc(var(--audio-peak, 0) * 1.5); transition: opacity 0.2s ease-out;
+            opacity: calc(var(--audio-peak, 0) * 1.5); transition: opacity 0.1s ease-out;
         }
         .echo-arc {
             position: absolute; top: 0; width: 100%; height: 100%; border: 2px solid transparent; border-bottom: 2px solid var(--accent);
@@ -68,21 +75,26 @@
         .echo-arc:nth-child(3) { animation-delay: 1.0s; } .echo-arc:nth-child(4) { animation-delay: 1.5s; }
         @keyframes echo-radiate { 0% { transform: scale(0.4) translateY(0); opacity: 0; border-bottom-width: 4px; } 15% { opacity: 1; } 100% { transform: scale(2.2) translateY(60px); opacity: 0; border-bottom-width: 1px; } }
 
+        /* =========================================
+           3. CHASIS DEL REPRODUCTOR
+           ========================================= */
         .player-deck {
             position: relative; z-index: 1; background: linear-gradient(180deg, var(--deck-edge) 0%, var(--deck-base) 20%, var(--deck-dark) 100%);
-            border-radius: 12px; padding: 14px 14px 24px 14px; max-width: 380px; width: 100%;
+            border-radius: 12px; padding: 14px 14px 22px 14px; max-width: 380px; width: 100%;
             box-shadow: inset 0 1px 2px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.8), 0 30px 50px rgba(0,0,0,0.6), 0 10px 15px rgba(0,0,0,0.4);
-            border: 1px solid #322E3A; display: flex; flex-direction: column; gap: 16px;
+            border: 1px solid #322E3A; display: flex; flex-direction: column; gap: 14px;
         }
 
         .cassette-compartment {
             background: #08070a; border-radius: 8px; padding: 12px;
             box-shadow: inset 0 8px 15px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.03); position: relative;
+            overflow: hidden;
         }
 
         .cassette {
             background: linear-gradient(180deg, #322e3b 0%, var(--cassette-bg) 100%); border-radius: 6px; padding: 12px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 8px;
+            position: relative; z-index: 1;
         }
 
         .cassette-label {
@@ -100,13 +112,24 @@
             box-shadow: inset 0 4px 10px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,0.04); height: 75px; position: relative; overflow: hidden;
         }
 
+        /* Cristal Giroscópico */
         .window-glass { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .window-glass::after { content: ''; position: absolute; inset: 0; z-index: 10; pointer-events: none; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.06) 50%, transparent 55%); }
+        .window-glass::after { 
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; z-index: 10; pointer-events: none; 
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.03) 48%, rgba(255,255,255,0.08) 50%, transparent 55%);
+            /* Animación guiada por acelerómetro */
+            transform: translate(calc(var(--tilt-x, 0) * 35px), calc(var(--tilt-y, 0) * 35px));
+            transition: transform 0.1s ease-out;
+        }
 
+        /* =========================================
+           4. INGENIERÍA MECÁNICA: CINTA Y CABEZAL
+           ========================================= */
         .reels-row { display: flex; justify-content: center; align-items: center; gap: 55px; position: relative; z-index: 2; width: 100%; }
         
         .tape-spool {
-            position: absolute; background: #150F0B; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 0 1px #090604; z-index: 0;
+            position: absolute; background: repeating-radial-gradient(circle at center, #110B08 0px, #1a120d 1px, #0a0604 2px);
+            border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.9), 0 0 0 1.5px #090604; z-index: 0;
             transition: width 0.1s linear, height 0.1s linear;
         }
         .tape-spool-left { width: calc(85px - (30px * var(--tape-progress, 0))); height: calc(85px - (30px * var(--tape-progress, 0))); } 
@@ -121,24 +144,86 @@
         .reel.spinning { animation: reel-spin 2s linear infinite; }
         @keyframes reel-spin { to { transform: rotate(360deg); } }
 
-        .digital-display {
-            background: #070608; border: 1px solid #1a1820; border-radius: 6px; padding: 12px 14px 10px; box-shadow: inset 0 6px 12px rgba(0,0,0,0.8); position: relative; margin: 0 4px;
+        /* La Cinta Horizontal */
+        .tape-strip {
+            position: absolute; bottom: -2px; left: 0; right: 0; height: 10px; z-index: 3;
+            background: linear-gradient(180deg, #111 0%, #2a1b14 50%, #050302 100%);
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.9); border-top: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
+
+        /* El Cabezal de Lectura Mecánico */
+        .magnetic-head {
+            position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+            width: 48px; height: 28px; z-index: 4; border-radius: 4px 4px 0 0;
+            background: linear-gradient(90deg, #444 0%, #999 15%, #555 50%, #999 85%, #444 100%);
+            box-shadow: inset 0 2px 2px rgba(255,255,255,0.6), 0 -2px 10px rgba(0,0,0,0.9), 0 0 0 1px #111;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); /* Rebote al subir */
+        }
+        .magnetic-head::after {
+            content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+            width: 24px; height: 8px; background: #111; border-radius: 2px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
+        }
+
+        /* Estados de Enganche (Cuando le das PLAY) */
+        .engaged .magnetic-head { transform: translateX(-50%) translateY(-22px); }
+        .engaged .tape-strip { transform: translateY(-4px); } /* La cinta se empuja hacia arriba */
+
+        /* =========================================
+           5. PANTALLA DIGITAL Y VFD GHOSTING
+           ========================================= */
+        .digital-display {
+            background: #070608; border: 1px solid #1a1820; border-radius: 6px; 
+            padding: 12px 14px 12px; box-shadow: inset 0 6px 12px rgba(0,0,0,0.8); position: relative; margin: 0 4px;
+        }
+        /* Scanlines */
+        .digital-display::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 10; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2) 0px, rgba(0,0,0,0.2) 1px, transparent 1px, transparent 2px); }
 
         .status-text {
-            font-size: 11px; color: var(--text-color); margin-bottom: 12px; line-height: 1.5; min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; display: flex; justify-content: space-between;
+            font-size: 11px; color: var(--text-color); margin-bottom: 8px; line-height: 1.5; 
+            min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; display: flex; justify-content: space-between; position: relative; z-index: 5;
         }
-        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 13px; }
+        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 13px; text-shadow: 0 0 8px var(--accent-glow); }
 
         .waveform-wrapper { 
-            width: 100%; height: 50px; position: relative; display: block; cursor: pointer; border-radius: 2px;
+            width: 100%; height: 46px; position: relative; display: block; cursor: pointer; border-radius: 2px; z-index: 5;
             background: repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 4px);
         }
         canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 3px var(--accent-glow)); }
 
-        .time-display { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; letter-spacing: 1.5px; color: var(--title-color); opacity: 0.8; font-weight: 700; }
+        /* Aguja de lectura de Fósforo (El Scanner) */
+        .vfd-playhead {
+            position: absolute; top: 0; bottom: 0; width: 2px; background: var(--title-color);
+            box-shadow: 0 0 10px var(--title-color), 0 0 15px var(--accent-glow); z-index: 6; pointer-events: none;
+            left: calc(var(--tape-progress, 0) * 100%); opacity: 0; transition: opacity 0.2s;
+        }
+        .vfd-playhead::after {
+            content: ''; position: absolute; top: 0; bottom: 0; right: 2px; width: 24px;
+            background: linear-gradient(to right, transparent, rgba(221, 142, 92, 0.4));
+        }
+        .engaged .vfd-playhead { opacity: 1; }
 
-        .mechanical-controls { display: flex; justify-content: center; gap: 12px; margin-top: 4px; padding: 0 4px; }
+        .time-display { display: flex; justify-content: space-between; margin-top: 6px; font-size: 10px; letter-spacing: 1.5px; color: var(--title-color); opacity: 0.8; font-weight: 700; position: relative; z-index: 5; }
+
+        /* =========================================
+           6. VÚMETRO ANALÓGICO DE LEDS
+           ========================================= */
+        .vu-meter-container {
+            display: flex; gap: 3px; justify-content: center; align-items: center; margin-top: 10px;
+            padding: 4px; background: #040305; border-radius: 3px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.9);
+            position: relative; z-index: 5;
+        }
+        .vu-led { width: 100%; max-width: 14px; height: 4px; border-radius: 1px; background: #161616; transition: background 0.05s, box-shadow 0.05s; }
+        
+        /* Colores dinámicos inyectados por clase */
+        .vu-led.on[data-color="green"] { background: var(--retro-green); box-shadow: 0 0 6px var(--retro-green); }
+        .vu-led.on[data-color="yellow"] { background: var(--retro-yellow); box-shadow: 0 0 6px var(--retro-yellow); }
+        .vu-led.on[data-color="red"] { background: var(--retro-red); box-shadow: 0 0 8px var(--retro-red); }
+
+        /* =========================================
+           7. BOTONES MECÁNICOS
+           ========================================= */
+        .mechanical-controls { display: flex; justify-content: center; gap: 12px; margin-top: 2px; padding: 0 4px; }
         .mech-btn {
             flex: 1; height: 48px; border-radius: 4px; cursor: pointer;
             background: linear-gradient(180deg, #2b2834 0%, #1e1b25 100%); border: 1px solid #000; border-top: 1px solid #433e50;
@@ -177,7 +262,7 @@
             <div class="echo-arc"></div><div class="echo-arc"></div><div class="echo-arc"></div><div class="echo-arc"></div>
         </div>
 
-        <div class="cassette-compartment">
+        <div class="cassette-compartment" id="compartment">
             <div class="cassette">
                 <div class="cassette-label">
                     <h1 class="brand-title">Etéreo</h1>
@@ -191,12 +276,15 @@
                             <div class="tape-spool tape-spool-right"></div>
                             <div class="reel" id="reel-right"></div>
                         </div>
+                        <!-- CINTA Y CABEZAL MECÁNICO -->
+                        <div class="tape-strip"></div>
+                        <div class="magnetic-head"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="digital-display">
+        <div class="digital-display" id="display-screen">
             <div class="status-text mono">
                 <span id="status-text" aria-live="polite">Analizando...</span>
                 <span>GDL·MX</span>
@@ -205,11 +293,22 @@
             <div class="waveform-wrapper" id="waveform-wrapper">
                 <canvas id="canvas-base"></canvas>
                 <canvas id="canvas-progress"></canvas>
+                <!-- ESCÁNER DE FÓSFORO -->
+                <div class="vfd-playhead"></div>
             </div>
             
             <div class="time-display mono">
                 <span id="time-elapsed">0:00</span>
                 <span id="time-total">0:00</span>
+            </div>
+
+            <!-- VÚMETRO DE LEDS -->
+            <div class="vu-meter-container" id="vu-meter">
+                <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
+                <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
+                <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
+                <div class="vu-led" data-color="yellow"></div><div class="vu-led" data-color="yellow"></div>
+                <div class="vu-led" data-color="red"></div><div class="vu-led" data-color="red"></div>
             </div>
         </div>
 
@@ -249,11 +348,14 @@
         const iconPause = document.getElementById('icon-pause');
         const playTextLabel = document.getElementById('play-text-label');
         const playBtn = document.getElementById('custom-play-btn');
+        const compartment = document.getElementById('compartment');
+        const displayScreen = document.getElementById('display-screen');
         
         const reelLeft = document.getElementById('reel-left');
         const reelRight = document.getElementById('reel-right');
         const timeElapsed = document.getElementById('time-elapsed');
         const timeTotal = document.getElementById('time-total');
+        const vuLeds = document.querySelectorAll('.vu-led');
 
         const canvasBase = document.getElementById('canvas-base');
         const canvasProgress = document.getElementById('canvas-progress');
@@ -270,6 +372,7 @@
         let lastTime = 0;
         const demoDuration = 10000; 
         let smoothedPeak = 0;
+        let prevLedCount = 0;
 
         const colorBase = "rgba(237, 230, 214, 0.18)";
         const colorProgress = "#DD8E5C";
@@ -277,6 +380,7 @@
         // --- SISTEMA DSP (FFT & RUIDO DE CINTA) ---
         let audioCtx, analyser, dataArray;
         let noiseSource, noiseGain;
+        let gyroEnabled = false;
 
         function createTapeHiss() {
             if (!audioCtx || noiseSource) return;
@@ -286,20 +390,14 @@
             for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
 
             noiseSource = audioCtx.createBufferSource();
-            noiseSource.buffer = noiseBuffer;
-            noiseSource.loop = true;
+            noiseSource.buffer = noiseBuffer; noiseSource.loop = true;
 
             const filter = audioCtx.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.value = 1200; // Frecuencia cálida de cinta analógica
+            filter.type = 'lowpass'; filter.frequency.value = 1200; 
 
-            noiseGain = audioCtx.createGain();
-            noiseGain.gain.value = 0; 
-
-            noiseSource.connect(filter);
-            filter.connect(noiseGain);
-            noiseGain.connect(audioCtx.destination);
-            noiseSource.start();
+            noiseGain = audioCtx.createGain(); noiseGain.gain.value = 0; 
+            noiseSource.connect(filter); filter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination); noiseSource.start();
         }
 
         function setupWebAudio() {
@@ -307,65 +405,62 @@
             try {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContextClass();
-                analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 256; 
+                analyser = audioCtx.createAnalyser(); analyser.fftSize = 256; 
                 const source = audioCtx.createMediaElementSource(audioEl);
-                source.connect(analyser);
-                analyser.connect(audioCtx.destination);
+                source.connect(analyser); analyser.connect(audioCtx.destination);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
             } catch(e) { analyser = null; }
-
-            // Generamos ruido de cinta incluso si CORS bloquea el Analyser
             if (audioCtx) createTapeHiss();
         }
 
-        // --- FADE IN/OUT (ANTI-POP & TAPE HISS CONTROL) ---
+        // --- GIROSCOPIO (Reflexión holográfica del cristal) ---
+        function initGyro() {
+            if (gyroEnabled) return;
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(permissionState => {
+                    if (permissionState === 'granted') { startGyro(); }
+                }).catch(console.error);
+            } else { startGyro(); }
+            gyroEnabled = true;
+        }
+
+        function startGyro() {
+            window.addEventListener('deviceorientation', (e) => {
+                let tiltX = Math.max(-1, Math.min(1, e.gamma / 45)); 
+                let tiltY = Math.max(-1, Math.min(1, (e.beta - 45) / 45));
+                document.documentElement.style.setProperty('--tilt-x', tiltX);
+                document.documentElement.style.setProperty('--tilt-y', tiltY);
+            });
+        }
+
+        // --- FADE IN/OUT (ANTI-POP & TAPE HISS) ---
         let fadeInterval;
         function smoothPlay() {
-            clearInterval(fadeInterval);
-            audioEl.volume = 0;
-            audioEl.play();
-            
-            // Subimos el siseo analógico sutilmente
+            clearInterval(fadeInterval); audioEl.volume = 0; audioEl.play();
             if (noiseGain && audioCtx) noiseGain.gain.setTargetAtTime(0.015, audioCtx.currentTime, 0.5);
-
-            fadeInterval = setInterval(() => {
-                if (audioEl.volume < 0.9) { audioEl.volume += 0.1; } 
-                else { audioEl.volume = 1; clearInterval(fadeInterval); }
-            }, 10);
+            fadeInterval = setInterval(() => { if (audioEl.volume < 0.9) { audioEl.volume += 0.1; } else { audioEl.volume = 1; clearInterval(fadeInterval); } }, 10);
         }
 
         function smoothPause(callback) {
             clearInterval(fadeInterval);
-            
-            // Apagamos el motor de ruido analógico
             if (noiseGain && audioCtx) noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
-
             fadeInterval = setInterval(() => {
                 if (audioEl.volume > 0.1) { audioEl.volume -= 0.1; } 
-                else {
-                    audioEl.volume = 0;
-                    audioEl.pause();
-                    clearInterval(fadeInterval);
-                    if (callback) callback();
-                }
+                else { audioEl.volume = 0; audioEl.pause(); clearInterval(fadeInterval); if (callback) callback(); }
             }, 10);
         }
 
-        // --- ESTADOS DE RED (BUFFERING) ---
+        // --- ESTADOS DE RED ---
         audioEl.addEventListener('waiting', () => {
             if (isPlaying) {
-                isBuffering = true;
-                playTextLabel.textContent = "LOAD";
-                statusText.innerHTML = "↻ <span class='accent'>Cargando cinta...</span>";
+                isBuffering = true; playTextLabel.textContent = "LOAD";
+                statusText.innerHTML = "↻ <span class='accent'>Cargando...</span>";
                 setReelsSpinning(false);
             }
         });
-
         audioEl.addEventListener('playing', () => {
             if (isPlaying && isBuffering) {
-                isBuffering = false;
-                playTextLabel.textContent = "PAUSE";
+                isBuffering = false; playTextLabel.textContent = "PAUSE";
                 statusText.innerHTML = "▶ <span class='accent'>Reproduciendo...</span>";
                 setReelsSpinning(true);
             }
@@ -375,8 +470,7 @@
         function setReelsSpinning(spinning) { reelLeft.classList.toggle('spinning', spinning); reelRight.classList.toggle('spinning', spinning); }
         function formatTime(seconds) {
             if (!isFinite(seconds) || seconds < 0) return '0:00';
-            const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
+            const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60).toString().padStart(2, '0'); return `${m}:${s}`;
         }
 
         const AUDIO_FORMATS = ['mp3', 'm4a', 'wav']; const MAX_ATTEMPTS = 3; const RETRY_DELAY_MS = 2500;
@@ -401,23 +495,19 @@
                     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                     const audioCtxLocal = new AudioContextClass();
                     const audioBuffer = await audioCtxLocal.decodeAudioData(found.arrayBuffer);
-                    processAudioData(audioBuffer);
-                    hideShimmer(); statusText.innerHTML = "<span class='accent'>Cinta lista.</span>";
-                    attemptAutoplay(); return;
+                    processAudioData(audioBuffer); hideShimmer();
+                    statusText.innerHTML = "<span class='accent'>Cinta lista.</span>"; attemptAutoplay(); return;
                 } catch (e) { }
             }
             if (attempt < MAX_ATTEMPTS) { setTimeout(() => tryLoadAudio(id, attempt + 1), RETRY_DELAY_MS); } 
             else { isDemo = true; hideShimmer(); initDemoMode("Sincronizando...<br><span class='accent'>Prueba los controles.</span>"); }
         }
 
-        if (!isDemo) { showShimmer(); tryLoadAudio(audioId); } 
-        else { initDemoMode("Modo Demostración.<br><span class='accent'>Presiona Play.</span>"); }
+        if (!isDemo) { showShimmer(); tryLoadAudio(audioId); } else { initDemoMode("Modo Demostración.<br><span class='accent'>Presiona Play.</span>"); }
 
         function attemptAutoplay() {
             const playPromise = audioEl.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => { startPlaybackState(); }).catch(() => { statusText.innerHTML = "Lista.<br><span class='accent'>Presiona PLAY.</span>"; });
-            }
+            if (playPromise !== undefined) { playPromise.then(() => { startPlaybackState(); }).catch(() => { statusText.innerHTML = "Lista.<br><span class='accent'>Presiona PLAY.</span>"; }); }
         }
 
         function initDemoMode(message) {
@@ -444,29 +534,24 @@
             drawSmoothWave(ctxBase, canvasBase.width / dpr, canvasBase.height / dpr, colorBase); updateProgress();
         }
 
-        // --- INTERPOLACIÓN MATEMÁTICA (SPLINES) ---
         function drawSmoothWave(ctx, width, height, color) {
             ctx.clearRect(0, 0, width, height); ctx.fillStyle = color; ctx.beginPath();
             const centerY = height / 2; const step = width / (peaks.length - 1);
             
-            // Mitad superior (Curvas cuadráticas suaves)
             ctx.moveTo(0, centerY);
             for (let i = 0; i < peaks.length - 1; i++) {
                 let x = i * step; let y = centerY - ((peaks[i] * height) / 2);
                 let nextX = (i + 1) * step; let nextY = centerY - ((peaks[i+1] * height) / 2);
                 let xc = (x + nextX) / 2; let yc = (y + nextY) / 2;
-                if(i === 0) ctx.lineTo(x, y);
-                ctx.quadraticCurveTo(x, y, xc, yc);
+                if(i === 0) ctx.lineTo(x, y); ctx.quadraticCurveTo(x, y, xc, yc);
                 if(i === peaks.length - 2) ctx.lineTo(nextX, nextY);
             }
             
-            // Mitad inferior (En reversa para cerrar la onda)
             for (let i = peaks.length - 1; i > 0; i--) {
                 let x = i * step; let y = centerY + ((peaks[i] * height) / 2);
                 let prevX = (i - 1) * step; let prevY = centerY + ((peaks[i-1] * height) / 2);
                 let xc = (x + prevX) / 2; let yc = (y + prevY) / 2;
-                if(i === peaks.length - 1) ctx.lineTo(x, y);
-                ctx.quadraticCurveTo(x, y, xc, yc);
+                if(i === peaks.length - 1) ctx.lineTo(x, y); ctx.quadraticCurveTo(x, y, xc, yc);
                 if(i === 1) ctx.lineTo(prevX, prevY);
             }
             ctx.closePath(); ctx.fill();
@@ -498,6 +583,13 @@
             smoothedPeak += (currentPeak - smoothedPeak) * 0.15;
             document.documentElement.style.setProperty('--audio-peak', smoothedPeak);
 
+            // Actualización optimizada del Vúmetro
+            let ledCount = Math.min(10, Math.floor(smoothedPeak * 11));
+            if (ledCount !== prevLedCount) {
+                vuLeds.forEach((led, i) => led.classList.toggle('on', i < ledCount));
+                prevLedCount = ledCount;
+            }
+
             const fillWidth = width * currentP;
             ctxProgress.clearRect(0, 0, width, height); ctxProgress.save();
             ctxProgress.beginPath(); ctxProgress.rect(0, 0, fillWidth, height); ctxProgress.clip();
@@ -519,19 +611,31 @@
         function startPlaybackState() {
             isPlaying = true; isBuffering = false;
             iconPlay.style.display = "none"; iconPause.style.display = "block"; playTextLabel.textContent = "PAUSE"; playBtn.classList.add('playing'); 
+            
+            // Enganche Mecánico
+            compartment.classList.add('engaged');
+            displayScreen.classList.add('engaged');
+
             setReelsSpinning(true); lastTime = Date.now(); statusText.innerHTML = "▶ <span class='accent'>Reproduciendo...</span>"; updateProgress();
         }
 
         function pausePlaybackState() {
             isPlaying = false; isBuffering = false;
             iconPlay.style.display = "block"; iconPause.style.display = "none"; playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing'); 
+            
+            // Liberación Mecánica
+            compartment.classList.remove('engaged');
+            displayScreen.classList.remove('engaged');
+
             setReelsSpinning(false); statusText.innerHTML = "‖ <span class='accent'>Pausado.</span>";
             smoothedPeak = 0; document.documentElement.style.setProperty('--audio-peak', 0);
+            vuLeds.forEach(led => led.classList.remove('on')); prevLedCount = 0;
+            
             cancelAnimationFrame(animationFrame); requestAnimationFrame(updateProgress);
         }
 
         function togglePlay() {
-            hapticPulse(15);
+            hapticPulse(15); initGyro(); // Pide permiso de giroscopio en la primera interacción
             if (!isPlaying) {
                 if (isDemo && demoProgress >= 1) demoProgress = 0;
                 if (!isDemo) { setupWebAudio(); if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); smoothPlay(); }
@@ -541,8 +645,11 @@
 
         function stopAudio() {
             hapticPulse([10, 30, 10]); isPlaying = false; isBuffering = false;
-            iconPlay.style.display = "block"; iconPause.style.display = "none"; playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing'); setReelsSpinning(false);
-            smoothedPeak = 0; document.documentElement.style.setProperty('--audio-peak', 0);
+            iconPlay.style.display = "block"; iconPause.style.display = "none"; playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing'); 
+            
+            compartment.classList.remove('engaged'); displayScreen.classList.remove('engaged');
+            setReelsSpinning(false); smoothedPeak = 0; document.documentElement.style.setProperty('--audio-peak', 0);
+            vuLeds.forEach(led => led.classList.remove('on')); prevLedCount = 0;
             
             if (isDemo) { demoProgress = 0; statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>"; } 
             else { smoothPause(() => { audioEl.currentTime = 0; }); statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>"; }
