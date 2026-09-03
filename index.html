@@ -55,41 +55,21 @@
 
         .mono { font-family: 'Space Mono', monospace; }
 
-        /* =========================================
-           ECOLOCALIZACIÓN (ONDAS)
-           ========================================= */
         .echo-container {
-            position: absolute; bottom: -20px; left: 50%;
-            width: 280px; height: 140px; transform: translateX(-50%);
+            position: absolute; bottom: -20px; left: 50%; width: 280px; height: 140px; transform: translateX(-50%);
             z-index: 0; pointer-events: none; display: flex; justify-content: center;
-            opacity: calc(var(--audio-peak, 0) * 1.5);
-            transition: opacity 0.2s ease-out; /* Transición más suave para el apagado */
+            opacity: calc(var(--audio-peak, 0) * 1.5); transition: opacity 0.2s ease-out;
         }
-
         .echo-arc {
-            position: absolute; top: 0; width: 100%; height: 100%;
-            border: 2px solid transparent; border-bottom: 2px solid var(--accent);
-            border-radius: 50%; filter: drop-shadow(0 0 8px var(--accent-glow));
-            animation: echo-radiate 2.2s cubic-bezier(0.1, 0.4, 0.8, 1) infinite;
+            position: absolute; top: 0; width: 100%; height: 100%; border: 2px solid transparent; border-bottom: 2px solid var(--accent);
+            border-radius: 50%; filter: drop-shadow(0 0 8px var(--accent-glow)); animation: echo-radiate 2.2s cubic-bezier(0.1, 0.4, 0.8, 1) infinite;
         }
+        .echo-arc:nth-child(1) { animation-delay: 0s; } .echo-arc:nth-child(2) { animation-delay: 0.5s; }
+        .echo-arc:nth-child(3) { animation-delay: 1.0s; } .echo-arc:nth-child(4) { animation-delay: 1.5s; }
+        @keyframes echo-radiate { 0% { transform: scale(0.4) translateY(0); opacity: 0; border-bottom-width: 4px; } 15% { opacity: 1; } 100% { transform: scale(2.2) translateY(60px); opacity: 0; border-bottom-width: 1px; } }
 
-        .echo-arc:nth-child(1) { animation-delay: 0s; }
-        .echo-arc:nth-child(2) { animation-delay: 0.5s; }
-        .echo-arc:nth-child(3) { animation-delay: 1.0s; }
-        .echo-arc:nth-child(4) { animation-delay: 1.5s; }
-
-        @keyframes echo-radiate {
-            0% { transform: scale(0.4) translateY(0); opacity: 0; border-bottom-width: 4px; }
-            15% { opacity: 1; }
-            100% { transform: scale(2.2) translateY(60px); opacity: 0; border-bottom-width: 1px; }
-        }
-
-        /* =========================================
-           REPRODUCTOR / DECK
-           ========================================= */
         .player-deck {
-            position: relative; z-index: 1; 
-            background: linear-gradient(180deg, var(--deck-edge) 0%, var(--deck-base) 20%, var(--deck-dark) 100%);
+            position: relative; z-index: 1; background: linear-gradient(180deg, var(--deck-edge) 0%, var(--deck-base) 20%, var(--deck-dark) 100%);
             border-radius: 12px; padding: 14px 14px 24px 14px; max-width: 380px; width: 100%;
             box-shadow: inset 0 1px 2px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.8), 0 30px 50px rgba(0,0,0,0.6), 0 10px 15px rgba(0,0,0,0.4);
             border: 1px solid #322E3A; display: flex; flex-direction: column; gap: 16px;
@@ -97,14 +77,12 @@
 
         .cassette-compartment {
             background: #08070a; border-radius: 8px; padding: 12px;
-            box-shadow: inset 0 8px 15px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.03);
-            position: relative;
+            box-shadow: inset 0 8px 15px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.03); position: relative;
         }
 
         .cassette {
-            background: linear-gradient(180deg, #322e3b 0%, var(--cassette-bg) 100%);
-            border-radius: 6px; padding: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1);
-            border: 1px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 8px;
+            background: linear-gradient(180deg, #322e3b 0%, var(--cassette-bg) 100%); border-radius: 6px; padding: 12px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 8px;
         }
 
         .cassette-label {
@@ -114,69 +92,41 @@
         .cassette-label::before { content: ''; position: absolute; left: 12px; right: 12px; top: 6px; height: 1px; background: rgba(27,25,18,0.15); }
         .cassette-label::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 1px; background: rgba(27,25,18,0.15); }
 
-        .brand-title {
-            font-family: 'Clash Display', sans-serif; font-weight: 600; font-size: 22px; 
-            letter-spacing: 5px; text-transform: uppercase; margin: 0; text-shadow: 0px 1px 1px rgba(255,255,255,0.6);
-        }
+        .brand-title { font-family: 'Clash Display', sans-serif; font-weight: 600; font-size: 22px; letter-spacing: 5px; text-transform: uppercase; margin: 0; text-shadow: 0px 1px 1px rgba(255,255,255,0.6); }
         .side-tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; margin-top: 2px; font-weight: 700; }
 
         .cassette-window {
             background: #040305; margin: 0 16px; border-radius: 6px; padding: 4px;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,0.04);
-            height: 75px; position: relative; overflow: hidden;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,0.04); height: 75px; position: relative; overflow: hidden;
         }
 
         .window-glass { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .window-glass::after {
-            content: ''; position: absolute; inset: 0; z-index: 10; pointer-events: none;
-            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.06) 50%, transparent 55%);
-        }
+        .window-glass::after { content: ''; position: absolute; inset: 0; z-index: 10; pointer-events: none; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.06) 50%, transparent 55%); }
 
-        /* =========================================
-           TRANSFERENCIA FÍSICA DE CINTA
-           ========================================= */
         .reels-row { display: flex; justify-content: center; align-items: center; gap: 55px; position: relative; z-index: 2; width: 100%; }
         
         .tape-spool {
-            position: absolute; background: #150F0B; border-radius: 50%;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 0 1px #090604; z-index: 0;
-            /* Suaviza visualmente la transferencia de cinta */
+            position: absolute; background: #150F0B; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 0 1px #090604; z-index: 0;
             transition: width 0.1s linear, height 0.1s linear;
         }
-        
-        /* Matemáticas CSS que transfieren la cinta según el progreso */
-        .tape-spool-left { 
-            width: calc(85px - (30px * var(--tape-progress, 0))); 
-            height: calc(85px - (30px * var(--tape-progress, 0))); 
-        } 
-        .tape-spool-right { 
-            width: calc(55px + (30px * var(--tape-progress, 0))); 
-            height: calc(55px + (30px * var(--tape-progress, 0))); 
-        }
+        .tape-spool-left { width: calc(85px - (30px * var(--tape-progress, 0))); height: calc(85px - (30px * var(--tape-progress, 0))); } 
+        .tape-spool-right { width: calc(55px + (30px * var(--tape-progress, 0))); height: calc(55px + (30px * var(--tape-progress, 0))); }
 
         .reel {
             width: 36px; height: 36px; border-radius: 50%;
             background: radial-gradient(circle at center, #100E14 18%, transparent 20%), repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #D8D3C8 35deg, #D8D3C8 60deg);
             border: 4px solid #D8D3C8; position: relative; z-index: 2; box-shadow: 0 2px 6px rgba(0,0,0,0.5);
         }
-        .reel::after {
-            content: ''; position: absolute; inset: 25%; border-radius: 50%;
-            background: #0A090D; border: 1px solid rgba(255,255,255,0.1);
-        }
+        .reel::after { content: ''; position: absolute; inset: 25%; border-radius: 50%; background: #0A090D; border: 1px solid rgba(255,255,255,0.1); }
         .reel.spinning { animation: reel-spin 2s linear infinite; }
         @keyframes reel-spin { to { transform: rotate(360deg); } }
 
-        /* =========================================
-           PANTALLA DIGITAL
-           ========================================= */
         .digital-display {
-            background: #070608; border: 1px solid #1a1820; border-radius: 6px; 
-            padding: 12px 14px 10px; box-shadow: inset 0 6px 12px rgba(0,0,0,0.8); position: relative; margin: 0 4px;
+            background: #070608; border: 1px solid #1a1820; border-radius: 6px; padding: 12px 14px 10px; box-shadow: inset 0 6px 12px rgba(0,0,0,0.8); position: relative; margin: 0 4px;
         }
 
         .status-text {
-            font-size: 11px; color: var(--text-color); margin-bottom: 12px; line-height: 1.5; 
-            min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; display: flex; justify-content: space-between;
+            font-size: 11px; color: var(--text-color); margin-bottom: 12px; line-height: 1.5; min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; display: flex; justify-content: space-between;
         }
         .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 13px; }
 
@@ -186,28 +136,17 @@
         }
         canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 3px var(--accent-glow)); }
 
-        .time-display {
-            display: flex; justify-content: space-between; margin-top: 8px;
-            font-size: 10px; letter-spacing: 1.5px; color: var(--title-color); opacity: 0.8; font-weight: 700;
-        }
+        .time-display { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; letter-spacing: 1.5px; color: var(--title-color); opacity: 0.8; font-weight: 700; }
 
-        /* =========================================
-           BOTONES MECÁNICOS
-           ========================================= */
         .mechanical-controls { display: flex; justify-content: center; gap: 12px; margin-top: 4px; padding: 0 4px; }
-
         .mech-btn {
             flex: 1; height: 48px; border-radius: 4px; cursor: pointer;
             background: linear-gradient(180deg, #2b2834 0%, #1e1b25 100%); border: 1px solid #000; border-top: 1px solid #433e50;
             box-shadow: 0 4px 0 #08070a, 0 6px 10px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.1); 
-            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 10px; 
-            letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-            transition: transform 0.1s, box-shadow 0.1s, background 0.2s; position: relative;
+            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: transform 0.1s, box-shadow 0.1s, background 0.2s; position: relative;
         }
-
         .mech-btn:hover { background: linear-gradient(180deg, #322e3d 0%, #23202b 100%); color: var(--title-color); }
-        
         .mech-btn:active, .mech-btn.active-state {
             transform: translateY(4px); box-shadow: 0 0px 0 #08070a, 0 2px 4px rgba(0,0,0,0.6), inset 0 2px 4px rgba(0,0,0,0.5);
             background: linear-gradient(180deg, #18161d 0%, #1e1b25 100%); border-top: 1px solid #111;
@@ -220,9 +159,6 @@
         .btn-content { display: flex; align-items: center; gap: 6px; }
         .btn-icon { width: 10px; height: 10px; fill: currentColor; }
 
-        /* =========================================
-           ENLACE EXTERNO
-           ========================================= */
         .back-link {
             margin-top: 32px; display: inline-block; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-color); text-decoration: none;
             text-transform: uppercase; letter-spacing: 2px; font-weight: 400; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
@@ -235,18 +171,12 @@
 </head>
 <body>
 
-    <!-- REPRODUCTOR -->
     <div class="player-deck" id="main-card">
         
-        <!-- ECOLOCALIZACIÓN -->
         <div class="echo-container">
-            <div class="echo-arc"></div>
-            <div class="echo-arc"></div>
-            <div class="echo-arc"></div>
-            <div class="echo-arc"></div>
+            <div class="echo-arc"></div><div class="echo-arc"></div><div class="echo-arc"></div><div class="echo-arc"></div>
         </div>
 
-        <!-- COMPARTIMENTO FÍSICO -->
         <div class="cassette-compartment">
             <div class="cassette">
                 <div class="cassette-label">
@@ -266,7 +196,6 @@
             </div>
         </div>
 
-        <!-- PANTALLA DIGITAL (VISOR DE ONDA) -->
         <div class="digital-display">
             <div class="status-text mono">
                 <span id="status-text" aria-live="polite">Analizando...</span>
@@ -284,7 +213,6 @@
             </div>
         </div>
 
-        <!-- CONTROLES MECÁNICOS -->
         <div class="mechanical-controls">
             <button class="mech-btn stop-btn" onclick="stopAudio()" aria-label="Detener memoria">
                 <div class="btn-led"></div>
@@ -336,6 +264,7 @@
         let peaks = [];
         let isDemo = !audioId; 
         let isPlaying = false;
+        let isBuffering = false;
 
         let demoProgress = 0;
         let lastTime = 0;
@@ -345,8 +274,34 @@
         const colorBase = "rgba(237, 230, 214, 0.18)";
         const colorProgress = "#DD8E5C";
 
-        // --- SISTEMA DSP (API WEB AUDIO) ---
+        // --- SISTEMA DSP (FFT & RUIDO DE CINTA) ---
         let audioCtx, analyser, dataArray;
+        let noiseSource, noiseGain;
+
+        function createTapeHiss() {
+            if (!audioCtx || noiseSource) return;
+            const bufferSize = audioCtx.sampleRate * 2; 
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+
+            noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = noiseBuffer;
+            noiseSource.loop = true;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 1200; // Frecuencia cálida de cinta analógica
+
+            noiseGain = audioCtx.createGain();
+            noiseGain.gain.value = 0; 
+
+            noiseSource.connect(filter);
+            filter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noiseSource.start();
+        }
+
         function setupWebAudio() {
             if (audioCtx) return;
             try {
@@ -358,25 +313,22 @@
                 source.connect(analyser);
                 analyser.connect(audioCtx.destination);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
-            } catch(e) {
-                console.warn("Modo FFT desactivado por CORS. Usando onda normal.", e);
-                analyser = null;
-            }
+            } catch(e) { analyser = null; }
+
+            // Generamos ruido de cinta incluso si CORS bloquea el Analyser
+            if (audioCtx) createTapeHiss();
         }
 
-        // --- RESPUESTA HÁPTICA (ANDROID NATIVO) ---
-        function hapticPulse(pattern) {
-            if (navigator.vibrate) {
-                try { navigator.vibrate(pattern); } catch(e) {}
-            }
-        }
-
-        // --- FADE IN/OUT (ANTI-SPECTRAL LEAKAGE) ---
+        // --- FADE IN/OUT (ANTI-POP & TAPE HISS CONTROL) ---
         let fadeInterval;
         function smoothPlay() {
             clearInterval(fadeInterval);
             audioEl.volume = 0;
             audioEl.play();
+            
+            // Subimos el siseo analógico sutilmente
+            if (noiseGain && audioCtx) noiseGain.gain.setTargetAtTime(0.015, audioCtx.currentTime, 0.5);
+
             fadeInterval = setInterval(() => {
                 if (audioEl.volume < 0.9) { audioEl.volume += 0.1; } 
                 else { audioEl.volume = 1; clearInterval(fadeInterval); }
@@ -385,6 +337,10 @@
 
         function smoothPause(callback) {
             clearInterval(fadeInterval);
+            
+            // Apagamos el motor de ruido analógico
+            if (noiseGain && audioCtx) noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
+
             fadeInterval = setInterval(() => {
                 if (audioEl.volume > 0.1) { audioEl.volume -= 0.1; } 
                 else {
@@ -396,21 +352,34 @@
             }, 10);
         }
 
-        function setReelsSpinning(spinning) {
-            reelLeft.classList.toggle('spinning', spinning);
-            reelRight.classList.toggle('spinning', spinning);
-        }
+        // --- ESTADOS DE RED (BUFFERING) ---
+        audioEl.addEventListener('waiting', () => {
+            if (isPlaying) {
+                isBuffering = true;
+                playTextLabel.textContent = "LOAD";
+                statusText.innerHTML = "↻ <span class='accent'>Cargando cinta...</span>";
+                setReelsSpinning(false);
+            }
+        });
 
+        audioEl.addEventListener('playing', () => {
+            if (isPlaying && isBuffering) {
+                isBuffering = false;
+                playTextLabel.textContent = "PAUSE";
+                statusText.innerHTML = "▶ <span class='accent'>Reproduciendo...</span>";
+                setReelsSpinning(true);
+            }
+        });
+
+        function hapticPulse(pattern) { if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch(e) {} } }
+        function setReelsSpinning(spinning) { reelLeft.classList.toggle('spinning', spinning); reelRight.classList.toggle('spinning', spinning); }
         function formatTime(seconds) {
             if (!isFinite(seconds) || seconds < 0) return '0:00';
-            const m = Math.floor(seconds / 60);
-            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60).toString().padStart(2, '0');
             return `${m}:${s}`;
         }
 
-        const AUDIO_FORMATS = ['mp3', 'm4a', 'wav'];
-        const MAX_ATTEMPTS = 3;
-        const RETRY_DELAY_MS = 2500;
+        const AUDIO_FORMATS = ['mp3', 'm4a', 'wav']; const MAX_ATTEMPTS = 3; const RETRY_DELAY_MS = 2500;
 
         function showShimmer() { waveformWrapper.classList.add('loading'); }
         function hideShimmer() { waveformWrapper.classList.remove('loading'); }
@@ -418,15 +387,8 @@
         async function findAudioSource(id) {
             for (const ext of AUDIO_FORMATS) {
                 const path = `audios/${id}.${ext}`;
-                try {
-                    const response = await fetch(path);
-                    if (response.ok) {
-                        const arrayBuffer = await response.arrayBuffer();
-                        return { path, arrayBuffer };
-                    }
-                } catch (e) { }
-            }
-            return null;
+                try { const response = await fetch(path); if (response.ok) { const arrayBuffer = await response.arrayBuffer(); return { path, arrayBuffer }; } } catch (e) { }
+            } return null;
         }
 
         async function tryLoadAudio(id, attempt = 1) {
@@ -435,24 +397,17 @@
 
             if (found) {
                 try {
-                    audioEl.preload = 'auto';
-                    audioEl.src = found.path;
+                    audioEl.preload = 'auto'; audioEl.src = found.path;
                     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                     const audioCtxLocal = new AudioContextClass();
                     const audioBuffer = await audioCtxLocal.decodeAudioData(found.arrayBuffer);
                     processAudioData(audioBuffer);
-                    hideShimmer();
-                    statusText.innerHTML = "<span class='accent'>Cinta lista.</span>";
-                    attemptAutoplay();
-                    return;
+                    hideShimmer(); statusText.innerHTML = "<span class='accent'>Cinta lista.</span>";
+                    attemptAutoplay(); return;
                 } catch (e) { }
             }
-
-            if (attempt < MAX_ATTEMPTS) {
-                setTimeout(() => tryLoadAudio(id, attempt + 1), RETRY_DELAY_MS);
-            } else {
-                isDemo = true; hideShimmer(); initDemoMode("Sincronizando...<br><span class='accent'>Prueba los controles.</span>");
-            }
+            if (attempt < MAX_ATTEMPTS) { setTimeout(() => tryLoadAudio(id, attempt + 1), RETRY_DELAY_MS); } 
+            else { isDemo = true; hideShimmer(); initDemoMode("Sincronizando...<br><span class='accent'>Prueba los controles.</span>"); }
         }
 
         if (!isDemo) { showShimmer(); tryLoadAudio(audioId); } 
@@ -461,93 +416,84 @@
         function attemptAutoplay() {
             const playPromise = audioEl.play();
             if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    startPlaybackState();
-                }).catch(() => {
-                    statusText.innerHTML = "Lista.<br><span class='accent'>Presiona PLAY.</span>";
-                });
+                playPromise.then(() => { startPlaybackState(); }).catch(() => { statusText.innerHTML = "Lista.<br><span class='accent'>Presiona PLAY.</span>"; });
             }
         }
 
         function initDemoMode(message) {
             statusText.innerHTML = message; peaks = [];
             for(let i = 0; i < 200; i++) {
-                let wave = Math.abs(Math.sin(i * 0.1) * Math.cos(i * 0.05));
-                let noise = Math.random() * 0.3;
-                let bellCurve = Math.sin(Math.PI * (i / 200));
+                let wave = Math.abs(Math.sin(i * 0.1) * Math.cos(i * 0.05)); let noise = Math.random() * 0.3; let bellCurve = Math.sin(Math.PI * (i / 200));
                 peaks.push(((wave + noise) * bellCurve) * 0.8 + 0.05);
             }
             prepareCanvases();
         }
 
         function processAudioData(audioBuffer) {
-            const rawData = audioBuffer.getChannelData(0);
-            const numSamples = 200;
-            const blockSize = Math.floor(rawData.length / numSamples);
-            let maxPeak = 0;
-
+            const rawData = audioBuffer.getChannelData(0); const numSamples = 200; const blockSize = Math.floor(rawData.length / numSamples); let maxPeak = 0;
             for (let i = 0; i < numSamples; i++) {
-                let sum = 0;
-                for (let j = 0; j < blockSize; j++) sum += Math.abs(rawData[i * blockSize + j]);
-                let peak = sum / blockSize;
-                peaks.push(peak);
-                if (peak > maxPeak) maxPeak = peak;
+                let sum = 0; for (let j = 0; j < blockSize; j++) sum += Math.abs(rawData[i * blockSize + j]);
+                let peak = sum / blockSize; peaks.push(peak); if (peak > maxPeak) maxPeak = peak;
             }
-            peaks = peaks.map(p => (p / maxPeak) * 0.8 + 0.05);
-            prepareCanvases();
+            peaks = peaks.map(p => (p / maxPeak) * 0.8 + 0.05); prepareCanvases();
         }
 
         function prepareCanvases() {
-            const dpr = window.devicePixelRatio || 1;
-            const rect = waveformWrapper.getBoundingClientRect();
-
-            [canvasBase, canvasProgress].forEach(c => {
-                c.width = rect.width * dpr; c.height = rect.height * dpr; c.getContext('2d').scale(dpr, dpr);
-            });
-            drawPolygon(ctxBase, canvasBase.width / dpr, canvasBase.height / dpr, colorBase);
-            updateProgress();
+            const dpr = window.devicePixelRatio || 1; const rect = waveformWrapper.getBoundingClientRect();
+            [canvasBase, canvasProgress].forEach(c => { c.width = rect.width * dpr; c.height = rect.height * dpr; c.getContext('2d').scale(dpr, dpr); });
+            drawSmoothWave(ctxBase, canvasBase.width / dpr, canvasBase.height / dpr, colorBase); updateProgress();
         }
 
-        function drawPolygon(ctx, width, height, color) {
+        // --- INTERPOLACIÓN MATEMÁTICA (SPLINES) ---
+        function drawSmoothWave(ctx, width, height, color) {
             ctx.clearRect(0, 0, width, height); ctx.fillStyle = color; ctx.beginPath();
             const centerY = height / 2; const step = width / (peaks.length - 1);
+            
+            // Mitad superior (Curvas cuadráticas suaves)
             ctx.moveTo(0, centerY);
-            for (let i = 0; i < peaks.length; i++) ctx.lineTo(i * step, centerY - ((peaks[i] * height) / 2));
-            for (let i = peaks.length - 1; i >= 0; i--) ctx.lineTo(i * step, centerY + ((peaks[i] * height) / 2));
+            for (let i = 0; i < peaks.length - 1; i++) {
+                let x = i * step; let y = centerY - ((peaks[i] * height) / 2);
+                let nextX = (i + 1) * step; let nextY = centerY - ((peaks[i+1] * height) / 2);
+                let xc = (x + nextX) / 2; let yc = (y + nextY) / 2;
+                if(i === 0) ctx.lineTo(x, y);
+                ctx.quadraticCurveTo(x, y, xc, yc);
+                if(i === peaks.length - 2) ctx.lineTo(nextX, nextY);
+            }
+            
+            // Mitad inferior (En reversa para cerrar la onda)
+            for (let i = peaks.length - 1; i > 0; i--) {
+                let x = i * step; let y = centerY + ((peaks[i] * height) / 2);
+                let prevX = (i - 1) * step; let prevY = centerY + ((peaks[i-1] * height) / 2);
+                let xc = (x + prevX) / 2; let yc = (y + prevY) / 2;
+                if(i === peaks.length - 1) ctx.lineTo(x, y);
+                ctx.quadraticCurveTo(x, y, xc, yc);
+                if(i === 1) ctx.lineTo(prevX, prevY);
+            }
             ctx.closePath(); ctx.fill();
         }
 
         function updateProgress() {
             if (!peaks.length) return;
-            const rect = canvasProgress.getBoundingClientRect();
-            const width = rect.width; const height = rect.height;
-            let currentP = 0;
+            const rect = canvasProgress.getBoundingClientRect(); const width = rect.width; const height = rect.height; let currentP = 0;
 
             if (isDemo) {
-                if (isPlaying) {
-                    let now = Date.now();
-                    demoProgress += (now - lastTime) / demoDuration;
-                    lastTime = now;
+                if (isPlaying && !isBuffering) {
+                    let now = Date.now(); demoProgress += (now - lastTime) / demoDuration; lastTime = now;
                     if (demoProgress >= 1) { demoProgress = 1; stopAudio(); }
                 }
                 currentP = demoProgress;
-            } else {
-                currentP = (audioEl.currentTime / (audioEl.duration || 1));
-            }
+            } else { currentP = (audioEl.currentTime / (audioEl.duration || 1)); }
 
-            // Transferencia Visual de la Cinta
             document.documentElement.style.setProperty('--tape-progress', currentP);
 
-            // FFT / Mapeo de Frecuencia para los Ecos
             let currentPeak = 0;
-            if (isPlaying && !isDemo && analyser && dataArray) {
-                analyser.getByteFrequencyData(dataArray);
-                let sum = 0;
-                for(let i = 0; i < 6; i++) sum += dataArray[i]; 
-                currentPeak = Math.pow((sum / 6) / 255, 1.5); 
-            } else if (isPlaying && peaks.length) {
-                let index = Math.floor(currentP * peaks.length);
-                currentPeak = peaks[Math.min(index, peaks.length - 1)];
+            if (isPlaying && !isBuffering) {
+                if (!isDemo && analyser && dataArray) {
+                    analyser.getByteFrequencyData(dataArray); let sum = 0; for(let i = 0; i < 6; i++) sum += dataArray[i]; 
+                    currentPeak = Math.pow((sum / 6) / 255, 1.5); 
+                } else if (peaks.length) {
+                    let index = Math.floor(currentP * peaks.length); currentPeak = peaks[Math.min(index, peaks.length - 1)];
+                }
             }
             smoothedPeak += (currentPeak - smoothedPeak) * 0.15;
             document.documentElement.style.setProperty('--audio-peak', smoothedPeak);
@@ -555,46 +501,32 @@
             const fillWidth = width * currentP;
             ctxProgress.clearRect(0, 0, width, height); ctxProgress.save();
             ctxProgress.beginPath(); ctxProgress.rect(0, 0, fillWidth, height); ctxProgress.clip();
-            drawPolygon(ctxProgress, width, height, colorProgress); ctxProgress.restore();
+            drawSmoothWave(ctxProgress, width, height, colorProgress); ctxProgress.restore();
 
             const totalSeconds = isDemo ? (demoDuration / 1000) : (audioEl.duration || 0);
             timeElapsed.textContent = formatTime(totalSeconds * currentP);
             timeTotal.textContent = formatTime(totalSeconds);
 
-            if (isPlaying) {
-                animationFrame = requestAnimationFrame(updateProgress);
-            }
+            if (isPlaying) animationFrame = requestAnimationFrame(updateProgress);
         }
 
         waveformWrapper.addEventListener('click', (e) => {
-            if (!peaks.length) return;
-            hapticPulse(10);
-            const rect = waveformWrapper.getBoundingClientRect();
-            const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
-            if (isDemo) demoProgress = ratio; else audioEl.currentTime = ratio * audioEl.duration;
-            updateProgress();
+            if (!peaks.length) return; hapticPulse(10);
+            const rect = waveformWrapper.getBoundingClientRect(); const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+            if (isDemo) demoProgress = ratio; else audioEl.currentTime = ratio * audioEl.duration; updateProgress();
         });
 
         function startPlaybackState() {
-            isPlaying = true;
-            iconPlay.style.display = "none"; iconPause.style.display = "block";
-            playTextLabel.textContent = "PAUSE"; playBtn.classList.add('playing'); 
-            setReelsSpinning(true); lastTime = Date.now();
-            statusText.innerHTML = "▶ <span class='accent'>Reproduciendo...</span>";
-            updateProgress();
+            isPlaying = true; isBuffering = false;
+            iconPlay.style.display = "none"; iconPause.style.display = "block"; playTextLabel.textContent = "PAUSE"; playBtn.classList.add('playing'); 
+            setReelsSpinning(true); lastTime = Date.now(); statusText.innerHTML = "▶ <span class='accent'>Reproduciendo...</span>"; updateProgress();
         }
 
         function pausePlaybackState() {
-            isPlaying = false;
-            iconPlay.style.display = "block"; iconPause.style.display = "none";
-            playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing'); 
-            setReelsSpinning(false);
-            statusText.innerHTML = "‖ <span class='accent'>Pausado.</span>";
-            
-            // CORRECCIÓN DEL BUG: Forzar variable y eco a 0 inmediatamente
-            smoothedPeak = 0;
-            document.documentElement.style.setProperty('--audio-peak', 0);
-            
+            isPlaying = false; isBuffering = false;
+            iconPlay.style.display = "block"; iconPause.style.display = "none"; playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing'); 
+            setReelsSpinning(false); statusText.innerHTML = "‖ <span class='accent'>Pausado.</span>";
+            smoothedPeak = 0; document.documentElement.style.setProperty('--audio-peak', 0);
             cancelAnimationFrame(animationFrame); requestAnimationFrame(updateProgress);
         }
 
@@ -602,36 +534,18 @@
             hapticPulse(15);
             if (!isPlaying) {
                 if (isDemo && demoProgress >= 1) demoProgress = 0;
-                if (!isDemo) {
-                    setupWebAudio();
-                    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-                    smoothPlay();
-                }
+                if (!isDemo) { setupWebAudio(); if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); smoothPlay(); }
                 startPlaybackState();
-            } else {
-                if (!isDemo) smoothPause();
-                pausePlaybackState();
-            }
+            } else { if (!isDemo) smoothPause(); pausePlaybackState(); }
         }
 
         function stopAudio() {
-            hapticPulse([10, 30, 10]); 
-            isPlaying = false;
-            iconPlay.style.display = "block"; iconPause.style.display = "none";
-            playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing');
-            setReelsSpinning(false);
+            hapticPulse([10, 30, 10]); isPlaying = false; isBuffering = false;
+            iconPlay.style.display = "block"; iconPause.style.display = "none"; playTextLabel.textContent = "PLAY"; playBtn.classList.remove('playing'); setReelsSpinning(false);
+            smoothedPeak = 0; document.documentElement.style.setProperty('--audio-peak', 0);
             
-            // CORRECCIÓN DEL BUG: Forzar variable y eco a 0 inmediatamente
-            smoothedPeak = 0;
-            document.documentElement.style.setProperty('--audio-peak', 0);
-            
-            if (isDemo) {
-                demoProgress = 0;
-                statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>";
-            } else {
-                smoothPause(() => { audioEl.currentTime = 0; });
-                statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>";
-            }
+            if (isDemo) { demoProgress = 0; statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>"; } 
+            else { smoothPause(() => { audioEl.currentTime = 0; }); statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>"; }
             
             cancelAnimationFrame(animationFrame); requestAnimationFrame(updateProgress); 
         }
