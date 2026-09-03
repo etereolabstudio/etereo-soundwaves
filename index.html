@@ -12,214 +12,165 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+        /* =========================================
+           VARIABLES Y PALETA ETÉREO
+           ========================================= */
         :root {
             --bg-color: #0c0b0f;
-            --cassette-base: #1c1a22;
-            --cassette-dark: #110f15;
-            --cassette-light: #2a2731;
             
+            /* Colores del Reproductor (Deck) */
+            --deck-base: #18161d;
+            --deck-dark: #0e0d12;
+            --deck-edge: #2a2732;
+            
+            /* Colores del Cassette */
+            --cassette-bg: #222029;
+            --label-bg: #EAE3D2;
+            --label-text: #1B1912;
+            
+            /* Acentos Etéreo y Retro */
             --text-color: #9B9488;
             --title-color: #EDE6D6;
             --accent: #DD8E5C;
             --accent-glow: rgba(221, 142, 92, 0.4);
             
-            --label-bg: #EAE3D2;
-            --label-text: #1B1912;
-            
-            --light-leak-1: rgba(221, 142, 92, 0.08);
-            --light-leak-2: rgba(139, 132, 163, 0.06);
+            /* LEDs Retro */
+            --retro-green: #34d399;
+            --retro-red: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Outfit', sans-serif;
-            font-weight: 300;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 24px;
-            text-align: center;
-            overflow-x: hidden;
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: 'Outfit', sans-serif; font-weight: 300;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 24px; text-align: center; overflow-x: hidden;
             position: relative;
         }
 
+        /* Iluminación de fondo */
         body::before {
-            content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0;
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
             background:
-                radial-gradient(ellipse 45% 45% at 80% 20%, var(--light-leak-1) 0%, transparent 65%),
-                radial-gradient(ellipse 50% 50% at -10% 115%, var(--light-leak-2) 0%, transparent 60%);
+                radial-gradient(ellipse 45% 45% at 80% 20%, rgba(221, 142, 92, 0.08) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 50% at -10% 115%, rgba(139, 132, 163, 0.06) 0%, transparent 60%);
         }
         body::after {
-            content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9998; opacity: 0.15; mix-blend-mode: overlay;
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.15; mix-blend-mode: overlay;
             background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
         }
 
         .mono { font-family: 'Space Mono', monospace; }
 
-        .cassette {
+        /* =========================================
+           EL REPRODUCTOR (TAPE DECK / WALKMAN)
+           ========================================= */
+        .player-deck {
             position: relative; z-index: 1;
-            background: linear-gradient(180deg, var(--cassette-light) 0%, var(--cassette-base) 40%, var(--cassette-dark) 100%);
-            border-radius: 16px;
-            padding: 16px;
-            max-width: 380px;
-            width: 100%;
+            background: linear-gradient(180deg, var(--deck-edge) 0%, var(--deck-base) 20%, var(--deck-dark) 100%);
+            border-radius: 12px; padding: 14px 14px 24px 14px;
+            max-width: 380px; width: 100%;
             box-shadow: 
-                inset 0 2px 2px rgba(255,255,255,0.08),
-                inset 0 -4px 6px rgba(0,0,0,0.6),
-                inset -2px 0 4px rgba(0,0,0,0.4),
-                inset 2px 0 4px rgba(255,255,255,0.03),
-                0 30px 60px rgba(0,0,0,0.6), 
-                0 15px 20px rgba(0,0,0,0.4);
+                inset 0 1px 2px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.8),
+                0 30px 50px rgba(0,0,0,0.6), 0 10px 15px rgba(0,0,0,0.4);
             border: 1px solid #322E3A;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            display: flex; flex-direction: column; gap: 16px;
         }
 
-        .screw { 
-            position: absolute; width: 10px; height: 10px; border-radius: 50%; 
-            background: linear-gradient(135deg, #5A5462, #18151D); 
-            box-shadow: inset 0 1px 2px rgba(255,255,255,0.2), 0 1px 3px rgba(0,0,0,0.8);
-            display: flex; justify-content: center; align-items: center;
+        /* =========================================
+           COMPARTIMENTO DEL CASSETTE
+           ========================================= */
+        .cassette-compartment {
+            background: #08070a; border-radius: 8px; padding: 12px;
+            box-shadow: inset 0 8px 15px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.03);
+            position: relative;
         }
-        .screw::after {
-            content: ''; width: 6px; height: 6px; border-radius: 50%;
-            background: 
-                linear-gradient(0deg, transparent 40%, #0c0b0f 40%, #0c0b0f 60%, transparent 60%),
-                linear-gradient(90deg, transparent 40%, #0c0b0f 40%, #0c0b0f 60%, transparent 60%);
-            opacity: 0.8; transform: rotate(45deg);
+
+        .cassette {
+            background: linear-gradient(180deg, #322e3b 0%, var(--cassette-bg) 100%);
+            border-radius: 6px; padding: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 8px;
         }
-        .screw.tl { top: 12px; left: 12px; transform: rotate(15deg); } 
-        .screw.tr { top: 12px; right: 12px; transform: rotate(-35deg); }
-        .screw.bl { bottom: 12px; left: 12px; transform: rotate(80deg); } 
-        .screw.br { bottom: 12px; right: 12px; transform: rotate(-10deg); }
 
         .cassette-label {
             background: linear-gradient(160deg, var(--label-bg) 0%, #D4CBB5 100%);
-            color: var(--label-text);
-            border-radius: 6px;
-            padding: 16px 20px;
-            margin: 0 16px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.05), 0 2px 5px rgba(0,0,0,0.4);
-            position: relative; z-index: 2;
+            color: var(--label-text); border-radius: 4px; padding: 12px 16px; margin: 0 8px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.4);
         }
-        .cassette-label::before { content: ''; position: absolute; left: 12px; right: 12px; top: 6px; height: 2px; background: rgba(27,25,18,0.1); border-radius: 1px; }
-        .cassette-label::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 2px; background: rgba(27,25,18,0.1); border-radius: 1px; }
+        .cassette-label::before { content: ''; position: absolute; left: 12px; right: 12px; top: 6px; height: 1px; background: rgba(27,25,18,0.15); }
+        .cassette-label::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 1px; background: rgba(27,25,18,0.15); }
 
         .brand-title {
-            font-family: 'Clash Display', sans-serif; font-weight: 600; font-size: 24px; 
-            letter-spacing: 6px; text-transform: uppercase; margin: 0;
-            text-shadow: 0px 1px 1px rgba(255,255,255,0.6);
+            font-family: 'Clash Display', sans-serif; font-weight: 600; font-size: 22px; 
+            letter-spacing: 5px; text-transform: uppercase; margin: 0; text-shadow: 0px 1px 1px rgba(255,255,255,0.6);
         }
-        .side-tag { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; margin-top: 4px; font-weight: 700; }
+        .side-tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; margin-top: 2px; font-weight: 700; }
 
+        /* Ventana del cassette (Carretes) */
         .cassette-window {
-            background: #060507; margin: 0 24px; border-radius: 8px; padding: 6px;
-            box-shadow: inset 0 4px 15px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.04), 0 1px 1px rgba(255,255,255,0.08);
-            position: relative; height: 90px; overflow: hidden;
+            background: #040305; margin: 0 16px; border-radius: 6px; padding: 4px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,0.04);
+            height: 75px; position: relative; overflow: hidden;
         }
 
         .window-glass { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
         .window-glass::after {
             content: ''; position: absolute; inset: 0; z-index: 10; pointer-events: none;
-            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.08) 50%, transparent 55%);
-            mix-blend-mode: screen;
+            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.06) 50%, transparent 55%);
         }
 
-        .tape-markers {
-            position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 100px; height: 10px; z-index: 5;
-            background: 
-                linear-gradient(90deg, 
-                    transparent 0%, transparent 10%, rgba(255,255,255,0.15) 10%, rgba(255,255,255,0.15) 15%,
-                    transparent 15%, transparent 48%, rgba(255,255,255,0.3) 48%, rgba(255,255,255,0.3) 52%,
-                    transparent 52%, transparent 85%, rgba(255,255,255,0.15) 85%, rgba(255,255,255,0.15) 90%, transparent 90%
-                );
-        }
-
-        .reels-row { display: flex; justify-content: center; align-items: center; gap: 70px; position: relative; z-index: 2; width: 100%; }
-        .reel-container { position: relative; display: flex; justify-content: center; align-items: center; }
-
+        .reels-row { display: flex; justify-content: center; align-items: center; gap: 55px; position: relative; z-index: 2; width: 100%; }
+        
         .tape-spool {
             position: absolute; background: #150F0B; border-radius: 50%;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 0 2px #090604; z-index: 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 0 1px #090604; z-index: 0;
         }
-        .tape-spool-left { width: 85px; height: 85px; } 
-        .tape-spool-right { width: 65px; height: 65px; }
+        .tape-spool-left { width: 70px; height: 70px; } 
+        .tape-spool-right { width: 55px; height: 55px; }
 
         .reel {
-            width: 44px; height: 44px; border-radius: 50%;
-            background: 
-                radial-gradient(circle at center, #100E14 18%, transparent 20%),
-                repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #D8D3C8 35deg, #D8D3C8 60deg);
-            border: 5px solid #D8D3C8; position: relative; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            width: 36px; height: 36px; border-radius: 50%;
+            background: radial-gradient(circle at center, #100E14 18%, transparent 20%),
+                        repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #D8D3C8 35deg, #D8D3C8 60deg);
+            border: 4px solid #D8D3C8; position: relative; z-index: 2; box-shadow: 0 2px 6px rgba(0,0,0,0.5);
         }
         .reel::after {
-            content: ''; position: absolute; inset: 30%; border-radius: 50%;
+            content: ''; position: absolute; inset: 25%; border-radius: 50%;
             background: #0A090D; border: 1px solid rgba(255,255,255,0.1);
         }
         .reel.spinning { animation: reel-spin 2s linear infinite; }
         @keyframes reel-spin { to { transform: rotate(360deg); } }
 
-        .cassette-bridge {
-            background: linear-gradient(180deg, var(--cassette-base) 0%, var(--cassette-dark) 100%);
-            border-radius: 8px 8px 12px 12px; padding: 16px 20px; margin-top: -4px;
-            box-shadow: inset 0 3px 6px rgba(255,255,255,0.03), inset 0 1px 1px rgba(255,255,255,0.05);
-            border-top: 1px solid rgba(0,0,0,0.4); position: relative;
-        }
-        .cassette-bridge::before, .cassette-bridge::after {
-            content: ''; position: absolute; top: -5px; width: 30px; height: 10px;
-            background: #060507; border-radius: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
-        }
-        .cassette-bridge::before { left: 30px; } .cassette-bridge::after { right: 30px; }
-
-        .tape-window { 
-            background: #09080A; border: 1px solid rgba(255,255,255,0.03);
-            border-radius: 8px; padding: 14px 16px 12px; box-shadow: inset 0 4px 10px rgba(0,0,0,0.6); position: relative;
+        /* =========================================
+           PANTALLA DIGITAL (HUD & WAVEFORM)
+           ========================================= */
+        .digital-display {
+            background: #070608; border: 1px solid #1a1820; border-radius: 6px; 
+            padding: 12px 14px 10px; box-shadow: inset 0 6px 12px rgba(0,0,0,0.8);
+            position: relative; margin: 0 4px;
         }
 
         .status-text {
-            font-size: 11px; color: var(--text-color); margin-bottom: 12px; 
-            line-height: 1.5; min-height: 33px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
+            font-size: 11px; color: var(--text-color); margin-bottom: 12px; line-height: 1.5; 
+            min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
+            display: flex; justify-content: space-between;
         }
-        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 14px; }
+        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 13px; }
 
+        /* Ahora la onda está 100% libre de botones */
         .waveform-wrapper { 
-            width: 100%; height: 50px; position: relative; display: block; cursor: pointer; border-radius: 4px; overflow: hidden;
+            width: 100%; height: 50px; position: relative; display: block; cursor: pointer; border-radius: 2px;
             background: repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 4px);
         }
         canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 3px var(--accent-glow)); }
 
-        .play-btn {
-            background: linear-gradient(135deg, #E69D6F, #D27E47); border: none; border-radius: 50%;
-            width: 48px; height: 48px; cursor: pointer; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2);
-            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;
+        .time-display {
+            display: flex; justify-content: space-between; margin-top: 8px;
+            font-size: 10px; letter-spacing: 1.5px; color: var(--title-color); opacity: 0.8; font-weight: 700;
         }
-        .play-btn:hover { 
-            transform: translate(-50%, -50%) scale(1.05); 
-            box-shadow: 0 6px 16px var(--accent-glow), inset 0 2px 2px rgba(255,255,255,0.5);
-        }
-        .play-btn:active {
-            transform: translate(-50%, -46%) scale(0.96);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6), inset 0 3px 6px rgba(0,0,0,0.4);
-        }
-
-        .icon-play, .icon-pause { fill: #1B120C; width: 18px; height: 18px; filter: drop-shadow(0 1px 0 rgba(255,255,255,0.3)); }
-        .icon-pause { display: none; }
-
-        @keyframes invite-pulse-ring {
-            0% { box-shadow: 0 4px 12px rgba(221, 142, 92, 0.4), 0 0 0 0 rgba(221, 142, 92, 0.6); }
-            70% { box-shadow: 0 4px 12px rgba(221, 142, 92, 0.4), 0 0 0 16px rgba(221, 142, 92, 0); }
-            100% { box-shadow: 0 4px 12px rgba(221, 142, 92, 0.4), 0 0 0 0 rgba(221, 142, 92, 0); }
-        }
-        .play-btn.invite-pulse { animation: invite-pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
 
         .waveform-wrapper.loading::before {
             content: ''; position: absolute; inset: 0; z-index: 5;
@@ -228,17 +179,55 @@
         }
         @keyframes shimmer-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        .time-display {
-            display: flex; justify-content: space-between; margin-top: 10px;
-            font-size: 10px; letter-spacing: 1.5px; color: var(--text-color); opacity: 0.8; font-weight: 700;
+        /* =========================================
+           BOTONES MECÁNICOS DEL REPRODUCTOR
+           ========================================= */
+        .mechanical-controls {
+            display: flex; justify-content: center; gap: 12px; margin-top: 4px; padding: 0 4px;
         }
 
-        .cassette-stamp {
-            margin-top: 16px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px;
-            color: var(--text-color); opacity: 0.4; text-align: right; text-transform: uppercase;
+        .mech-btn {
+            flex: 1; height: 48px; border-radius: 4px; cursor: pointer;
+            background: linear-gradient(180deg, #2b2834 0%, #1e1b25 100%);
+            border: 1px solid #000; border-top: 1px solid #433e50;
+            /* El efecto 3D mecánico grueso */
+            box-shadow: 
+                0 4px 0 #08070a, /* Grosor frontal del botón */
+                0 6px 10px rgba(0,0,0,0.6), /* Sombra proyectada */
+                inset 0 1px 2px rgba(255,255,255,0.1); /* Brillo superior */
+            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 10px; 
+            letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+            transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+            position: relative;
         }
-        .cassette-stamp span { color: var(--accent); }
 
+        .mech-btn:hover { background: linear-gradient(180deg, #322e3d 0%, #23202b 100%); color: var(--title-color); }
+        
+        /* Efecto de hundimiento mecánico al presionar */
+        .mech-btn:active, .mech-btn.active-state {
+            transform: translateY(4px);
+            box-shadow: 
+                0 0px 0 #08070a, 
+                0 2px 4px rgba(0,0,0,0.6),
+                inset 0 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(180deg, #18161d 0%, #1e1b25 100%);
+            border-top: 1px solid #111;
+        }
+
+        /* Leds indicadores en los botones */
+        .btn-led { width: 16px; height: 3px; border-radius: 2px; background: #111; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8); }
+        
+        .mech-btn.stop-btn:active .btn-led { background: var(--retro-red); box-shadow: 0 0 6px var(--retro-red); }
+        /* El LED verde se mantiene encendido mientras suena */
+        .mech-btn.play-btn.playing .btn-led { background: var(--retro-green); box-shadow: 0 0 8px var(--retro-green); }
+
+        .btn-content { display: flex; align-items: center; gap: 6px; }
+        .btn-icon { width: 10px; height: 10px; fill: currentColor; }
+
+        /* =========================================
+           ENLACES
+           ========================================= */
         .back-link {
             margin-top: 32px; display: inline-block; font-family: 'Space Mono', monospace;
             font-size: 11px; color: var(--text-color); text-decoration: none;
@@ -253,52 +242,67 @@
 </head>
 <body>
 
-    <div class="cassette" id="main-card">
-        <span class="screw tl"></span><span class="screw tr"></span>
-        <span class="screw bl"></span><span class="screw br"></span>
-
-        <div class="cassette-label">
-            <h1 class="brand-title">Etéreo</h1>
-            <p class="side-tag mono">Lado A · Memoria Acústica</p>
-        </div>
-
-        <div class="cassette-window">
-            <div class="window-glass">
-                <div class="tape-markers"></div>
-                <div class="reels-row">
-                    <div class="reel-container">
-                        <div class="tape-spool tape-spool-left"></div>
-                        <div class="reel" id="reel-left"></div>
-                    </div>
-                    <div class="reel-container">
-                        <div class="tape-spool tape-spool-right"></div>
-                        <div class="reel" id="reel-right"></div>
+    <!-- REPRODUCTOR (EL DECK) -->
+    <div class="player-deck" id="main-card">
+        
+        <!-- COMPARTIMENTO Y CASSETTE -->
+        <div class="cassette-compartment">
+            <div class="cassette">
+                <div class="cassette-label">
+                    <h1 class="brand-title">Etéreo</h1>
+                    <p class="side-tag mono">Memoria Acústica</p>
+                </div>
+                <div class="cassette-window">
+                    <div class="window-glass">
+                        <div class="reels-row">
+                            <div class="tape-spool tape-spool-left"></div>
+                            <div class="reel" id="reel-left"></div>
+                            <div class="tape-spool tape-spool-right"></div>
+                            <div class="reel" id="reel-right"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="cassette-bridge">
-            <div class="tape-window">
-                <p class="status-text" id="status-text" aria-live="polite">Analizando señal acústica...</p>
-
-                <div class="waveform-wrapper" id="waveform-wrapper">
-                    <canvas id="canvas-base"></canvas>
-                    <canvas id="canvas-progress"></canvas>
-
-                    <button class="play-btn" id="custom-play-btn" onclick="togglePlay()" aria-label="Reproducir memoria">
-                        <svg class="icon-play" id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        <svg class="icon-pause" id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                    </button>
-                </div>
-                
-                <div class="time-display mono">
-                    <span id="time-elapsed">0:00</span>
-                    <span id="time-total">0:00</span>
-                </div>
-                
-                <div class="cassette-stamp">GDL·MX <span>· Rec ●</span></div>
+        <!-- PANTALLA DIGITAL (WAVEFORM LIBRE) -->
+        <div class="digital-display">
+            <div class="status-text mono">
+                <span id="status-text" aria-live="polite">Analizando...</span>
+                <span>GDL·MX</span>
             </div>
+
+            <div class="waveform-wrapper" id="waveform-wrapper">
+                <canvas id="canvas-base"></canvas>
+                <canvas id="canvas-progress"></canvas>
+            </div>
+            
+            <div class="time-display mono">
+                <span id="time-elapsed">0:00</span>
+                <span id="time-total">0:00</span>
+            </div>
+        </div>
+
+        <!-- BOTONES MECÁNICOS CLÁSICOS -->
+        <div class="mechanical-controls">
+            <!-- BOTÓN STOP (ROJO) -->
+            <button class="mech-btn stop-btn" onclick="stopAudio()" aria-label="Detener memoria">
+                <div class="btn-led"></div>
+                <div class="btn-content">
+                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                    STOP
+                </div>
+            </button>
+            
+            <!-- BOTÓN PLAY/PAUSE (VERDE) -->
+            <button class="mech-btn play-btn" id="custom-play-btn" onclick="togglePlay()" aria-label="Reproducir memoria">
+                <div class="btn-led"></div>
+                <div class="btn-content">
+                    <svg class="btn-icon" id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="btn-icon" id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    <span id="play-text-label">PLAY</span>
+                </div>
+            </button>
         </div>
 
         <audio id="native-audio"></audio>
@@ -307,18 +311,21 @@
     <a href="https://etereomx.com" class="back-link">Descubre Etéreo Studio</a>
 
     <script>
-        // EL SCRIPT PERMANECE INTACTO
         const params = new URLSearchParams(window.location.search);
         const audioId = params.get('id');
 
         const statusText = document.getElementById('status-text');
         const waveformWrapper = document.getElementById('waveform-wrapper');
         const audioEl = document.getElementById('native-audio');
+        
+        // Elementos de los botones
         const iconPlay = document.getElementById('icon-play');
         const iconPause = document.getElementById('icon-pause');
+        const playTextLabel = document.getElementById('play-text-label');
+        const playBtn = document.getElementById('custom-play-btn');
+        
         const reelLeft = document.getElementById('reel-left');
         const reelRight = document.getElementById('reel-right');
-        const playBtn = document.getElementById('custom-play-btn');
         const timeElapsed = document.getElementById('time-elapsed');
         const timeTotal = document.getElementById('time-total');
 
@@ -374,8 +381,8 @@
 
         async function tryLoadAudio(id, attempt = 1) {
             statusText.innerHTML = attempt === 1
-                ? "Analizando señal acústica..."
-                : `Sincronizando cápsula<span class="accent">...</span> (${attempt}/${MAX_ATTEMPTS})`;
+                ? "Buscando frecuencia..."
+                : `Sincronizando<span class="accent">...</span> (${attempt})`;
 
             const found = await findAudioSource(id);
 
@@ -388,7 +395,7 @@
                     const audioBuffer = await audioCtx.decodeAudioData(found.arrayBuffer);
                     processAudioData(audioBuffer);
                     hideShimmer();
-                    statusText.innerHTML = "<span class='accent'>Memoria lista.</span>";
+                    statusText.innerHTML = "<span class='accent'>Cinta lista.</span>";
                     attemptAutoplay();
                     return;
                 } catch (e) { }
@@ -399,7 +406,7 @@
             } else {
                 isDemo = true;
                 hideShimmer();
-                initDemoMode("La cápsula aún se está sincronizando.<br>Mientras tanto, <span class='accent'>prueba el reproductor.</span>");
+                initDemoMode("Sincronizando...<br><span class='accent'>Prueba los controles.</span>");
             }
         }
 
@@ -407,24 +414,16 @@
             showShimmer();
             tryLoadAudio(audioId);
         } else {
-            initDemoMode("Materializamos el sonido.<br>Acerca tu celular a tu cuadro o <span class='accent'>prueba la demostración.</span>");
+            initDemoMode("Modo Demostración.<br><span class='accent'>Presiona Play.</span>");
         }
 
         function attemptAutoplay() {
             const playPromise = audioEl.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    isPlaying = true;
-                    iconPlay.style.display = "none";
-                    iconPause.style.display = "block";
-                    setReelsSpinning(true);
-                    playBtn.setAttribute('aria-label', 'Pausar memoria');
-                    statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
-                    lastTime = Date.now();
-                    updateProgress();
+                    startPlaybackState();
                 }).catch(() => {
-                    playBtn.classList.add('invite-pulse');
-                    statusText.innerHTML = "Memoria lista.<br><span class='accent'>Toca para escuchar.</span>";
+                    statusText.innerHTML = "Lista.<br><span class='accent'>Presiona PLAY.</span>";
                 });
             }
         }
@@ -516,7 +515,7 @@
 
                     if (demoProgress >= 1) {
                         demoProgress = 1;
-                        handlePlaybackEnd();
+                        stopAudio(); // Demo terminó, se detiene
                     }
                 }
                 currentP = demoProgress;
@@ -544,7 +543,7 @@
         }
 
         waveformWrapper.addEventListener('click', (e) => {
-            if (e.target.closest('.play-btn') || !peaks.length) return;
+            if (!peaks.length) return;
             const rect = waveformWrapper.getBoundingClientRect();
             const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
             if (isDemo) {
@@ -555,56 +554,69 @@
             updateProgress();
         });
 
-        function togglePlay() {
-            playBtn.classList.remove('invite-pulse');
-            if (!isPlaying) {
-                isPlaying = true;
-                iconPlay.style.display = "none";
-                iconPause.style.display = "block";
-                setReelsSpinning(true);
-                playBtn.setAttribute('aria-label', 'Pausar memoria');
+        // --- LÓGICA DE BOTONES MECÁNICOS ---
 
-                if (isDemo) {
-                    if (demoProgress >= 1) demoProgress = 0;
-                    lastTime = Date.now();
-                    statusText.innerHTML = "<span class='accent'>Reproduciendo demostración...</span>";
-                    updateProgress();
-                } else {
-                    audioEl.play();
-                    statusText.innerHTML = "<span class='accent'>Reproduciendo memoria...</span>";
-                    updateProgress();
-                }
-            } else {
-                isPlaying = false;
-                iconPlay.style.display = "block";
-                iconPause.style.display = "none";
-                setReelsSpinning(false);
-                playBtn.setAttribute('aria-label', 'Reproducir memoria');
-                statusText.innerHTML = "Pausado.<br><span class='accent'>Presiona reproducir.</span>";
-                if (!isDemo) audioEl.pause();
-                cancelAnimationFrame(animationFrame);
-            }
-        }
-
-        function handlePlaybackEnd() {
-            isPlaying = false;
-            iconPlay.style.display = "block";
-            iconPause.style.display = "none";
-            setReelsSpinning(false);
-            playBtn.setAttribute('aria-label', 'Reproducir memoria');
-
-            if (isDemo) {
-                statusText.innerHTML = "Demostración finalizada.<br><span class='accent'>Vuelve a escuchar.</span>";
-            } else {
-                statusText.innerHTML = "Memoria finalizada.<br><span class='accent'>Vuelve a reproducir.</span>";
-                audioEl.currentTime = 0;
-            }
-
-            cancelAnimationFrame(animationFrame);
+        function startPlaybackState() {
+            isPlaying = true;
+            iconPlay.style.display = "none";
+            iconPause.style.display = "block";
+            playTextLabel.textContent = "PAUSE";
+            playBtn.classList.add('playing'); // Enciende el LED verde
+            
+            setReelsSpinning(true);
+            lastTime = Date.now();
+            statusText.innerHTML = "▶ <span class='accent'>Reproduciendo...</span>";
             updateProgress();
         }
 
-        audioEl.onended = handlePlaybackEnd;
+        function pausePlaybackState() {
+            isPlaying = false;
+            iconPlay.style.display = "block";
+            iconPause.style.display = "none";
+            playTextLabel.textContent = "PLAY";
+            playBtn.classList.remove('playing'); // Apaga el LED verde
+            
+            setReelsSpinning(false);
+            statusText.innerHTML = "‖ <span class='accent'>Pausado.</span>";
+            cancelAnimationFrame(animationFrame);
+        }
+
+        function togglePlay() {
+            if (!isPlaying) {
+                if (isDemo && demoProgress >= 1) demoProgress = 0;
+                if (!isDemo) audioEl.play();
+                startPlaybackState();
+            } else {
+                if (!isDemo) audioEl.pause();
+                pausePlaybackState();
+            }
+        }
+
+        // NUEVA FUNCIÓN: STOP (Detiene y reinicia a 0)
+        function stopAudio() {
+            isPlaying = false;
+            
+            // Actualizar botones a estado original
+            iconPlay.style.display = "block";
+            iconPause.style.display = "none";
+            playTextLabel.textContent = "PLAY";
+            playBtn.classList.remove('playing');
+            setReelsSpinning(false);
+            
+            if (isDemo) {
+                demoProgress = 0;
+                statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>";
+            } else {
+                audioEl.pause();
+                audioEl.currentTime = 0; // Regresa la cinta al inicio
+                statusText.innerHTML = "■ <span class='accent'>Cinta detenida.</span>";
+            }
+            
+            cancelAnimationFrame(animationFrame);
+            updateProgress(); // Fuerza el repintado a 0:00
+        }
+
+        audioEl.onended = stopAudio;
     </script>
 </body>
 </html>
