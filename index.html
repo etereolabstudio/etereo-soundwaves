@@ -13,28 +13,30 @@
 
     <style>
         /* =========================================
-           VARIABLES: PALETA ETÉREO Y MATERIALES
+           VARIABLES: PALETA ETÉREO (LIMPIA Y ELEGANTE)
            ========================================= */
         :root {
-            --bg-color: #070609;
+            --bg-color: #0c0b0f;
             
-            --deck-base: #1c1a21;
-            --deck-dark: #0f0e13;
-            --deck-edge: #302c38;
+            /* Colores del Reproductor (Deck) */
+            --deck-base: #18161d;
+            --deck-dark: #0e0d12;
+            --deck-edge: #2a2732;
             
+            /* Colores del Cassette */
             --cassette-bg: #222029;
             --label-bg: #EAE3D2;
             --label-text: #1B1912;
             
+            /* Acentos Etéreo */
             --text-color: #9B9488;
             --title-color: #EDE6D6;
             --accent: #DD8E5C;
             --accent-glow: rgba(221, 142, 92, 0.4);
             
-            --retro-green: #10b981;
+            /* LEDs Retro */
+            --retro-green: #34d399;
             --retro-red: #ef4444;
-            
-            --noise-texture: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -44,40 +46,40 @@
             font-family: 'Outfit', sans-serif; font-weight: 300;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 100vh; margin: 0; padding: 24px; text-align: center; overflow-x: hidden;
-            position: relative; perspective: 1200px; /* Profundidad 3D para el efecto de los ecos */
+            position: relative;
         }
 
+        /* Iluminación de fondo suave */
         body::before {
             content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
             background:
-                radial-gradient(ellipse 55% 45% at 75% 15%, rgba(221, 142, 92, 0.08) 0%, transparent 65%),
-                radial-gradient(ellipse 50% 50% at 15% 95%, rgba(139, 132, 163, 0.07) 0%, transparent 60%);
+                radial-gradient(ellipse 45% 45% at 80% 20%, rgba(221, 142, 92, 0.08) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 50% at -10% 115%, rgba(139, 132, 163, 0.06) 0%, transparent 60%);
         }
-        
+
+        /* Ruido sutil para el fondo (no aplicado a los componentes) */
         body::after {
-            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; 
-            opacity: 0.2; mix-blend-mode: soft-light; background-image: var(--noise-texture);
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.15; mix-blend-mode: overlay;
+            background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
         }
 
         .mono { font-family: 'Space Mono', monospace; }
 
         /* =========================================
-           ECOLOCALIZACIÓN ACÚSTICA (EFECTO ONDAS)
+           ECOLOCALIZACIÓN ACÚSTICA (ONDAS)
            ========================================= */
         .echo-container {
             position: absolute;
-            bottom: -30px; 
+            bottom: -20px; 
             left: 50%;
-            width: 260px;
-            height: 120px;
-            /* 3D: Se coloca físicamente detrás del reproductor */
-            transform: translateX(-50%) translateZ(-40px);
-            z-index: -1;
+            width: 280px;
+            height: 140px;
+            transform: translateX(-50%);
+            z-index: 0; /* Detrás del reproductor */
             pointer-events: none;
             display: flex;
             justify-content: center;
-            /* JS inyecta la variable --audio-peak dependiendo del volumen actual */
-            opacity: calc(var(--audio-peak, 0) * 1.8);
+            opacity: calc(var(--audio-peak, 0) * 1.5);
             transition: opacity 0.1s ease-out;
         }
 
@@ -87,204 +89,211 @@
             width: 100%;
             height: 100%;
             border: 2px solid transparent;
-            /* El arco inferior radiante */
-            border-bottom: 3px solid var(--accent);
+            border-bottom: 2px solid var(--accent);
             border-radius: 50%;
-            filter: drop-shadow(0 0 6px var(--accent-glow)) drop-shadow(0 0 12px rgba(221,142,92,0.4));
-            animation: echo-radiate 2.4s cubic-bezier(0.1, 0.4, 0.8, 1) infinite;
+            filter: drop-shadow(0 0 8px var(--accent-glow));
+            animation: echo-radiate 2.2s cubic-bezier(0.1, 0.4, 0.8, 1) infinite;
         }
 
-        /* Desfase de anillos para crear el patrón de ecolocalización */
         .echo-arc:nth-child(1) { animation-delay: 0s; }
-        .echo-arc:nth-child(2) { animation-delay: 0.6s; }
-        .echo-arc:nth-child(3) { animation-delay: 1.2s; }
-        .echo-arc:nth-child(4) { animation-delay: 1.8s; }
+        .echo-arc:nth-child(2) { animation-delay: 0.5s; }
+        .echo-arc:nth-child(3) { animation-delay: 1.0s; }
+        .echo-arc:nth-child(4) { animation-delay: 1.5s; }
 
         @keyframes echo-radiate {
             0% { transform: scale(0.4) translateY(0); opacity: 0; border-bottom-width: 4px; }
             15% { opacity: 1; }
-            100% { transform: scale(2.4) translateY(80px); opacity: 0; border-bottom-width: 1px; }
+            100% { transform: scale(2.2) translateY(60px); opacity: 0; border-bottom-width: 1px; }
         }
 
         /* =========================================
-           CHASIS PRINCIPAL (HARDWARE DECK)
+           EL REPRODUCTOR (TAPE DECK FIJO Y LIMPIO)
            ========================================= */
-        @keyframes deck-float {
-            0% { transform: rotateX(2deg) rotateY(-2deg) translateY(0px); box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), inset 1px 0 2px rgba(255,255,255,0.05), inset 0 -4px 8px rgba(0,0,0,0.8), 0 40px 60px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6); }
-            50% { transform: rotateX(-1deg) rotateY(1deg) translateY(-8px); box-shadow: inset 0 2px 2px rgba(255,255,255,0.2), inset 1px 0 2px rgba(255,255,255,0.08), inset 0 -4px 8px rgba(0,0,0,0.9), 0 50px 75px rgba(0,0,0,0.85), 0 20px 30px rgba(0,0,0,0.5); }
-            100% { transform: rotateX(2deg) rotateY(-2deg) translateY(0px); box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), inset 1px 0 2px rgba(255,255,255,0.05), inset 0 -4px 8px rgba(0,0,0,0.8), 0 40px 60px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6); }
-        }
-
         .player-deck {
-            position: relative; z-index: 1;
-            background-image: var(--noise-texture), linear-gradient(160deg, var(--deck-edge) 0%, var(--deck-base) 30%, var(--deck-dark) 100%);
-            background-blend-mode: soft-light, normal;
-            border-radius: 12px; padding: 16px 14px 26px 14px; max-width: 385px; width: 100%;
-            border: 1px solid #111; border-top: 1px solid #3c3846;
+            position: relative; z-index: 1; /* Encima de los ecos */
+            background: linear-gradient(180deg, var(--deck-edge) 0%, var(--deck-base) 20%, var(--deck-dark) 100%);
+            border-radius: 12px; padding: 14px 14px 24px 14px;
+            max-width: 380px; width: 100%;
+            box-shadow: 
+                inset 0 1px 2px rgba(255,255,255,0.08), inset 0 -2px 5px rgba(0,0,0,0.8),
+                0 30px 50px rgba(0,0,0,0.6), 0 10px 15px rgba(0,0,0,0.4);
+            border: 1px solid #322E3A;
             display: flex; flex-direction: column; gap: 16px;
-            animation: deck-float 9s ease-in-out infinite;
-            transform-style: preserve-3d; /* Permite que los ecos se rendericen detrás en 3D */
         }
-
-        .player-deck::before, .player-deck::after {
-            content: ''; position: absolute; bottom: 80px; width: 6px; height: 35px;
-            background: #0a090d; border-radius: 4px; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.9), 1px 0 1px rgba(255,255,255,0.05);
-        }
-        .player-deck::before { left: 4px; } .player-deck::after { right: 4px; }
 
         /* =========================================
-           COMPARTIMENTO DEL CASSETTE Y CRISTAL
+           COMPARTIMENTO DEL CASSETTE
            ========================================= */
         .cassette-compartment {
-            background: #050406; border-radius: 8px; padding: 14px;
-            box-shadow: inset 0 10px 20px rgba(0,0,0,1), inset 0 -2px 5px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04), 0 1px 1px rgba(255,255,255,0.06);
-            position: relative; overflow: hidden;
-        }
-
-        .cassette-compartment::after {
-            content: ''; position: absolute; inset: 0; z-index: 20; pointer-events: none; border-radius: 8px;
-            background: 
-                linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 30%, transparent 35%),
-                linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.6) 100%);
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.03);
+            background: #08070a; border-radius: 8px; padding: 12px;
+            box-shadow: inset 0 8px 15px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.03);
+            position: relative;
         }
 
         .cassette {
-            background: linear-gradient(180deg, #373342 0%, var(--cassette-bg) 100%);
-            border-radius: 6px; padding: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.15);
-            border: 1px solid rgba(0,0,0,0.7); display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1;
+            background: linear-gradient(180deg, #322e3b 0%, var(--cassette-bg) 100%);
+            border-radius: 6px; padding: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 8px;
         }
 
         .cassette-label {
-            background: var(--noise-texture), linear-gradient(160deg, var(--label-bg) 0%, #D4CBB5 100%);
-            background-blend-mode: multiply, normal; color: var(--label-text); border-radius: 4px; padding: 14px 16px; margin: 0 6px;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.5); position: relative;
+            background: linear-gradient(160deg, var(--label-bg) 0%, #D4CBB5 100%);
+            color: var(--label-text); border-radius: 4px; padding: 12px 16px; margin: 0 8px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.4);
+            position: relative;
         }
-        
+        .cassette-label::before { content: ''; position: absolute; left: 12px; right: 12px; top: 6px; height: 1px; background: rgba(27,25,18,0.15); }
+        .cassette-label::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 1px; background: rgba(27,25,18,0.15); }
+
         .brand-title {
-            font-family: 'Clash Display', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 6px; text-transform: uppercase; margin: 0; color: #111; text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
+            font-family: 'Clash Display', sans-serif; font-weight: 600; font-size: 22px; 
+            letter-spacing: 5px; text-transform: uppercase; margin: 0; text-shadow: 0px 1px 1px rgba(255,255,255,0.6);
         }
-        .side-tag { font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase; color: #444; margin-top: 2px; font-weight: 700; }
+        .side-tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; margin-top: 2px; font-weight: 700; }
 
         .cassette-window {
-            background: #020102; margin: 0 14px; border-radius: 6px; padding: 4px;
-            box-shadow: inset 0 4px 12px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,0.05), 0 1px 1px rgba(255,255,255,0.1);
-            height: 78px; position: relative; overflow: hidden;
+            background: #040305; margin: 0 16px; border-radius: 6px; padding: 4px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,0.04);
+            height: 75px; position: relative; overflow: hidden;
         }
 
-        .reels-row { display: flex; justify-content: center; align-items: center; gap: 58px; position: relative; z-index: 2; width: 100%; height: 100%; }
+        /* Cristal limpio de reflejos sutiles */
+        .window-glass { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .window-glass::after {
+            content: ''; position: absolute; inset: 0; z-index: 10; pointer-events: none;
+            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.06) 50%, transparent 55%);
+        }
+
+        .reels-row { display: flex; justify-content: center; align-items: center; gap: 55px; position: relative; z-index: 2; width: 100%; }
         
-        .magnetic-tape {
-            position: absolute; bottom: -8px; left: -10px; right: -10px; height: 16px;
-            background: linear-gradient(180deg, #111 0%, #2a1b14 50%, #0a0604 100%); box-shadow: 0 -2px 10px rgba(0,0,0,0.9); opacity: 0.9;
-        }
-
         .tape-spool {
-            position: absolute; background: repeating-radial-gradient(circle at center, #110B08 0px, #1a120d 1.5px, #0a0604 3px);
-            border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.9), 0 0 0 1.5px #050302; z-index: 0;
+            position: absolute; background: #150F0B; border-radius: 50%;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 0 1px #090604; z-index: 0;
         }
-        .tape-spool-left { width: 72px; height: 72px; } .tape-spool-right { width: 52px; height: 52px; }
+        .tape-spool-left { width: 70px; height: 70px; } 
+        .tape-spool-right { width: 55px; height: 55px; }
 
         .reel {
             width: 36px; height: 36px; border-radius: 50%;
-            background: radial-gradient(circle at center, #0a090d 18%, transparent 20%), repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #e4dfd3 35deg, #e4dfd3 60deg);
-            border: 4px solid #e4dfd3; position: relative; z-index: 2; box-shadow: 0 3px 8px rgba(0,0,0,0.7);
+            background: radial-gradient(circle at center, #100E14 18%, transparent 20%),
+                        repeating-conic-gradient(from 0deg, transparent 0deg, transparent 35deg, #D8D3C8 35deg, #D8D3C8 60deg);
+            border: 4px solid #D8D3C8; position: relative; z-index: 2; box-shadow: 0 2px 6px rgba(0,0,0,0.5);
         }
         .reel::after {
             content: ''; position: absolute; inset: 25%; border-radius: 50%;
-            background: conic-gradient(#111, #333, #111, #000, #111); border: 1px solid rgba(255,255,255,0.15); box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
+            background: #0A090D; border: 1px solid rgba(255,255,255,0.1);
         }
-        .reel.spinning { animation: reel-spin 1.8s linear infinite; }
+        .reel.spinning { animation: reel-spin 2s linear infinite; }
         @keyframes reel-spin { to { transform: rotate(360deg); } }
 
         /* =========================================
-           PANTALLA DIGITAL (VFD)
+           PANTALLA DIGITAL Y ONDA
            ========================================= */
         .digital-display {
-            background: #050406; border: 1px solid #14121a; border-radius: 6px; padding: 14px 16px 12px; position: relative; margin: 0 4px;
-            box-shadow: inset 0 8px 16px rgba(0,0,0,1), inset 0 0 8px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.06); overflow: hidden;
-        }
-        
-        .digital-display::after {
-            content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 10;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 1px, transparent 1px, transparent 2px);
+            background: #070608; border: 1px solid #1a1820; border-radius: 6px; 
+            padding: 12px 14px 10px; box-shadow: inset 0 6px 12px rgba(0,0,0,0.8);
+            position: relative; margin: 0 4px;
         }
 
         .status-text {
-            font-size: 11px; color: var(--text-color); margin-bottom: 14px; line-height: 1.5; min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
-            display: flex; justify-content: space-between; position: relative; z-index: 5; text-shadow: 0 0 5px rgba(155, 148, 136, 0.3);
+            font-size: 11px; color: var(--text-color); margin-bottom: 12px; line-height: 1.5; 
+            min-height: 16px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
+            display: flex; justify-content: space-between;
         }
-        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 14px; text-shadow: 0 0 12px var(--accent-glow); }
+        .accent { color: var(--accent); font-style: italic; font-family: 'Playfair Display', serif; font-size: 13px; }
 
         .waveform-wrapper { 
-            width: 100%; height: 50px; position: relative; display: block; cursor: pointer; border-radius: 2px; z-index: 5;
-            background: repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 4px);
+            width: 100%; height: 50px; position: relative; display: block; cursor: pointer; border-radius: 2px;
+            background: repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 4px);
         }
-        canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 4px var(--accent-glow)); }
+        canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 3px var(--accent-glow)); }
 
         .time-display {
-            display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; letter-spacing: 2px; color: var(--title-color); opacity: 0.9; font-weight: 700;
-            position: relative; z-index: 5; text-shadow: 0 0 5px rgba(237, 230, 214, 0.4);
+            display: flex; justify-content: space-between; margin-top: 8px;
+            font-size: 10px; letter-spacing: 1.5px; color: var(--title-color); opacity: 0.8; font-weight: 700;
         }
+
+        .waveform-wrapper.loading::before {
+            content: ''; position: absolute; inset: 0; z-index: 5;
+            background: linear-gradient(90deg, transparent, rgba(221, 142, 92, 0.2), transparent);
+            background-size: 200% 100%; animation: shimmer-sweep 1.5s ease-in-out infinite;
+        }
+        @keyframes shimmer-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
         /* =========================================
-           BOTONES MECÁNICOS (INGENIERÍA HÁPTICA)
+           BOTONES MECÁNICOS LIMPIOS (SIN LAG)
            ========================================= */
-        .mechanical-controls { display: flex; justify-content: center; gap: 14px; margin-top: 6px; padding: 0 6px; }
+        .mechanical-controls {
+            display: flex; justify-content: center; gap: 12px; margin-top: 4px; padding: 0 4px;
+        }
 
         .mech-btn {
-            flex: 1; height: 54px; border-radius: 4px; cursor: pointer;
-            background-image: var(--noise-texture), linear-gradient(180deg, #322e3e 0%, #1a1722 100%); background-blend-mode: soft-light, normal; border: none;
-            box-shadow: 0 6px 0 #070608, 0 8px 12px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.2), inset 1px 0 1px rgba(255,255,255,0.05), inset -1px 0 1px rgba(0,0,0,0.5);
-            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-            transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; text-shadow: 0 1px 1px rgba(0,0,0,0.8), 0 -1px 0 rgba(255,255,255,0.1);
+            flex: 1; height: 48px; border-radius: 4px; cursor: pointer;
+            background: linear-gradient(180deg, #2b2834 0%, #1e1b25 100%);
+            border: 1px solid #000; border-top: 1px solid #433e50;
+            box-shadow: 
+                0 4px 0 #08070a, 
+                0 6px 10px rgba(0,0,0,0.6), 
+                inset 0 1px 2px rgba(255,255,255,0.1); 
+            color: var(--text-color); font-family: 'Space Mono', monospace; font-size: 10px; 
+            letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+            /* Transiciones rápidas y limpias que no afectan el layout general */
+            transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+            position: relative;
         }
 
-        .mech-btn:hover { background-image: var(--noise-texture), linear-gradient(180deg, #3a3648 0%, #201c29 100%); color: var(--title-color); }
+        .mech-btn:hover { background: linear-gradient(180deg, #322e3d 0%, #23202b 100%); color: var(--title-color); }
         
         .mech-btn:active, .mech-btn.active-state {
-            transform: translateY(6px); box-shadow: 0 0px 0 #070608, 0 2px 4px rgba(0,0,0,0.8), inset 0 4px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(0,0,0,0.8);
-            background-image: var(--noise-texture), linear-gradient(180deg, #131118 0%, #1a1722 100%);
+            transform: translateY(4px);
+            box-shadow: 
+                0 0px 0 #08070a, 
+                0 2px 4px rgba(0,0,0,0.6),
+                inset 0 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(180deg, #18161d 0%, #1e1b25 100%);
+            border-top: 1px solid #111;
         }
 
-        .btn-led { 
-            width: 18px; height: 4px; border-radius: 2px; background: #0a090c; 
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.1); 
-            transition: all 0.2s; border: 1px solid #000;
-        }
+        .btn-led { width: 16px; height: 3px; border-radius: 2px; background: #111; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8); }
         
-        .mech-btn.stop-btn:active .btn-led { background: var(--retro-red); box-shadow: 0 0 8px var(--retro-red), inset 0 1px 2px rgba(255,255,255,0.4); border-color: var(--retro-red); }
-        .mech-btn.play-btn.playing .btn-led { background: var(--retro-green); box-shadow: 0 0 12px var(--retro-green), inset 0 1px 2px rgba(255,255,255,0.5); border-color: var(--retro-green); }
+        .mech-btn.stop-btn:active .btn-led { background: var(--retro-red); box-shadow: 0 0 6px var(--retro-red); }
+        .mech-btn.play-btn.playing .btn-led { background: var(--retro-green); box-shadow: 0 0 8px var(--retro-green); }
 
-        .btn-content { display: flex; align-items: center; gap: 8px; }
-        .btn-icon { width: 11px; height: 11px; fill: currentColor; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.8)); }
+        .btn-content { display: flex; align-items: center; gap: 6px; }
+        .btn-icon { width: 10px; height: 10px; fill: currentColor; }
 
+        /* =========================================
+           ENLACE
+           ========================================= */
         .back-link {
-            margin-top: 36px; display: inline-block; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-color); text-decoration: none;
-            text-transform: uppercase; letter-spacing: 3px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
-            transition: all 0.3s ease; position: relative; z-index: 1;
+            margin-top: 32px; display: inline-block; font-family: 'Space Mono', monospace;
+            font-size: 11px; color: var(--text-color); text-decoration: none;
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 400;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
+            transition: color 0.3s, border-color 0.3s; position: relative; z-index: 1;
         }
-        .back-link:hover { color: var(--title-color); border-color: var(--accent); text-shadow: 0 0 8px rgba(237, 230, 214, 0.4); transform: translateY(-1px); }
+        .back-link:hover { color: var(--title-color); border-color: var(--accent); }
 
         audio { display: none; }
     </style>
 </head>
 <body>
 
+    <!-- REPRODUCTOR (EL DECK) -->
     <div class="player-deck" id="main-card">
         
-        <!-- =========================================
-             NUEVO: ECOLOCALIZACIÓN ETÉREA (ONDAS)
-             ========================================= -->
+        <!-- ECOLOCALIZACIÓN ETÉREA (ONDAS) -->
         <div class="echo-container">
             <div class="echo-arc"></div>
             <div class="echo-arc"></div>
             <div class="echo-arc"></div>
             <div class="echo-arc"></div>
         </div>
-        
-        <!-- COMPARTIMENTO FÍSICO -->
+
+        <!-- COMPARTIMENTO Y CASSETTE -->
         <div class="cassette-compartment">
             <div class="cassette">
                 <div class="cassette-label">
@@ -292,18 +301,19 @@
                     <p class="side-tag mono">Memoria Acústica</p>
                 </div>
                 <div class="cassette-window">
-                    <div class="magnetic-tape"></div>
-                    <div class="reels-row">
-                        <div class="tape-spool tape-spool-left"></div>
-                        <div class="reel" id="reel-left"></div>
-                        <div class="tape-spool tape-spool-right"></div>
-                        <div class="reel" id="reel-right"></div>
+                    <div class="window-glass">
+                        <div class="reels-row">
+                            <div class="tape-spool tape-spool-left"></div>
+                            <div class="reel" id="reel-left"></div>
+                            <div class="tape-spool tape-spool-right"></div>
+                            <div class="reel" id="reel-right"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PANTALLA DIGITAL -->
+        <!-- PANTALLA DIGITAL (WAVEFORM LIBRE) -->
         <div class="digital-display">
             <div class="status-text mono">
                 <span id="status-text" aria-live="polite">Analizando...</span>
@@ -321,7 +331,7 @@
             </div>
         </div>
 
-        <!-- BOTONES MECÁNICOS -->
+        <!-- BOTONES MECÁNICOS CLÁSICOS -->
         <div class="mechanical-controls">
             <!-- BOTÓN STOP -->
             <button class="mech-btn stop-btn" onclick="stopAudio()" aria-label="Detener memoria">
@@ -379,11 +389,11 @@
         let demoProgress = 0;
         let lastTime = 0;
         const demoDuration = 10000; 
-
+        
         // Variable para controlar la opacidad de los ecos según el volumen
-        let smoothedPeak = 0; 
+        let smoothedPeak = 0;
 
-        const colorBase = "rgba(237, 230, 214, 0.2)";
+        const colorBase = "rgba(237, 230, 214, 0.18)";
         const colorProgress = "#DD8E5C";
 
         function setReelsSpinning(spinning) {
@@ -563,17 +573,16 @@
                 currentP = (audioEl.currentTime / (audioEl.duration || 1));
             }
 
-            // --- LÓGICA DE ECOLOCALIZACIÓN (ECOS) ---
+            // --- LÓGICA DE ECOS (Mapeado de volumen en tiempo real) ---
             let currentPeak = 0;
             if (isPlaying && peaks.length) {
                 let index = Math.floor(currentP * peaks.length);
                 if (index >= peaks.length) index = peaks.length - 1;
                 currentPeak = peaks[index];
             }
-            // Suavizamos el cambio matemático para que el brillo de los ecos sea fluido
             smoothedPeak += (currentPeak - smoothedPeak) * 0.15;
             document.documentElement.style.setProperty('--audio-peak', smoothedPeak);
-            // ----------------------------------------
+            // --------------------------------------------------------
 
             const fillWidth = width * currentP;
 
@@ -629,7 +638,7 @@
             setReelsSpinning(false);
             statusText.innerHTML = "‖ <span class='accent'>Pausado.</span>";
             cancelAnimationFrame(animationFrame);
-            // Forzamos un update para que los ecos se apaguen al pausar
+            // Actualiza una última vez para apagar los ecos suavemente
             requestAnimationFrame(updateProgress);
         }
 
@@ -662,7 +671,7 @@
             }
             
             cancelAnimationFrame(animationFrame);
-            // Forzamos un update para que los ecos desaparezcan de inmediato al poner Stop
+            // Apaga los ecos y resetea progreso visual
             requestAnimationFrame(updateProgress); 
         }
 
