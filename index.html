@@ -104,12 +104,57 @@ padding:55px 24px;box-shadow:0 30px 70px rgba(0,0,0,.25)
 #playerView.demo-player .player-deck{margin:0}
 .demo-final-copy{font-family:'Playfair Display',serif;font-size:18px;line-height:1.6;color:var(--text-color);margin:25px auto}
 .demo-final-copy em{color:var(--title-color)}
+
+@media(max-width:780px){
+  .soundwave-feature{grid-template-columns:1fr;gap:34px}
+  .product-focus{padding-top:80px}
+  .soundwave-copy{padding:0 4px}
+}
+
 @media(max-width:650px){
   .before-after{grid-template-columns:1fr;gap:10px}
   .transform-arrow{transform:rotate(90deg);font-size:20px}
 }
 
 .privacy{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1.3px;text-transform:uppercase;opacity:.55;margin-top:18px}
+
+/* SOUNDWAVE — producto principal */
+.product-focus{padding-top:110px}
+.soundwave-feature{
+  width:min(1040px,calc(100% - 40px));margin:0 auto;
+  display:grid;grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr);
+  gap:56px;align-items:center;text-align:left
+}
+.soundwave-photo-wrap{
+  position:relative;background:#111016;border:1px solid rgba(255,255,255,.08);
+  padding:12px;box-shadow:0 28px 70px rgba(0,0,0,.38)
+}
+.soundwave-photo{
+  display:block;width:100%;height:auto;max-height:600px;object-fit:cover;
+  background:linear-gradient(145deg,#27232c,#0e0d12)
+}
+.photo-caption{
+  padding:11px 4px 2px;font-size:8px;letter-spacing:2px;color:#77716a;text-align:left
+}
+.soundwave-copy{padding:8px 0}
+.soundwave-copy .process-num{display:block;margin-bottom:14px}
+.soundwave-copy h3{
+  color:var(--title-color);font-family:'Clash Display',sans-serif;
+  font-size:clamp(30px,4vw,48px);line-height:1.02;font-weight:500;
+  margin-bottom:18px
+}
+.soundwave-copy p{max-width:470px;line-height:1.75;color:#8f897f}
+.feature-points{
+  margin:28px 0 32px;border-top:1px solid rgba(255,255,255,.08)
+}
+.feature-points>div{
+  display:grid;grid-template-columns:34px 1fr;column-gap:10px;
+  padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)
+}
+.feature-points span{grid-row:span 2;font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);padding-top:3px}
+.feature-points strong{font-size:13px;color:#d8d1c5;font-weight:500}
+.feature-points small{font-size:11px;color:#706b64;margin-top:3px}
+
 .products{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .product-card{padding:28px 22px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.018);text-align:left}
 .product-card .symbol{font-family:'Playfair Display',serif;color:var(--accent);font-size:30px}
@@ -323,9 +368,62 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
   </div>
 </section>
 
+
+<section class="section product-focus" id="soundwave-piece">
+  <div class="section-head">
+    <div class="section-kicker">La pieza principal</div>
+    <h2>Tu sonido, en una pieza que permanece.</h2>
+    <p>
+      La forma de tu sonido se convierte en el centro del Portarretrato Soundwave.
+      NFC y QR conectan la pieza física con tu memoria acústica.
+    </p>
+  </div>
+
+  <div class="soundwave-feature">
+    <div class="soundwave-photo-wrap">
+      <!--
+        Coloca AQUÍ la misma fotografía del Soundwave que utilizas en tu landing principal.
+        Ruta recomendada: assets/soundwave.jpg
+        Si tu archivo tiene otro nombre, cambia únicamente el atributo src.
+      -->
+      <img
+        class="soundwave-photo"
+        src="assets/soundwave.jpg"
+        alt="Portarretrato Soundwave de ETÉREO"
+        loading="lazy"
+      >
+      <div class="photo-caption mono">SOUNDWAVE · MEMORIA ACÚSTICA</div>
+    </div>
+
+    <div class="soundwave-copy">
+      <span class="process-num">03 / OBJETO</span>
+      <h3>La memoria toma forma.</h3>
+      <p>
+        No es solamente una visualización. Es una pieza física diseñada para
+        conservar la huella de un sonido significativo.
+      </p>
+
+      <div class="feature-points">
+        <div><span>01</span><strong>Tu sonido</strong><small>voz, canción o mensaje</small></div>
+        <div><span>02</span><strong>Tu onda</strong><small>una forma visual única</small></div>
+        <div><span>03</span><strong>Tu acceso</strong><small>NFC + QR para volver a escucharlo</small></div>
+      </div>
+
+      <a class="cta" href="https://etereomx.com">Ver el Soundwave</a>
+    </div>
+  </div>
+</section>
+
 <section class="section">
   <div class="section-head">
-    <div class="section-kicker">La pieza</div>
+    <div class="section-kicker">Complementos</div>
+    <h2>La misma memoria, otros formatos.</h2>
+    <p>
+      El Soundwave es la pieza principal. Cassette, vinilo y llavero funcionan
+      como formatos complementarios para llevar la experiencia a otros objetos.
+    </p>
+  </div>
+
     <h2>Tu sonido puede convertirse en algo que permanece.</h2>
     <p>
       La representación sonora puede formar parte de diferentes objetos
@@ -337,17 +435,17 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
     <article class="product-card">
       <div class="symbol">01</div>
       <h3>Cassette</h3>
-      <p>Una estética analógica para recuerdos que merecen volver a escucharse.</p>
+      <p>La interfaz de reproducción que da vida a la Memoria Acústica.</p>
     </article>
     <article class="product-card">
       <div class="symbol">02</div>
-      <h3>Vinilo</h3>
-      <p>La forma de una canción convertida en una pieza visual para conservar.</p>
+      <h3>Vinilo NFC</h3>
+      <p>Un formato complementario para conservar y volver a escuchar una canción.</p>
     </article>
     <article class="product-card">
       <div class="symbol">03</div>
-      <h3>Llave de memoria</h3>
-      <p>Un objeto compacto con acceso NFC a la experiencia sonora.</p>
+      <h3>Llavero Cassette</h3>
+      <p>Una versión portátil de la experiencia sonora ETÉREO.</p>
     </article>
   </div>
 </section>
