@@ -2,10 +2,11 @@
 <html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0c0b0f">
 <meta name="description" content="ETÉREO Memoria Acústica. Convierte una voz, canción o recuerdo sonoro en una forma que puedas conservar.">
 <title>Etéreo | Memoria Acústica</title>
+<link rel="preload" as="image" href="./onda-sonora.png">
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23121016'/%3E%3Ccircle cx='50' cy='50' r='34' fill='none' stroke='%23DD8E5C' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23DD8E5C'/%3E%3C/svg%3E">
 
@@ -139,8 +140,15 @@ padding:55px 24px;box-shadow:0 30px 70px rgba(0,0,0,.25)
 }
 .soundwave-photo-wrap{
   position:relative;background:#111016;border:1px solid rgba(255,255,255,.08);
-  padding:12px;box-shadow:0 28px 70px rgba(0,0,0,.38)
+  padding:12px;box-shadow:0 28px 70px rgba(0,0,0,.38);min-width:0
 }
+.soundwave-image-frame{position:relative;min-width:0;overflow:hidden;background:#111016}
+.soundwave-image-frame .soundwave-photo{width:100%;display:block}
+.image-missing-note{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;padding:25px;color:#a9a19a;font-family:Space Mono,monospace}
+.image-missing-note span{font-size:9px;letter-spacing:2px;color:#DD8E5C}
+.image-missing-note small{font-size:9px;line-height:1.6;max-width:230px}
+.image-missing .soundwave-photo{visibility:hidden}
+.image-missing .image-missing-note{display:flex}
 .soundwave-photo{
   display:block;width:100%;height:auto;max-height:600px;object-fit:cover;
   background:linear-gradient(145deg,#27232c,#0e0d12)
@@ -253,6 +261,105 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
 .hero h1{font-size:48px}.hero-copy{font-size:14px}
 .player-top{margin-bottom:10px}
 }
+
+/* =========================================================
+   V8 — RESPONSIVE HARDENING
+   ========================================================= */
+html{overflow-x:hidden}
+body{overflow-x:hidden}
+img,canvas,video{max-width:100%}
+button,a{touch-action:manipulation}
+.cta{min-height:44px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+
+@media(max-width:780px){
+  .section{width:calc(100% - 28px);padding:72px 0}
+  .section-head{margin-bottom:32px}
+  .section-head p{font-size:13px}
+  .demo-box{padding:32px 12px}
+  .demo-stage{width:100%;max-width:none}
+  .demo-actions{width:100%;gap:9px}
+  .demo-actions .cta{flex:1 1 180px;max-width:none}
+  .before-after{width:100%;grid-template-columns:minmax(0,1fr);gap:12px}
+  .signal-card{width:100%;box-sizing:border-box;padding:18px 15px}
+  .signal-card canvas{height:64px}
+  .transform-arrow{height:20px;display:flex;align-items:center;justify-content:center;transform:rotate(90deg)}
+  .player-label{margin-top:38px}
+  .demo-player-slot{width:100%;max-width:100%;overflow:visible}
+  .demo-player-view{width:100%;box-sizing:border-box;padding:16px 0 8px}
+  .demo-player-view .player-deck{width:min(380px,100%);max-width:100%;box-sizing:border-box}
+  .mechanical-controls{gap:9px}
+  .mech-btn{min-width:0}
+  .soundwave-feature{width:100%;grid-template-columns:minmax(0,1fr);gap:32px}
+  .soundwave-photo-wrap{width:100%;box-sizing:border-box;padding:8px}
+  .soundwave-copy{width:100%;box-sizing:border-box;padding:0}
+  .soundwave-copy h3{font-size:clamp(30px,9vw,42px)}
+  .feature-points{margin:24px 0 28px}
+  .products{grid-template-columns:1fr;gap:10px}
+  .product-card{padding:22px 18px}
+  .final-cta{padding:80px 20px 100px}
+}
+
+@media(max-width:480px){
+  .nav{width:calc(100% - 28px);padding:22px 0}
+  .nav-brand{font-size:13px;letter-spacing:4px}
+  .nav-link{font-size:8px;letter-spacing:1.5px}
+  .hero{min-height:calc(100svh - 20px);padding:38px 16px 70px}
+  .hero h1{font-size:clamp(43px,14vw,60px);letter-spacing:-1.5px}
+  .hero-copy{font-size:14px;max-width:330px}
+  .cta-row{width:100%;gap:9px}
+  .cta-row .cta{width:100%;max-width:330px}
+  .demo-box{padding:28px 10px}
+  .demo-step-label{gap:9px;text-align:center;line-height:1.35}
+  .demo-step-label strong{font-size:8px;letter-spacing:1.5px}
+  .record-wave{height:105px;margin:20px 0 16px}
+  .demo-note{font-size:10px}
+  .demo-actions .cta{width:100%;flex-basis:100%}
+  .player-deck{padding:10px 10px 18px}
+  .cassette-compartment{padding:8px}
+  .cassette{padding:9px}
+  .cassette-label{padding:10px 12px;margin:0 5px}
+  .brand-title{font-size:19px;letter-spacing:4px}
+  .cassette-window{margin:0 9px;height:66px}
+  .reels-row{gap:36px}
+  .reel{width:32px;height:32px}
+  .digital-display{padding:10px 11px;margin:0 2px}
+  .status-text{font-size:9px}
+  .waveform-wrapper{height:48px}
+  .mechanical-controls{gap:8px;padding:0 2px}
+  .mech-btn{height:46px;font-size:9px}
+  .soundwave-photo-wrap{padding:6px}
+  .photo-caption{font-size:7px;letter-spacing:1.5px}
+  .feature-points>div{padding:13px 0}
+}
+
+@media(max-width:360px){
+  .section{width:calc(100% - 22px)}
+  .hero{padding-left:11px;padding-right:11px}
+  .demo-box{padding-left:7px;padding-right:7px}
+  .player-deck{padding:8px 8px 16px}
+  .cassette-compartment{padding:6px}
+  .cassette{padding:8px}
+  .cassette-label{padding:9px 10px}
+  .cassette-window{margin:0 6px;height:62px}
+  .reels-row{gap:27px}
+  .reel{width:29px;height:29px}
+  .tape-spool-left{width:calc(70px - (23px * var(--tape-progress,0)));height:calc(70px - (23px * var(--tape-progress,0)))}
+  .tape-spool-right{width:calc(45px + (23px * var(--tape-progress,0)));height:calc(45px + (23px * var(--tape-progress,0)))}
+  .digital-display{padding:9px 9px}
+  .status-text{font-size:8px}
+  .waveform-wrapper{height:44px}
+  .time-display{font-size:8px}
+  .vu-meter-container{gap:2px}
+  .vu-led{height:3px}
+  .mechanical-controls{gap:6px}
+  .mech-btn{height:44px}
+  .soundwave-copy h3{font-size:30px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
+}
+
 </style>
 </head>
 
@@ -480,13 +587,20 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
         Coloca AQUÍ la misma fotografía del Soundwave que utilizas en tu landing principal.
         La fotografía se carga desde la raíz del repositorio: onda-sonora.png.
       -->
+      <div class="soundwave-image-frame">
       <img
         class="soundwave-photo"
-        src="onda-sonora.png"
+        src="./onda-sonora.png"
         alt="Portarretrato Soundwave de ETÉREO"
-        loading="lazy"
+        loading="eager"
         decoding="async"
+        onerror="this.closest('.soundwave-image-frame').classList.add('image-missing')"
       >
+      <div class="image-missing-note">
+        <span>IMAGEN NO ENCONTRADA</span>
+        <small>Sube <b>onda-sonora.png</b> a la raíz del repositorio.</small>
+      </div>
+    </div>
       <div class="photo-caption mono">SOUNDWAVE · MEMORIA ACÚSTICA</div>
     </div>
 
@@ -1364,4 +1478,4 @@ if (audioId) {
 }
 </script>
 </body>
-</html>
+  </html>
