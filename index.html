@@ -222,6 +222,7 @@ border:1px solid #322e3a;display:flex;flex-direction:column;gap:14px
 .accent{color:var(--accent);font-style:italic;font-family:'Playfair Display',serif;font-size:13px;text-shadow:0 0 8px var(--accent-glow)}
 .waveform-wrapper{width:100%;height:46px;position:relative;display:block;cursor:pointer;border-radius:2px;z-index:5;background:repeating-linear-gradient(90deg,rgba(255,255,255,.01) 0 2px,transparent 2px 4px)}
 canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter:drop-shadow(0 0 3px var(--accent-glow))}
+.audio-progress-layer{position:absolute;inset:0;overflow:hidden;clip-path:inset(0 100% 0 0);will-change:clip-path;pointer-events:none}.audio-progress-layer canvas{filter:drop-shadow(0 0 3px var(--accent-glow))}
 .vfd-playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--title-color);box-shadow:0 0 10px var(--title-color),0 0 15px var(--accent-glow);z-index:6;pointer-events:none;left:calc(var(--tape-progress,0) * 100%);opacity:0;transition:opacity .2s}
 .vfd-playhead:after{content:'';position:absolute;top:0;bottom:0;right:2px;width:24px;background:linear-gradient(to right,transparent,rgba(221,142,92,.4))}
 .engaged .vfd-playhead{opacity:1}
@@ -407,7 +408,7 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
 
       <div class="waveform-wrapper" id="demo-waveform-wrapper">
         <canvas class="audio-canvas" id="demo-canvas-base"></canvas>
-        <canvas class="audio-canvas" id="demo-canvas-progress"></canvas>
+        <div class="audio-progress-layer" id="demo-progress-layer"><canvas class="audio-canvas" id="demo-canvas-progress"></canvas></div>
         <div class="vfd-playhead"></div>
       </div>
 
@@ -590,7 +591,7 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
 
       <div class="waveform-wrapper" id="waveform-wrapper">
         <canvas class="audio-canvas" id="canvas-base"></canvas>
-        <canvas class="audio-canvas" id="canvas-progress"></canvas>
+        <div class="audio-progress-layer" id="progress-layer"><canvas class="audio-canvas" id="canvas-progress"></canvas></div>
         <div class="vfd-playhead"></div>
       </div>
 
@@ -725,7 +726,7 @@ async function startVoiceDemo(){
     });
     micContext=new(window.AudioContext||window.webkitAudioContext)();
     const source=micContext.createMediaStreamSource(micStream);
-    micAnalyser=micContext.createAnalyser();micAnalyser.fftSize=512;micData=new Uint8Array(micAnalyser.fftSize);source.connect(micAnalyser);
+    micAnalyser=micContext.createAnalyser();micAnalyser.fftSize=256;micAnalyser.smoothingTimeConstant=.72;micData=new Uint8Array(micAnalyser.fftSize);source.connect(micAnalyser);
     if(!window.MediaRecorder)throw new Error('MediaRecorder unavailable');
     const options={};
     const mimeCandidates=[
@@ -848,6 +849,7 @@ function mountDemoPlayer(url,buffer){
   const wrap=document.getElementById('demo-waveform-wrapper');
   const base=document.getElementById('demo-canvas-base');
   const progress=document.getElementById('demo-canvas-progress');
+  const progressLayer=document.getElementById('demo-progress-layer');
   const ctxB=base.getContext('2d');
   const ctxP=progress.getContext('2d');
   const left=document.getElementById('demo-reel-left');
@@ -863,7 +865,7 @@ function mountDemoPlayer(url,buffer){
 
   if(root._demoCleanup)root._demoCleanup();
 
-  let peaks=buildLocalPeaks(buffer),playing=false,raf=0,smoothed=0,prev=0,ac=null,analyser=null,data=null;
+  let peaks=buildLocalPeaks(buffer),playing=false,raf=0,smoothed=0,prev=0,frameNo=0,ac=null,analyser=null,data=null;
   let objectUrl=url;
 
   audio.pause();
@@ -882,6 +884,7 @@ function mountDemoPlayer(url,buffer){
       c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
     });
     drawWave(ctxB,base.clientWidth,base.clientHeight,'rgba(237,230,214,.18)');
+    drawWave(ctxP,progress.clientWidth,progress.clientHeight,'#DD8E5C');
     drawProgress();
   }
   function drawWave(c,w,h,color){
@@ -906,8 +909,7 @@ function mountDemoPlayer(url,buffer){
     const p=duration?Math.max(0,Math.min(1,audio.currentTime/duration)):0;
     const w=progress.clientWidth,h=progress.clientHeight;
     document.documentElement.style.setProperty('--demo-tape-progress',p);
-    ctxP.clearRect(0,0,w,h);ctxP.save();ctxP.beginPath();ctxP.rect(0,0,w*p,h);ctxP.clip();
-    drawWave(ctxP,w,h,'#DD8E5C');ctxP.restore();
+    progressLayer.style.clipPath=`inset(0 ${((1-p)*100).toFixed(3)}% 0 0)`;
     elapsed.textContent=formatDuration(audio.currentTime);total.textContent=formatDuration(duration);
   }
   function setup(){
@@ -915,10 +917,10 @@ function mountDemoPlayer(url,buffer){
     try{
       const C=window.AudioContext||window.webkitAudioContext;
       if(!C)return;
-      ac=new C();analyser=ac.createAnalyser();analyser.fftSize=256;
+      ac=new C();analyser=ac.createAnalyser();analyser.fftSize=128;analyser.smoothingTimeConstant=.78;
       const source=ac.createMediaElementSource(audio);
       source.connect(analyser);analyser.connect(ac.destination);
-      data=new Uint8Array(analyser.frequencyBinCount);
+      data=new Uint8Array(analyser.fftSize);
     }catch(e){analyser=null;data=null}
   }
   function tick(){
@@ -926,16 +928,19 @@ function mountDemoPlayer(url,buffer){
     drawProgress();
     let peak=0;
     if(analyser&&data){
-      analyser.getByteFrequencyData(data);
-      let sum=0;for(let i=0;i<Math.min(6,data.length);i++)sum+=data[i];
-      peak=Math.pow((sum/Math.max(1,Math.min(6,data.length)))/255,1.5);
+      analyser.getByteTimeDomainData(data);
+      let sum=0;
+      for(let i=0;i<data.length;i++){const v=(data[i]-128)/128;sum+=v*v}
+      peak=Math.min(1,Math.sqrt(sum/data.length)*2.2);
     }else{
       peak=peaks[Math.min(peaks.length-1,Math.floor((audio.currentTime/(audio.duration||1))*peaks.length))]||0;
     }
     smoothed+=(peak-smoothed)*.15;
     document.documentElement.style.setProperty('--demo-audio-peak',smoothed);
-    const count=Math.min(10,Math.floor(smoothed*11));
-    if(count!==prev){leds.forEach((x,i)=>x.classList.toggle('on',i<count));prev=count}
+    if((frameNo++&1)===0){
+      const count=Math.min(10,Math.floor(smoothed*11));
+      if(count!==prev){leds.forEach((x,i)=>x.classList.toggle('on',i<count));prev=count}
+    }
     raf=requestAnimationFrame(tick);
   }
   function setPlaying(on){
@@ -1011,6 +1016,8 @@ if (audioId) {
   const vuLeds = document.querySelectorAll('.vu-led');
   const canvasBase = document.getElementById('canvas-base');
   const canvasProgress = document.getElementById('canvas-progress');
+  const progressLayer = document.getElementById('progress-layer');
+  const playhead = waveformWrapper.querySelector('.vfd-playhead');
   const ctxBase = canvasBase.getContext('2d');
   const ctxProgress = canvasProgress.getContext('2d');
 
@@ -1028,6 +1035,8 @@ if (audioId) {
   const colorProgress = '#DD8E5C';
   let audioCtx, analyser, dataArray, noiseSource, noiseGain, gyroEnabled = false;
   let fadeInterval;
+  let frameNo=0;
+  let lastTapeUi=0;
 
   function createTapeHiss() {
     if (!audioCtx || noiseSource) return;
@@ -1048,10 +1057,10 @@ if (audioId) {
     try{
       const AudioContextClass=window.AudioContext||window.webkitAudioContext;
       audioCtx=new AudioContextClass();
-      analyser=audioCtx.createAnalyser();analyser.fftSize=256;
+      analyser=audioCtx.createAnalyser();analyser.fftSize=128;analyser.smoothingTimeConstant=.78;
       const source=audioCtx.createMediaElementSource(audioEl);
       source.connect(analyser);analyser.connect(audioCtx.destination);
-      dataArray=new Uint8Array(analyser.frequencyBinCount);
+      dataArray=new Uint8Array(analyser.fftSize);
       createTapeHiss();
     }catch(e){analyser=null}
   }
@@ -1186,6 +1195,7 @@ if (audioId) {
       c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
     });
     drawSmoothWave(ctxBase,canvasBase.clientWidth,canvasBase.clientHeight,colorBase);
+    drawSmoothWave(ctxProgress,canvasProgress.clientWidth,canvasProgress.clientHeight,colorProgress);
     updateProgress();
   }
 
@@ -1232,9 +1242,10 @@ if (audioId) {
     let currentPeak=0;
     if(isPlaying&&!isBuffering){
       if(!isDemo&&analyser&&dataArray){
-        analyser.getByteFrequencyData(dataArray);
-        let sum=0;for(let i=0;i<6;i++)sum+=dataArray[i];
-        currentPeak=Math.pow((sum/6)/255,1.5);
+        analyser.getByteTimeDomainData(dataArray);
+        let sum=0;
+        for(let i=0;i<dataArray.length;i++){const v=(dataArray[i]-128)/128;sum+=v*v}
+        currentPeak=Math.min(1,Math.sqrt(sum/dataArray.length)*2.2);
       }else if(peaks.length){
         const index=Math.floor(currentP*peaks.length);
         currentPeak=peaks[Math.min(index,peaks.length-1)];
@@ -1243,16 +1254,22 @@ if (audioId) {
     smoothedPeak+=(currentPeak-smoothedPeak)*.15;
     document.documentElement.style.setProperty('--audio-peak',smoothedPeak);
 
-    const ledCount=Math.min(10,Math.floor(smoothedPeak*11));
-    if(ledCount!==prevLedCount){
-      vuLeds.forEach((led,i)=>led.classList.toggle('on',i<ledCount));
-      prevLedCount=ledCount;
+    if((frameNo++&1)===0){
+      const ledCount=Math.min(10,Math.floor(smoothedPeak*11));
+      if(ledCount!==prevLedCount){
+        vuLeds.forEach((led,i)=>led.classList.toggle('on',i<ledCount));
+        prevLedCount=ledCount;
+      }
     }
 
-    const fillWidth=width*currentP;
-    ctxProgress.clearRect(0,0,width,height);
-    ctxProgress.save();ctxProgress.beginPath();ctxProgress.rect(0,0,fillWidth,height);ctxProgress.clip();
-    drawSmoothWave(ctxProgress,width,height,colorProgress);ctxProgress.restore();
+    progressLayer.style.clipPath=`inset(0 ${((1-currentP)*100).toFixed(3)}% 0 0)`;
+    if(playhead)playhead.style.left=(currentP*100).toFixed(3)+'%';
+
+    const nowUi=performance.now();
+    if(nowUi-lastTapeUi>45){
+      document.documentElement.style.setProperty('--tape-progress',currentP);
+      lastTapeUi=nowUi;
+    }
 
     const totalSeconds=isDemo?(demoDuration/1000):(audioEl.duration||0);
     timeElapsed.textContent=formatTime(totalSeconds*currentP);
@@ -1287,7 +1304,7 @@ if (audioId) {
     statusText.innerHTML='‖ <span class="accent">Pausado.</span>';
     smoothedPeak=0;document.documentElement.style.setProperty('--audio-peak',0);
     vuLeds.forEach(led=>led.classList.remove('on'));prevLedCount=0;
-    cancelAnimationFrame(animationFrame);requestAnimationFrame(updateProgress);
+    cancelAnimationFrame(animationFrame);updateProgress();
   }
 
   function togglePlay(){
@@ -1319,7 +1336,7 @@ if (audioId) {
       smoothPause(()=>{audioEl.currentTime=0});
       statusText.innerHTML='■ <span class="accent">Cinta detenida.</span>';
     }
-    cancelAnimationFrame(animationFrame);requestAnimationFrame(updateProgress);
+    cancelAnimationFrame(animationFrame);updateProgress();
   }
 
   audioEl.addEventListener('waiting',()=>{
