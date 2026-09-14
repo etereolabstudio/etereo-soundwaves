@@ -324,7 +324,7 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
       <div class="rec-status" id="recStatus">Listo para comenzar</div>
       <div class="record-wave"><canvas id="recordCanvas"></canvas></div>
       <div class="rec-time mono" id="recTime">0:00</div>
-      <p class="demo-note" id="demoNote">Graba hasta 15 segundos o elige un archivo de audio.</p>
+      <p class="demo-note" id="demoNote">Graba hasta 15 segundos o elige un archivo de audio. El micrófono funciona mediante HTTPS.</p>
       <div class="privacy">Procesamiento local · Sin almacenamiento</div>
 
       <div class="demo-transition hidden" id="demoResult">
@@ -582,7 +582,6 @@ const demoResult=document.getElementById('demoResult');
 const originalMeta=document.getElementById('originalMeta');
 const resetDemoBtn=document.getElementById('resetDemoBtn');
 const demoPlayerSlot=document.getElementById('demoPlayerSlot');
-const playerView=document.getElementById('playerView');
 
 let micStream=null,micContext=null,micAnalyser=null,micData=null,recorder=null;
 let recordedChunks=[],recordAnimation=null,recordStart=0,localAudioUrl=null,localAudioBuffer=null;
@@ -628,18 +627,29 @@ function cleanupMic(){
   micStream=null;micContext=null;micAnalyser=null;micData=null;
 }
 async function startVoiceDemo(){
-  if(!navigator.mediaDevices?.getUserMedia){
-    recStatus.textContent='Micrófono no disponible';demoNote.textContent='Elige un archivo de audio para continuar.';return;
+  if(!window.isSecureContext || !navigator.mediaDevices?.getUserMedia){
+    recStatus.textContent='Micrófono requiere HTTPS';
+    demoNote.textContent='Abre esta página desde https://play.etereomx.com o elige un archivo de audio.';
+    return;
   }
   try{
-    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    micStream=await navigator.mediaDevices.getUserMedia({
+      audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}
+    });
     micContext=new(window.AudioContext||window.webkitAudioContext)();
     const source=micContext.createMediaStreamSource(micStream);
     micAnalyser=micContext.createAnalyser();micAnalyser.fftSize=512;micData=new Uint8Array(micAnalyser.fftSize);source.connect(micAnalyser);
     if(!window.MediaRecorder)throw new Error('MediaRecorder unavailable');
     const options={};
-    if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus'))options.mimeType='audio/webm;codecs=opus';
-    else if(MediaRecorder.isTypeSupported('audio/webm'))options.mimeType='audio/webm';
+    const mimeCandidates=[
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/ogg;codecs=opus'
+    ];
+    for(const mime of mimeCandidates){
+      if(MediaRecorder.isTypeSupported?.(mime)){options.mimeType=mime;break}
+    }
     recorder=new MediaRecorder(micStream,options);recordedChunks=[];
     recorder.ondataavailable=e=>{if(e.data?.size)recordedChunks.push(e.data)};
     recorder.onstop=finishVoiceDemo;recorder.start();
@@ -719,7 +729,7 @@ function drawEtereoWave(buffer,canvas){
 }
 recordBtn?.addEventListener('click',()=>recStatus.classList.contains('recording')?stopVoiceDemo():startVoiceDemo());
 uploadBtn?.addEventListener('click',()=>audioFileInput.click());
-audioFileInput?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)loadLocalAudio(f,'Archivo')});
+audioFileInput?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f){recStatus.textContent='Leyendo audio…';demoNote.textContent='Procesando tu archivo localmente, sin subirlo.';loadLocalAudio(f,'Archivo')}});
 resetDemoBtn?.addEventListener('click',()=>{
   if(localAudioUrl)URL.revokeObjectURL(localAudioUrl);
   if(window.demoLocalStop)window.demoLocalStop();
