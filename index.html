@@ -15,6 +15,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:hidden}
 :root{
 --bg-color:#0c0b0f;--deck-base:#1a1820;--deck-dark:#0f0d14;--deck-edge:#2c2936;
 --cassette-bg:#222029;--label-bg:#EAE3D2;--label-text:#1B1912;
@@ -101,6 +103,16 @@ padding:55px 24px;box-shadow:0 30px 70px rgba(0,0,0,.25)
 #playerView.demo-player{display:flex;min-height:auto;padding:0;margin:0;background:transparent}
 #playerView.demo-player .player-top{display:none}
 #playerView.demo-player .player-footer{display:none}
+.demo-player-view{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:20px 0 10px}
+.demo-player-view .player-top{display:none}
+.demo-player-view .player-footer{display:none}
+.demo-player-view .player-deck{margin:0}
+.demo-player-view .echo-container{position:absolute}
+.demo-player-view .vfd-playhead{left:calc(var(--demo-tape-progress,0) * 100%)}
+.demo-player-view .engaged .vfd-playhead{opacity:1}
+.demo-player-view .player-deck{box-sizing:border-box}
+@media(max-width:420px){#playerView{padding:18px 12px}.player-deck{padding:10px 10px 18px}.reels-row{gap:38px}.cassette-window{margin:0 10px}.demo-player-view{padding-left:0;padding-right:0}.demo-player-view .player-deck{width:100%}}
+@media(max-width:340px){.player-deck{padding:8px 8px 16px}.reels-row{gap:28px}.tape-spool-left{width:calc(72px - (24px * var(--tape-progress,0)));height:calc(72px - (24px * var(--tape-progress,0)))}.tape-spool-right{width:calc(48px + (24px * var(--tape-progress,0)));height:calc(48px + (24px * var(--tape-progress,0)))}.reel{width:32px;height:32px}}
 #playerView.demo-player .player-deck{margin:0}
 .demo-final-copy{font-family:'Playfair Display',serif;font-size:18px;line-height:1.6;color:var(--text-color);margin:25px auto}
 .demo-final-copy em{color:var(--title-color)}
@@ -355,6 +367,88 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
     </div>
 
     <div id="demoPlayerSlot" class="demo-player-slot"></div>
+    <section id="demoPlayerView" class="hidden demo-player-view" aria-label="Reproductor de Memoria Acústica">
+  <div class="player-top">
+    <a class="player-brand" href="https://etereomx.com">ETÉREO</a>
+    <a class="player-home" href="./">Memoria Acústica</a>
+  </div>
+
+  <div class="player-deck" id="demo-main-card">
+    <div class="echo-container">
+      <div class="echo-arc"></div><div class="echo-arc"></div><div class="echo-arc"></div><div class="echo-arc"></div>
+    </div>
+
+    <div class="cassette-compartment" id="demo-compartment">
+      <div class="cassette">
+        <div class="cassette-label">
+          <h1 class="brand-title">Etéreo</h1>
+          <p class="side-tag mono">Memoria Acústica</p>
+        </div>
+        <div class="cassette-window">
+          <div class="window-glass">
+            <div class="reels-row">
+              <div class="tape-spool tape-spool-left"></div>
+              <div class="reel" id="demo-reel-left"></div>
+              <div class="tape-spool tape-spool-right"></div>
+              <div class="reel" id="demo-reel-right"></div>
+            </div>
+            <div class="tape-strip"></div>
+            <div class="magnetic-head"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="digital-display" id="demo-display-screen">
+      <div class="status-text mono">
+        <span id="demo-status-text" aria-live="polite">Analizando...</span>
+        <span>GDL·MX</span>
+      </div>
+
+      <div class="waveform-wrapper" id="demo-waveform-wrapper">
+        <canvas class="audio-canvas" id="demo-canvas-base"></canvas>
+        <canvas class="audio-canvas" id="demo-canvas-progress"></canvas>
+        <div class="vfd-playhead"></div>
+      </div>
+
+      <div class="time-display mono">
+        <span id="demo-time-elapsed">0:00</span>
+        <span id="demo-time-total">0:00</span>
+      </div>
+
+      <div class="vu-meter-container" id="vu-meter">
+        <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
+        <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
+        <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
+        <div class="vu-led" data-color="yellow"></div><div class="vu-led" data-color="yellow"></div>
+        <div class="vu-led" data-color="red"></div><div class="vu-led" data-color="red"></div>
+      </div>
+    </div>
+
+    <div class="mechanical-controls">
+      <button class="mech-btn stop-btn" id="demo-stop-btn" type="button" aria-label="Detener memoria">
+        <div class="btn-led"></div>
+        <div class="btn-content">
+          <svg class="btn-icon" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+          STOP
+        </div>
+      </button>
+
+      <button class="mech-btn play-btn" id="demo-custom-play-btn" type="button" aria-label="Reproducir memoria">
+        <div class="btn-led"></div>
+        <div class="btn-content">
+          <svg class="btn-icon" id="demo-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="btn-icon" id="demo-icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          <span id="demo-play-text-label">PLAY</span>
+        </div>
+      </button>
+    </div>
+
+    <audio id="demo-native-audio" crossorigin="anonymous" preload="none"></audio>
+  </div>
+
+  <div class="player-footer">MEMORIA ACÚSTICA · UNA PIEZA ETÉREO</div>
+</section>
     <p class="demo-final-copy">
       <em>Tu sonido ya tiene una forma.</em><br>
       Ahora puede convertirse en una pieza ETÉREO.
@@ -421,13 +515,6 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
     <p>
       El Soundwave es la pieza principal. Cassette, vinilo y llavero funcionan
       como formatos complementarios para llevar la experiencia a otros objetos.
-    </p>
-  </div>
-
-    <h2>Tu sonido puede convertirse en algo que permanece.</h2>
-    <p>
-      La representación sonora puede formar parte de diferentes objetos
-      diseñados alrededor de la memoria.
     </p>
   </div>
 
@@ -512,7 +599,7 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
         <span id="time-total">0:00</span>
       </div>
 
-      <div class="vu-meter-container" id="vu-meter">
+      <div class="vu-meter-container" id="demo-vu-meter">
         <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
         <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
         <div class="vu-led" data-color="green"></div><div class="vu-led" data-color="green"></div>
@@ -733,6 +820,7 @@ audioFileInput?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f){
 resetDemoBtn?.addEventListener('click',()=>{
   if(localAudioUrl)URL.revokeObjectURL(localAudioUrl);
   if(window.demoLocalStop)window.demoLocalStop();
+  document.getElementById('demoPlayerView')?.classList.add('hidden');
   localAudioUrl=null;localAudioBuffer=null;demoResult.classList.add('hidden');
   recStatus.textContent='Listo para comenzar';recStatus.classList.remove('recording');
   recTime.textContent='0:00';recordBtn.textContent='● Grabar mi voz';uploadBtn.disabled=false;
@@ -743,84 +831,165 @@ window.addEventListener('resize',()=>{drawIdleWave();if(localAudioBuffer){drawAu
 requestAnimationFrame(drawIdleWave);
 
 /* =========================================================
-   CASSETTE PLAYER LOCAL — MISMA INTERFAZ DEL REPRODUCTOR ORIGINAL
+   CASSETTE PLAYER LOCAL — INSTANCIA INDEPENDIENTE
+   No comparte DOM ni eventos con el reproductor ?id=XXXX.
    ========================================================= */
 let demoLocalStop=null;
 
 function mountDemoPlayer(url,buffer){
-  if(!playerView)return;
-  demoPlayerSlot.appendChild(playerView);
-  playerView.classList.remove('hidden');playerView.classList.add('demo-player');
+  const root=document.getElementById('demoPlayerView');
+  if(!root)return;
+  root.classList.remove('hidden');
 
-  const audio=document.getElementById('native-audio');
-  const play=document.getElementById('custom-play-btn'),stop=document.getElementById('stop-btn');
-  const status=document.getElementById('status-text'),wrap=document.getElementById('waveform-wrapper');
-  const base=document.getElementById('canvas-base'),progress=document.getElementById('canvas-progress');
-  const ctxB=base.getContext('2d'),ctxP=progress.getContext('2d');
-  const left=document.getElementById('reel-left'),right=document.getElementById('reel-right');
-  const compartment=document.getElementById('compartment'),screen=document.getElementById('display-screen');
-  const elapsed=document.getElementById('time-elapsed'),total=document.getElementById('time-total');
-  const playIcon=document.getElementById('icon-play'),pauseIcon=document.getElementById('icon-pause'),label=document.getElementById('play-text-label');
-  const leds=document.querySelectorAll('#playerView .vu-led');
+  const audio=document.getElementById('demo-native-audio');
+  const play=document.getElementById('demo-custom-play-btn');
+  const stop=document.getElementById('demo-stop-btn');
+  const status=document.getElementById('demo-status-text');
+  const wrap=document.getElementById('demo-waveform-wrapper');
+  const base=document.getElementById('demo-canvas-base');
+  const progress=document.getElementById('demo-canvas-progress');
+  const ctxB=base.getContext('2d');
+  const ctxP=progress.getContext('2d');
+  const left=document.getElementById('demo-reel-left');
+  const right=document.getElementById('demo-reel-right');
+  const compartment=document.getElementById('demo-compartment');
+  const screen=document.getElementById('demo-display-screen');
+  const elapsed=document.getElementById('demo-time-elapsed');
+  const total=document.getElementById('demo-time-total');
+  const playIcon=document.getElementById('demo-icon-play');
+  const pauseIcon=document.getElementById('demo-icon-pause');
+  const label=document.getElementById('demo-play-text-label');
+  const leds=root.querySelectorAll('.vu-led');
+
+  if(root._demoCleanup)root._demoCleanup();
+
   let peaks=buildLocalPeaks(buffer),playing=false,raf=0,smoothed=0,prev=0,ac=null,analyser=null,data=null;
+  let objectUrl=url;
 
-  audio.pause();audio.src=url;audio.load();
-  function prep(){
-    const dpr=devicePixelRatio||1,r=wrap.getBoundingClientRect();
-    [base,progress].forEach(c=>{c.width=Math.max(1,Math.floor(r.width*dpr));c.height=Math.max(1,Math.floor(r.height*dpr));c.getContext('2d').setTransform(dpr,0,0,dpr,0,0)});
-    drawWave(ctxB,base.clientWidth,base.clientHeight,'rgba(237,230,214,.18)');drawProgress();
+  audio.pause();
+  audio.removeAttribute('src');
+  audio.load();
+  audio.src=objectUrl;
+  audio.preload='auto';
+  audio.load();
+
+  function resize(){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    const r=wrap.getBoundingClientRect();
+    [base,progress].forEach(c=>{
+      c.width=Math.max(1,Math.floor(r.width*dpr));
+      c.height=Math.max(1,Math.floor(r.height*dpr));
+      c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+    });
+    drawWave(ctxB,base.clientWidth,base.clientHeight,'rgba(237,230,214,.18)');
+    drawProgress();
   }
   function drawWave(c,w,h,color){
     if(!peaks.length)return;
     c.clearRect(0,0,w,h);c.fillStyle=color;c.beginPath();
     const cy=h/2,step=w/(peaks.length-1);c.moveTo(0,cy);
-    for(let i=0;i<peaks.length-1;i++){const x=i*step,y=cy-peaks[i]*h/2,nx=(i+1)*step,ny=cy-peaks[i+1]*h/2,xc=(x+nx)/2,yc=(y+ny)/2;i?c.quadraticCurveTo(x,y,xc,yc):c.lineTo(x,y);if(i===peaks.length-2)c.lineTo(nx,ny)}
-    for(let i=peaks.length-1;i>0;i--){const x=i*step,y=cy+peaks[i]*h/2,px=(i-1)*step,py=cy+peaks[i-1]*h/2,xc=(x+px)/2,yc=(y+py)/2;c.quadraticCurveTo(x,y,xc,yc);if(i===1)c.lineTo(px,py)}
+    for(let i=0;i<peaks.length-1;i++){
+      const x=i*step,y=cy-peaks[i]*h/2,nx=(i+1)*step,ny=cy-peaks[i+1]*h/2;
+      const xc=(x+nx)/2,yc=(y+ny)/2;
+      if(i===0)c.lineTo(x,y);c.quadraticCurveTo(x,y,xc,yc);
+      if(i===peaks.length-2)c.lineTo(nx,ny);
+    }
+    for(let i=peaks.length-1;i>0;i--){
+      const x=i*step,y=cy+peaks[i]*h/2,px=(i-1)*step,py=cy+peaks[i-1]*h/2;
+      const xc=(x+px)/2,yc=(y+py)/2;c.quadraticCurveTo(x,y,xc,yc);
+      if(i===1)c.lineTo(px,py);
+    }
     c.closePath();c.fill();
   }
   function drawProgress(){
-    const p=audio.duration?audio.currentTime/audio.duration:0,w=progress.clientWidth,h=progress.clientHeight;
-    document.documentElement.style.setProperty('--tape-progress',Math.max(0,Math.min(1,p)));
-    ctxP.clearRect(0,0,w,h);ctxP.save();ctxP.beginPath();ctxP.rect(0,0,w*p,h);ctxP.clip();drawWave(ctxP,w,h,'#DD8E5C');ctxP.restore();
-    elapsed.textContent=formatDuration(audio.currentTime);total.textContent=formatDuration(audio.duration||buffer.duration);
+    const duration=audio.duration||buffer.duration||0;
+    const p=duration?Math.max(0,Math.min(1,audio.currentTime/duration)):0;
+    const w=progress.clientWidth,h=progress.clientHeight;
+    document.documentElement.style.setProperty('--demo-tape-progress',p);
+    ctxP.clearRect(0,0,w,h);ctxP.save();ctxP.beginPath();ctxP.rect(0,0,w*p,h);ctxP.clip();
+    drawWave(ctxP,w,h,'#DD8E5C');ctxP.restore();
+    elapsed.textContent=formatDuration(audio.currentTime);total.textContent=formatDuration(duration);
   }
   function setup(){
     if(ac)return;
-    try{ac=new(window.AudioContext||window.webkitAudioContext)();analyser=ac.createAnalyser();analyser.fftSize=256;
-      const source=ac.createMediaElementSource(audio);source.connect(analyser);analyser.connect(ac.destination);data=new Uint8Array(analyser.frequencyBinCount)}catch(e){}
+    try{
+      const C=window.AudioContext||window.webkitAudioContext;
+      if(!C)return;
+      ac=new C();analyser=ac.createAnalyser();analyser.fftSize=256;
+      const source=ac.createMediaElementSource(audio);
+      source.connect(analyser);analyser.connect(ac.destination);
+      data=new Uint8Array(analyser.frequencyBinCount);
+    }catch(e){analyser=null;data=null}
   }
   function tick(){
-    if(!playing)return;drawProgress();let peak=0;
-    if(analyser&&data){analyser.getByteFrequencyData(data);let sum=0;for(let i=0;i<6;i++)sum+=data[i];peak=Math.pow(sum/6/255,1.5)}
-    else peak=peaks[Math.min(peaks.length-1,Math.floor((audio.currentTime/(audio.duration||1))*peaks.length))]||0;
-    smoothed+=(peak-smoothed)*.15;document.documentElement.style.setProperty('--audio-peak',smoothed);
-    const count=Math.min(10,Math.floor(smoothed*11));if(count!==prev){leds.forEach((x,i)=>x.classList.toggle('on',i<count));prev=count}
+    if(!playing)return;
+    drawProgress();
+    let peak=0;
+    if(analyser&&data){
+      analyser.getByteFrequencyData(data);
+      let sum=0;for(let i=0;i<Math.min(6,data.length);i++)sum+=data[i];
+      peak=Math.pow((sum/Math.max(1,Math.min(6,data.length)))/255,1.5);
+    }else{
+      peak=peaks[Math.min(peaks.length-1,Math.floor((audio.currentTime/(audio.duration||1))*peaks.length))]||0;
+    }
+    smoothed+=(peak-smoothed)*.15;
+    document.documentElement.style.setProperty('--demo-audio-peak',smoothed);
+    const count=Math.min(10,Math.floor(smoothed*11));
+    if(count!==prev){leds.forEach((x,i)=>x.classList.toggle('on',i<count));prev=count}
     raf=requestAnimationFrame(tick);
   }
   function setPlaying(on){
-    playing=on;playIcon.style.display=on?'none':'block';pauseIcon.style.display=on?'block':'none';label.textContent=on?'PAUSE':'PLAY';
+    playing=on;
+    playIcon.style.display=on?'none':'block';pauseIcon.style.display=on?'block':'none';label.textContent=on?'PAUSE':'PLAY';
     play.classList.toggle('playing',on);compartment.classList.toggle('engaged',on);screen.classList.toggle('engaged',on);
     left.classList.toggle('spinning',on);right.classList.toggle('spinning',on);
     if(on){status.innerHTML='▶ <span class="accent">Reproduciendo...</span>';cancelAnimationFrame(raf);tick()}
-    else{status.innerHTML='‖ <span class="accent">Pausado.</span>';smoothed=0;document.documentElement.style.setProperty('--audio-peak',0);leds.forEach(x=>x.classList.remove('on'));prev=0;cancelAnimationFrame(raf);drawProgress()}
+    else{
+      status.innerHTML='‖ <span class="accent">Pausado.</span>';smoothed=0;
+      document.documentElement.style.setProperty('--demo-audio-peak',0);
+      leds.forEach(x=>x.classList.remove('on'));prev=0;cancelAnimationFrame(raf);drawProgress();
+    }
   }
-  function playLocal(){
-    setup();if(ac?.state==='suspended')ac.resume();
-    audio.play().then(()=>setPlaying(true)).catch(()=>{status.innerHTML='<span class="accent">Presiona PLAY.</span>'});
+  async function playLocal(){
+    setup();
+    if(ac?.state==='suspended')try{await ac.resume()}catch(e){}
+    try{await audio.play();setPlaying(true)}catch(e){status.innerHTML='<span class="accent">Presiona PLAY.</span>'}
   }
   function stopLocal(){audio.pause();audio.currentTime=0;setPlaying(false);status.innerHTML='■ <span class="accent">Cinta detenida.</span>'}
+  function seek(e){
+    const duration=audio.duration||buffer.duration;if(!duration)return;
+    const r=wrap.getBoundingClientRect();
+    audio.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*duration;drawProgress();
+  }
   play.onclick=()=>playing?(audio.pause(),setPlaying(false)):playLocal();
   stop.onclick=stopLocal;
-  audio.onended=stopLocal;
-  wrap.onclick=e=>{if(!audio.duration)return;const r=wrap.getBoundingClientRect();audio.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*audio.duration;drawProgress()};
-  prep();status.innerHTML='<span class="accent">Cinta lista.</span>';
-  demoLocalStop=stopLocal;window.demoLocalStop=stopLocal;
+  audio.onended=()=>{stopLocal();status.innerHTML='■ <span class="accent">Memoria reproducida.</span>'};
+  wrap.onclick=seek;
+  resize();status.innerHTML='<span class="accent">Cinta lista.</span>';
+  root.scrollIntoView({behavior:'smooth',block:'center'});
+
+  const onResize=()=>resize();
+  window.addEventListener('resize',onResize,{passive:true});
+  root._demoCleanup=()=>{
+    stopLocal();
+    window.removeEventListener('resize',onResize);
+    if(ac)ac.close().catch(()=>{});
+    ac=null;analyser=null;data=null;
+    audio.removeAttribute('src');audio.load();
+  };
+  demoLocalStop=stopLocal;
+  window.demoLocalStop=()=>root._demoCleanup?.();
 }
 function buildLocalPeaks(buffer){
-  const raw=buffer.getChannelData(0),n=200,bs=Math.max(1,Math.floor(raw.length/n)),p=[];let max=0;
-  for(let i=0;i<n;i++){let s=0;for(let j=0;j<bs;j++){const k=i*bs+j;if(k<raw.length)s+=Math.abs(raw[k])}const v=s/bs;p.push(v);max=Math.max(max,v)}
-  if(!max)max=1;return p.map(v=>v/max*.8+.05);
+  const raw=buffer.getChannelData(0),n=Math.max(240,Math.min(420,Math.floor((window.innerWidth||800)/2))),bs=Math.max(1,Math.floor(raw.length/n)),p=[];let max=0;
+  for(let i=0;i<n;i++){
+    let peak=0,rms=0,count=0;
+    for(let j=0;j<bs;j++){const k=i*bs+j;if(k<raw.length){const v=Math.abs(raw[k]);peak=Math.max(peak,v);rms+=v*v;count++}}
+    const v=Math.max(peak*.72,Math.sqrt(rms/Math.max(1,count))*1.45);p.push(v);max=Math.max(max,v)
+  }
+  if(!max)max=1;return p.map(v=>Math.min(.9,v/max*.86+.035));
 }
+
 /* =========================================================
    REPRODUCTOR EXISTENTE
    ========================================================= */
@@ -991,25 +1160,25 @@ if (audioId) {
   function processAudioData(audioBuffer){
     peaks=[];
     const rawData=audioBuffer.getChannelData(0);
-    const numSamples=200;
+    const numSamples=Math.max(240,Math.min(420,Math.floor((waveformWrapper.clientWidth||380)*1.1)));
     const blockSize=Math.max(1,Math.floor(rawData.length/numSamples));
     let maxPeak=0;
     for(let i=0;i<numSamples;i++){
-      let sum=0;
+      let peak=0,rms=0,count=0;
       for(let j=0;j<blockSize;j++){
         const index=i*blockSize+j;
-        if(index<rawData.length)sum+=Math.abs(rawData[index]);
+        if(index<rawData.length){const v=Math.abs(rawData[index]);peak=Math.max(peak,v);rms+=v*v;count++;}
       }
-      const peak=sum/blockSize;
-      peaks.push(peak);if(peak>maxPeak)maxPeak=peak;
+      const value=Math.max(peak*.72,Math.sqrt(rms/Math.max(1,count))*1.45);
+      peaks.push(value);if(value>maxPeak)maxPeak=value;
     }
     if(maxPeak===0)maxPeak=1;
-    peaks=peaks.map(p=>(p/maxPeak)*.8+.05);
+    peaks=peaks.map(p=>Math.min(.9,(p/maxPeak)*.86+.035));
     prepareCanvases();
   }
 
   function prepareCanvases(){
-    const dpr=window.devicePixelRatio||1;
+    const dpr=Math.min(window.devicePixelRatio||1,2);
     const rect=waveformWrapper.getBoundingClientRect();
     [canvasBase,canvasProgress].forEach(c=>{
       c.width=Math.max(1,Math.floor(rect.width*dpr));
