@@ -478,10 +478,15 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
     <div class="soundwave-photo-wrap">
       <!--
         Coloca AQUÍ la misma fotografía del Soundwave que utilizas en tu landing principal.
-        Ruta recomendada: assets/soundwave.jpg
-        Si tu archivo tiene otro nombre, cambia únicamente el atributo src.
+        La fotografía se carga desde la raíz del repositorio: onda-sonora.png.
       -->
-      <img src="onda-sonora.png" alt="Portarretrato Soundwave de ETÉREO">
+      <img
+        class="soundwave-photo"
+        src="onda-sonora.png"
+        alt="Portarretrato Soundwave de ETÉREO"
+        loading="lazy"
+        decoding="async"
+      >
       <div class="photo-caption mono">SOUNDWAVE · MEMORIA ACÚSTICA</div>
     </div>
 
@@ -545,7 +550,7 @@ canvas.audio-canvas{width:100%;height:100%;position:absolute;top:0;left:0;filter
 </footer>
 </main>
 
-<!-- ================= PLAYER EXISTENTE ================= -->
+<!-- ================= PLAYER REAL: ?id=XXXX — NO DEPENDE DEL DEMO ================= -->
 <section id="playerView" class="hidden" aria-label="Reproductor de Memoria Acústica">
   <div class="player-top">
     <a class="player-brand" href="https://etereomx.com">ETÉREO</a>
